@@ -14,8 +14,10 @@ psycopg2 = "^2.9.3"
 pydantic = "^1.9.1"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.5"
+alembic = "^1.8.0"
 
 [tool.poetry.dev-dependencies]
+sqlalchemy-stubs = "^0.4"
 
 [tool.poetry.scripts]
 run = "nux:run_app"

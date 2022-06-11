@@ -3,7 +3,7 @@ import typing as t
 import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.declarative
-import fastapi.params
+import fastapi
 
 from nux.config import options
 
@@ -15,12 +15,12 @@ Session = sqlalchemy.orm.sessionmaker(bind=engine)
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 
-def _SessionDependecy() -> t.Generator[sqlalchemy.orm.Session, None, None]:
+def session_generator() -> t.Generator[sqlalchemy.orm.Session, None, None]:
     print("Generate session")
     with Session() as session:
         yield session
 
 def SessionDependecy() -> sqlalchemy.orm.Session:
-    return fastapi.params.Depends(_SessionDependecy, use_cache=True) # type: ignore
+    return fastapi.Depends(session_generator, use_cache=True)
 
 
