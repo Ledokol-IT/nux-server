@@ -2,4 +2,5 @@
 .venv
 **/__pycache__/
 .gitignore
+nux_local.conf
 

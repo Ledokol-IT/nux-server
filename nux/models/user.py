@@ -16,8 +16,8 @@ pwd_context = passlib.context.CryptContext(
 class User(nux.database.Base):
     __tablename__ = "users"
 
-    id: uuid.UUID = sa.Column(sqlalchemy.dialects.postgresql.UUID,
-                              primary_key=True, index=True, default=uuid.uuid4)  # type: ignore
+    id: str = sa.Column(sqlalchemy.dialects.postgresql.UUID,
+                        primary_key=True, index=True, default=lambda: str(uuid.uuid4()))  # type: ignore
     # In +79999999999 format
     phone = sa.Column(sa.String, index=True, unique=True,
                       nullable=True)  # type: ignore
@@ -44,14 +44,14 @@ class UserSchemeSecure(UserSchemeBase):
     id: str
 
     class Config:
-        org_mode = True
+        orm_mode = True
 
 
 class UserScheme(UserSchemeSecure):
-    phone: str
+    phone: str | None
 
     class Config:
-        org_mode = True
+        orm_mode = True
 
 
 def create_user(user_data: UserSchemeCreate):
@@ -61,7 +61,7 @@ def create_user(user_data: UserSchemeCreate):
     return user
 
 
-def get_user(session: sqlalchemy.orm.Session, id: uuid.UUID | str | None = None, phone: str | None = None, nickname: str | None = None):
+def get_user(session: sqlalchemy.orm.Session, id: str | None = None, phone: str | None = None, nickname: str | None = None):
     cnt_args = sum(map(lambda x: x is not None, [id, phone, nickname]))
     if cnt_args != 1:
         raise ValueError(f"Expected 1 argument. Find {cnt_args}")
@@ -69,12 +69,10 @@ def get_user(session: sqlalchemy.orm.Session, id: uuid.UUID | str | None = None,
     query = session.query(User)
     user = None
     if id is not None:
-        if isinstance(id, str):
-            id = uuid.UUID(id)
         user = query.get(id)
     elif phone is not None:
         user = query.filter(User.phone == phone).first()
     elif nickname is not None:
         user = query.filter(User.nickname == nickname).first()
-    
+
     return user

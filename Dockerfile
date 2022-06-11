@@ -78,5 +78,7 @@ COPY --chown=web:web . /code
 # Running as non-root user:
 USER web
 
+RUN ["chmod", "+x", "/code/scripts/start_dev.sh"]
+
 # We customize how our app is loaded with the custom entrypoint:
-ENTRYPOINT ["poetry", "run", "run"]
+ENTRYPOINT ["scripts/start_dev.sh"]

@@ -1,6 +1,7 @@
 import fastapi
 
 from nux.auth import auth_router
+from nux.resources.users_resources import user_router
 
 
 def create_app():
@@ -12,4 +13,5 @@ def create_app():
         return {"hello": "world"}
 
     app.include_router(auth_router)
+    app.include_router(user_router)
     return app
