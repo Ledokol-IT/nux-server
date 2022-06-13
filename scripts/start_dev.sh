@@ -1,3 +1,3 @@
-#!/usr/bin/env sh
+#!/bin/bash
 poetry run create_all
 poetry run run
