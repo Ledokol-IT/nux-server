@@ -7,7 +7,7 @@ import jose.jwt
 from sqlalchemy.orm.session import Session
 
 from nux.database import SessionDependecy
-from nux.config import options
+import nux.config as config
 from nux.models.user import User, get_user, create_user, UserSchemeCreate
 
 auth_router = fastapi.APIRouter()
@@ -32,7 +32,7 @@ def create_token(user: User, expires_delta: datetime.timedelta | None = None):
 
     access_token = {"exp": expire, "sub": user_id}
     access_token = jose.jwt.encode(
-        access_token, options.secret_key, algorithm=ALGORITHM)
+        access_token, config.SECRET_KEY, algorithm=ALGORITHM)
 
     return Token(
         access_token=access_token,
@@ -94,7 +94,7 @@ def get_current_user(token: str = fastapi.Depends(oauth2_scheme), session=Sessio
     )
     try:
         payload = jose.jwt.decode(
-            token, options.secret_key, algorithms=[ALGORITHM])
+            token, config.SECRET_KEY, algorithms=[ALGORITHM])
         id = payload.get("sub")
         if id is None:
             raise credentials_exception
