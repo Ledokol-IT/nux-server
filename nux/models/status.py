@@ -27,7 +27,8 @@ class UserStatus(nux.database.Base):
         nullable=False,
         unique=True,
     )  # type: ignore
-    _user: 'nux.models.user.User' = orm.relationship(lambda: nux.models.user.User, back_populates="status")
+    _user: 'nux.models.user.User' = orm.relationship(
+        lambda: nux.models.user.User, back_populates="status")
 
     current_app_id: str = sa.Column(
         sa.String,

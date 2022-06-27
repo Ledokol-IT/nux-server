@@ -7,6 +7,27 @@ import sqlalchemy.orm as orm
 import sqlalchemy.dialects.postgresql as pg_types
 
 import nux.database
+import nux.models.user
+
+
+class UserInAppStatistic(nux.database.Base):
+    __tablename__ = "user_in_app_statistics"
+    user_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("users.id"),
+        primary_key=True,
+    )  # type: ignore
+    _user: 'nux.models.user.User' = orm.relationship(
+        lambda: nux.models.user.User,
+        back_populates="apps_stats"
+    )
+
+    app_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("apps.id"),
+        primary_key=True,
+    )  # type: ignore
+    # app: 'App' = orm.relationship(lambda: App)
 
 
 class CATEGORY(enum.Enum):
@@ -54,6 +75,14 @@ class App(nux.database.Base):
         sa.String,
         nullable=True,
     )  # type: ignore
+
+    users = orm.relationship(
+        lambda: nux.models.user.User,
+        primaryjoin=lambda: sa.and_(
+            id == UserInAppStatistic.app_id,
+            UserInAppStatistic.user_id == nux.models.user.User.id
+        ),
+    )
 
 
 class AppSchemeBase(pydantic.BaseModel):

@@ -8,6 +8,7 @@ import uuid
 
 import nux.database
 import nux.models.status
+import nux.models.app
 
 
 pwd_context = passlib.context.CryptContext(
@@ -28,6 +29,15 @@ class User(nux.database.Base):
 
     status: t.Optional['nux.models.status.UserStatus'] = orm.relationship(
         lambda: nux.models.status.UserStatus, uselist=False, back_populates="_user")
+
+    apps = orm.relationship(
+        lambda: nux.models.app.App,
+        primaryjoin=lambda: nux.models.app.UserInAppStatistic.user_id == id,
+    )
+    apps_stats: 'nux.models.app.UserInAppStatistic' = orm.relationship(
+        lambda: nux.models.app.UserInAppStatistic,
+        back_populates="_user"
+    )
 
     def check_password(self, password: str) -> bool:
         return pwd_context.verify(password, self.hashed_password)
