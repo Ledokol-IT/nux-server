@@ -76,14 +76,6 @@ class App(nux.database.Base):
         nullable=True,
     )  # type: ignore
 
-    users = orm.relationship(
-        lambda: nux.models.user.User,
-        primaryjoin=lambda: sa.and_(
-            id == UserInAppStatistic.app_id,
-            UserInAppStatistic.user_id == nux.models.user.User.id
-        ),
-    )
-
 
 class AppSchemeBase(pydantic.BaseModel):
     android_package_name: str | None

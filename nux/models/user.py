@@ -18,8 +18,12 @@ pwd_context = passlib.context.CryptContext(
 class User(nux.database.Base):
     __tablename__ = "users"
 
-    id: str = sa.Column(sa.String,
-                        primary_key=True, index=True, default=lambda: str(uuid.uuid4()))  # type: ignore
+    id: str = sa.Column(
+        sa.String,
+        primary_key=True,
+        index=True,
+        default=lambda: str(uuid.uuid4())
+    )  # type: ignore
     # In +79999999999 format
     phone = sa.Column(sa.String, index=True, unique=True,
                       nullable=True)  # type: ignore
@@ -30,10 +34,6 @@ class User(nux.database.Base):
     status: t.Optional['nux.models.status.UserStatus'] = orm.relationship(
         lambda: nux.models.status.UserStatus, uselist=False, back_populates="_user")
 
-    apps = orm.relationship(
-        lambda: nux.models.app.App,
-        primaryjoin=lambda: nux.models.app.UserInAppStatistic.user_id == id,
-    )
     apps_stats: 'nux.models.app.UserInAppStatistic' = orm.relationship(
         lambda: nux.models.app.UserInAppStatistic,
         back_populates="_user"

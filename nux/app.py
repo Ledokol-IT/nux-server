@@ -7,10 +7,9 @@ import nux.database
 import nux.config
 
 
-def create_app(args=None):
+def create_app(options):
     """Create and setup fastapi app ready to run."""
     app = fastapi.FastAPI()
-    options = nux.config.parse_args(args)
     nux.database.connect_to_db(options)
 
     @app.get("/")
