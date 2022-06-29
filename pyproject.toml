@@ -23,6 +23,7 @@ yarl = "^1.7.2"
 pytest = "^7.1.2"
 SQLAlchemy-Utils = "^0.38.2"
 requests = "^2.28.0"
+Faker = "^13.14.0"
 
 [tool.poetry.scripts]
 run = "nux:run_app"

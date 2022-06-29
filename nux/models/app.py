@@ -1,3 +1,4 @@
+from typing import Iterable
 import uuid
 import enum
 
@@ -17,7 +18,7 @@ class UserInAppStatistic(nux.database.Base):
         sa.ForeignKey("users.id"),
         primary_key=True,
     )  # type: ignore
-    _user: 'nux.models.user.User' = orm.relationship(
+    user: 'nux.models.user.User' = orm.relationship(
         lambda: nux.models.user.User,
         back_populates="apps_stats"
     )
@@ -27,7 +28,7 @@ class UserInAppStatistic(nux.database.Base):
         sa.ForeignKey("apps.id"),
         primary_key=True,
     )  # type: ignore
-    # app: 'App' = orm.relationship(lambda: App)
+    app: 'App' = orm.relationship(lambda: App)
 
 
 class CATEGORY(enum.Enum):
@@ -115,9 +116,13 @@ def create_app_android(app_data: AppSchemeCreateAndroid):
     return app
 
 
-def determine_app_android(session: orm.Session, app_data: AppSchemeCreateAndroid) -> tuple[bool, App]:
+def determine_app_android(
+    session: orm.Session,
+    app_data: AppSchemeCreateAndroid
+) -> tuple[bool, App]:
     """
-    Return `(True, new_app)` if no mathed app is found, returns `(False, found_app)` otherwise.
+    Return `(True, new_app)` if no mathed app is found, 
+    returns `(False, found_app)` otherwise.
     App is added to session, but not commited
     """
     app = session.query(App).filter(
@@ -129,3 +134,54 @@ def determine_app_android(session: orm.Session, app_data: AppSchemeCreateAndroid
     app = create_app_android(app_data)
     session.add(app)
     return True, app
+
+
+def add_app_to_user(
+    session: orm.Session,
+    user: 'nux.models.user.User',
+    app: App,
+):
+    app_stats = UserInAppStatistic()
+    app_stats.app = app
+    app_stats.user = user
+    session.add(app_stats)
+
+
+def delete_app_from_user(
+    session: orm.Session,
+    user: 'nux.models.user.User',
+    app: App,
+):
+    app_stats = session.query(UserInAppStatistic).get({
+        "user_id": user.id,
+        "app_id": app.id,
+    })
+    if app_stats is None:
+        return
+    session.delete(app_stats)
+
+
+def get_user_apps(
+    session: orm.Session,
+    user: 'nux.models.user.User'
+) -> list[App]:
+    return (
+        session.query(App).join(UserInAppStatistic)
+        .where(UserInAppStatistic.user_id == user.id)
+        .all()
+    )
+
+
+def set_apps_to_user(
+    session: orm.Session,
+    user: 'nux.models.user.User',
+    apps: Iterable[App],
+):
+    user_apps = set(get_user_apps(session, user))
+    apps = set(apps)
+    to_add = apps.difference(user_apps)
+    to_delete = user_apps.difference(apps)
+    for app in to_add:
+        add_app_to_user(session, user, app)
+    for app in to_delete:
+        delete_app_from_user(session, user, app)

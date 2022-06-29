@@ -36,7 +36,7 @@ class User(nux.database.Base):
 
     apps_stats: 'nux.models.app.UserInAppStatistic' = orm.relationship(
         lambda: nux.models.app.UserInAppStatistic,
-        back_populates="_user"
+        back_populates="user"
     )
 
     def check_password(self, password: str) -> bool:
