@@ -24,11 +24,11 @@ class UserStatus(nux.database.Base):
     user_id: str = sa.Column(
         sa.String,
         sa.ForeignKey("users.id"),
-        nullable=False,
-        unique=True,
     )  # type: ignore
     _user: 'nux.models.user.User' = orm.relationship(
-        lambda: nux.models.user.User, back_populates="status")
+        lambda: nux.models.user.User,
+        back_populates="status",
+    )
 
     current_app_id: str = sa.Column(
         sa.String,
@@ -70,6 +70,13 @@ class UserStatusSchemeSecure(UserStatusSchemeBase):
 
 class UserStatusScheme(UserStatusSchemeSecure):
     pass
+
+
+def create_empty_status():
+    new_status = UserStatus()
+    new_status.last_update = new_status.started_at = datetime.datetime.now()
+    new_status.finished = True
+    return new_status
 
 
 def update_status_in_app(session: orm.Session, user: 'nux.models.user.User', app: 'nux.models.app.App'):

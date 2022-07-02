@@ -31,8 +31,11 @@ class User(nux.database.Base):
                               nullable=False)  # type: ignore
     hashed_password: str = sa.Column(sa.String, nullable=False)  # type: ignore
 
-    status: t.Optional['nux.models.status.UserStatus'] = orm.relationship(
-        lambda: nux.models.status.UserStatus, uselist=False, back_populates="_user")
+    status: 'nux.models.status.UserStatus' = orm.relationship(
+        lambda: nux.models.status.UserStatus, 
+        uselist=False, 
+        back_populates="_user",
+    )
 
     apps_stats: 'nux.models.app.UserInAppStatistic' = orm.relationship(
         lambda: nux.models.app.UserInAppStatistic,
@@ -74,6 +77,7 @@ def create_user(user_data: UserSchemeCreate):
     user = User()
     user.nickname = user_data.nickname
     user.set_password(user_data.password)
+    user.status = nux.models.status.create_empty_status()
     return user
 
 
@@ -98,6 +102,7 @@ def get_friends(session: orm.Session, user: User, order="online") -> list[User]:
     friends = (
         session.query(User)
         .join(User.status)
+        .filter(User.id != user.id)
         .order_by(nux.models.status.UserStatus.last_update)
     ).all()
 
