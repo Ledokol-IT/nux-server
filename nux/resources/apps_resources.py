@@ -36,9 +36,9 @@ def sync_installed_apps(
 
 
 class SetIconsRequestBody(pydantic.BaseModel):
-    icon_large: pydantic.FileUrl = None
-    icon_preview: pydantic.FileUrl = None
-    image_wide: pydantic.FileUrl = None
+    icon_large: pydantic.FileUrl | None = None
+    icon_preview: pydantic.FileUrl | None = None
+    image_wide: pydantic.FileUrl | None = None
 
 
 @apps_router.put("/app/package/{package_name}/set_images", response_model=nux.models.app.AppScheme)

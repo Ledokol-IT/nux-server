@@ -187,5 +187,15 @@ def set_apps_to_user(
         delete_app_from_user(session, user, app)
 
 
-def get_app(session: orm.Session, id: str) -> App | None:
-    return session.query(App).get(id)
+def get_app(session: orm.Session, id: str | None = None, android_package_name: str | None = None) -> App | None:
+    cnt_args = sum(map(lambda x: x is not None, [id, android_package_name]))
+    if cnt_args != 1:
+        raise ValueError(f"Expected 1 argument. Find {cnt_args}")
+
+    query = session.query(App)
+    app = None
+    if id is not None:
+        app = query.get(id)
+    elif android_package_name is not None:
+        app = query.filter(App.android_package_name == android_package_name).first()
+    return app
