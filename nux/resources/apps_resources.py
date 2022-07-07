@@ -33,3 +33,24 @@ def sync_installed_apps(
     return {
         "apps": nux.models.app.get_user_apps(session, current_user)
     }
+
+
+class SetIconsRequestBody(pydantic.BaseModel):
+    icon_large: pydantic.FileUrl = None
+    icon_preview: pydantic.FileUrl = None
+    image_wide: pydantic.FileUrl = None
+
+
+@apps_router.put("/app/package/{package_name}/set_images", response_model=nux.models.app.AppScheme)
+def set_images(package_name, body: SetIconsRequestBody, session=SessionDependecy()):
+    app = nux.models.app.get_app(session, android_package_name=package_name)
+    if app is None:
+        raise fastapi.HTTPException(
+            400,
+            detail="bad app"
+        )
+    app.icon_preview = body.icon_preview
+    app.icon_large = body.icon_preview
+    app.image_wide = body.image_wide
+    session.commit()
+    return app

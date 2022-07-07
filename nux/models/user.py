@@ -90,7 +90,7 @@ def get_user(
     id: str | None = None,
     phone: str | None = None,
     nickname: str | None = None
-):
+) -> User | None:
     cnt_args = sum(map(lambda x: x is not None, [id, phone, nickname]))
     if cnt_args != 1:
         raise ValueError(f"Expected 1 argument. Find {cnt_args}")
@@ -123,4 +123,3 @@ def get_friends(
     friends = query.all()
 
     return friends
-

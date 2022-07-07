@@ -6,9 +6,11 @@ import firebase_admin.credentials
 
 logger = logging.getLogger(__name__)
 
+DISABLED = True
+firebase_app = None
 
 def setup_firebase(options):
-    global firebase_app, DRY_RUN
+    global firebase_app, DRY_RUN, DISABLED
 
     if options.google_creds is None:
         logger.error(
@@ -21,7 +23,9 @@ def setup_firebase(options):
     )
     DRY_RUN = options.firebase_dry_run
 
-    firebase_app = firebase_admin.initialize_app(credentials)
+    if firebase_app is None:
+        firebase_app = firebase_admin.initialize_app(credentials)
+    DISABLED = False
 
 
 def send_messages(

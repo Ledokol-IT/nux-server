@@ -97,7 +97,7 @@ def update_status_in_app(
         user.status = new_status
         session.merge(user)
 
-        events.user_entered_app(user, app)
+        events.user_entered_app(session, user, app)
     return user.status
 
 

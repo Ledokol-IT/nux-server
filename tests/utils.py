@@ -11,7 +11,7 @@ def create_user(client, nickname):
 
 
 app1_android_payload = {
-    "name": "Good App",
+    "name": "123 Good App",
     "android_package_name": "com.example.good_app",
     "android_category": "CATEGORY_GAME",
 }

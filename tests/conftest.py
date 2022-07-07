@@ -9,6 +9,7 @@ import sqlalchemy_utils
 from nux import create_app
 import nux.config
 import nux.database
+from tests.utils import app1_android_payload
 
 
 @pytest.fixture
@@ -20,7 +21,7 @@ def app():
         "--pg-db", tmp_db,
         "--pg-host", "localhost:5432",
         "--secret-key", "123",
-        "--firebase-dry-run",
+        # "--firebase-dry-run",
         "--google-creds", "./ledokol-it-google-auth.json"
     ]
     options = nux.config.parse_args(args)
@@ -59,6 +60,18 @@ def user_token(client):
 @pytest.fixture
 def user_auth_header(user_token):
     return {'Authorization': f'Bearer {user_token}'}
+
+@pytest.fixture
+def sync_app1(client, user_auth_header):
+    response = client.put(
+        "/sync_installed_apps/android",
+        json={
+            "apps": [app1_android_payload],
+        },
+        headers=user_auth_header,
+    )
+    return response.json()["apps"][0]
+    
 
 
 @pytest.fixture

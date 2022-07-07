@@ -185,3 +185,7 @@ def set_apps_to_user(
         add_app_to_user(session, user, app)
     for app in to_delete:
         delete_app_from_user(session, user, app)
+
+
+def get_app(session: orm.Session, id: str) -> App | None:
+    return session.query(App).get(id)

@@ -2,6 +2,7 @@ import threading
 from typing import Callable, Generic, ParamSpec
 
 import fastapi
+import sqlalchemy.orm
 
 import nux.models.user
 import nux.models.app
@@ -29,6 +30,7 @@ class Event(Generic[P]):
 
 
 def _user_entered_app_callback(
+    session: sqlalchemy.orm.Session,
     user: 'nux.models.user.User',
     app: 'nux.models.app.App'
 ) -> None:
@@ -45,10 +47,11 @@ class NuxEvents:
 
     def user_entered_app(
         self,
+        session: sqlalchemy.orm.Session,
         user: 'nux.models.user.User',
         app: 'nux.models.app.App'
     ):
-        self.background_tasks.add_task(user_entered_app, user, app)
+        self.background_tasks.add_task(user_entered_app, session, user, app)
 
 
 def EventsDependecy() -> NuxEvents:

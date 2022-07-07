@@ -1,3 +1,4 @@
+import sqlalchemy.orm
 import fastapi.encoders
 import firebase_admin.messaging
 import pydantic
@@ -25,7 +26,7 @@ def make_message_user_entered_app(
     if not to_user.firebase_messaging_token:
         return None
     data = {
-        "message_type": "friend_entered_app",
+        "type": "friend_entered_app",
         "user_nickname": from_user.nickname,
         "user_id": from_user.id,
         "app_name": app.name,
@@ -36,7 +37,6 @@ def make_message_user_entered_app(
     data = fastapi.encoders.jsonable_encoder(data)
     # firebase accept only strings as values
     data = {key: str(data[key]) for key in data if data[key] is not None}
-
     return firebase_admin.messaging.Message(
         data=data,
         token=to_user.firebase_messaging_token,
@@ -44,19 +44,19 @@ def make_message_user_entered_app(
 
 
 def send_notification_user_entered_app(
+    session: sqlalchemy.orm.Session,
     user: 'nux.models.user.User',
     app: 'nux.models.app.App'
 ):
     if nux.firebase.firebase_app is None:
         return
 
-    with nux.database.Session() as session:
-        friends = nux.models.user.get_friends(session, user)
-        none_or_messages = (
-            make_message_user_entered_app(user, app, friend) for friend in friends
-        )
-        messages = [m for m in none_or_messages if m is not None]
-        nux.firebase.send_messages(messages)
+    friends = nux.models.user.get_friends(session, user)
+    none_or_messages = (
+        make_message_user_entered_app(user, app, friend) for friend in friends
+    )
+    messages = [m for m in none_or_messages if m is not None]
+    nux.firebase.send_messages(messages)
 
 
 def make_message_invite_to_app(
@@ -68,10 +68,11 @@ def make_message_invite_to_app(
     user -- user joined the app
     friend -- user to notify
     """
+    print(to_user.nickname)
     if not to_user.firebase_messaging_token:
         return None
     data = {
-        "message_type": "invite_to_app",
+        "type": "invite_to_app",
         "user_nickname": from_user.nickname,
         "user_id": from_user.id,
         "app_name": app.name,
@@ -82,6 +83,7 @@ def make_message_invite_to_app(
     data = fastapi.encoders.jsonable_encoder(data)
     # firebase accept only strings as values
     data = {key: str(data[key]) for key in data if data[key] is not None}
+    print(data)
 
     return firebase_admin.messaging.Message(
         data=data,
@@ -90,14 +92,17 @@ def make_message_invite_to_app(
 
 
 def send_invite_to_app_from_friend(
+    session: sqlalchemy.orm.Session,
     from_user: 'nux.models.user.User',
-    to_user: 'nux.models.user.User',
+    to_users: list['nux.models.user.User'],
     app: 'nux.models.app.App',
 ):
+    print(to_users[0].nickname)
     if nux.firebase.firebase_app is None:
         return
 
-    with nux.database.Session() as session:
-        message = make_message_invite_to_app(from_user, to_user, app)
-        if message is not None:
-            nux.firebase.send_message(message)
+    none_or_messages = (
+        make_message_invite_to_app(from_user, friend, app) for friend in to_users
+    )
+    messages = [m for m in none_or_messages if m is not None]
+    nux.firebase.send_messages(messages)
