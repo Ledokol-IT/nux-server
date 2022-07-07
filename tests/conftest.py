@@ -1,12 +1,10 @@
-import fastapi
-import fastapi.testclient
-import sqlalchemy_utils
-import sqlalchemy.exc
-
-
-import pytest
 import uuid
 
+import fastapi
+import fastapi.testclient
+import pytest
+import sqlalchemy.exc
+import sqlalchemy_utils
 
 from nux import create_app
 import nux.config
@@ -22,6 +20,8 @@ def app():
         "--pg-db", tmp_db,
         "--pg-host", "localhost:5432",
         "--secret-key", "123",
+        "--firebase-dry-run",
+        "--google-creds", "./ledokol-it-google-auth.json"
     ]
     options = nux.config.parse_args(args)
     sqlalchemy_utils.create_database(options.postgres_url)
@@ -35,13 +35,6 @@ def app():
             sqlalchemy_utils.drop_database(options.postgres_url)
         except sqlalchemy.exc.ProgrammingError:
             pass
-
-
-@pytest.fixture
-def postgres():
-    """
-    Создает временную БД для запуска теста.
-    """
 
 
 @pytest.fixture
@@ -61,6 +54,7 @@ def user_token(client):
         json=good_register_payload,
     )
     return response.json()["access_token"]
+
 
 @pytest.fixture
 def user_auth_header(user_token):

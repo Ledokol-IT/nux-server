@@ -1,14 +1,14 @@
-import pydantic
 import typing as t
-import sqlalchemy as sa
-import sqlalchemy.orm as orm
-import passlib.context
-
 import uuid
 
+import passlib.context
+import pydantic
+import sqlalchemy as sa
+import sqlalchemy.orm as orm
+
 import nux.database
-import nux.models.status
 import nux.models.app
+import nux.models.status
 
 
 pwd_context = passlib.context.CryptContext(
@@ -30,10 +30,14 @@ class User(nux.database.Base):
     nickname: str = sa.Column(sa.String, index=True,
                               nullable=False)  # type: ignore
     hashed_password: str = sa.Column(sa.String, nullable=False)  # type: ignore
+    firebase_messaging_token: str = sa.Column(
+        sa.String,
+        nullable=True,
+    )  # type: ignore
 
     status: 'nux.models.status.UserStatus' = orm.relationship(
-        lambda: nux.models.status.UserStatus, 
-        uselist=False, 
+        lambda: nux.models.status.UserStatus,
+        uselist=False,
         back_populates="_user",
     )
 
@@ -81,7 +85,12 @@ def create_user(user_data: UserSchemeCreate):
     return user
 
 
-def get_user(session: orm.Session, id: str | None = None, phone: str | None = None, nickname: str | None = None):
+def get_user(
+    session: orm.Session,
+    id: str | None = None,
+    phone: str | None = None,
+    nickname: str | None = None
+):
     cnt_args = sum(map(lambda x: x is not None, [id, phone, nickname]))
     if cnt_args != 1:
         raise ValueError(f"Expected 1 argument. Find {cnt_args}")
@@ -98,12 +107,20 @@ def get_user(session: orm.Session, id: str | None = None, phone: str | None = No
     return user
 
 
-def get_friends(session: orm.Session, user: User, order="online") -> list[User]:
-    friends = (
+def get_friends(
+    session: orm.Session,
+    user: User,
+    order: t.Literal["online"] | None = None,
+) -> list[User]:
+    query = (
         session.query(User)
         .join(User.status)
         .filter(User.id != user.id)
-        .order_by(nux.models.status.UserStatus.last_update)
-    ).all()
+    )
+    if order == "online":
+        query = query.order_by(nux.models.status.UserStatus.last_update)
+
+    friends = query.all()
 
     return friends
+

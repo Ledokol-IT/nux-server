@@ -2,6 +2,7 @@ import fastapi
 
 from nux.auth import CurrentUserDependecy
 from nux.database import SessionDependecy
+from nux.events import EventsDependecy
 from nux.models.status import UserStatusScheme, update_status_in_app, update_status_leave_app
 from nux.models.app import AppSchemeCreateAndroid, determine_app_android
 
@@ -13,9 +14,10 @@ def set_status(
         app: AppSchemeCreateAndroid = fastapi.Body(embed=True),
         current_user=CurrentUserDependecy(),
         session=SessionDependecy(),
+        events=EventsDependecy(),
 ):
     _, app = determine_app_android(session, app)
-    status = update_status_in_app(session, current_user, app)
+    status = update_status_in_app(session, current_user, app, events)
 
     session.commit()
     session.refresh(status)

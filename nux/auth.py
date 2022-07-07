@@ -40,7 +40,11 @@ def create_token(user: User, expires_delta: datetime.timedelta | None = None):
     )
 
 
-def authenticate_user(session: Session, username: str, password: str) -> User | None:
+def authenticate_user(
+    session: Session,
+    username: str,
+    password: str,
+) -> User | None:
     if username.startswith("+"):
         user = get_user(session, phone=username)
     else:

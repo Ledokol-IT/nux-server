@@ -9,6 +9,7 @@ import sqlalchemy.orm as orm
 import nux.database
 import nux.models.user
 import nux.models.app
+import nux.events
 
 
 class UserStatus(nux.database.Base):
@@ -79,7 +80,12 @@ def create_empty_status():
     return new_status
 
 
-def update_status_in_app(session: orm.Session, user: 'nux.models.user.User', app: 'nux.models.app.App'):
+def update_status_in_app(
+    session: orm.Session,
+    user: 'nux.models.user.User',
+    app: 'nux.models.app.App',
+    events: 'nux.events.NuxEvents',
+):
     if user.status is not None and user.status.current_app == app:
         user.status.last_update = datetime.datetime.utcnow()
         session.merge(user.status)
@@ -90,6 +96,8 @@ def update_status_in_app(session: orm.Session, user: 'nux.models.user.User', app
         new_status.finished = False
         user.status = new_status
         session.merge(user)
+
+        events.user_entered_app(user, app)
     return user.status
 
 
