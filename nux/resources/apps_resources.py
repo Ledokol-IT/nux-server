@@ -1,5 +1,6 @@
 import fastapi
 import pydantic
+import sqlalchemy.orm
 
 from nux.auth import CurrentUserDependecy
 from nux.database import SessionDependecy
@@ -35,6 +36,14 @@ def sync_installed_apps(
     }
 
 
+@apps_router.get("/app/{app_id}", response_model=nux.models.app.AppScheme)
+def get_app_by_id(app_id, session: sqlalchemy.orm.Session = SessionDependecy()):
+    app = nux.models.app.get_app(session, id=app_id)
+    if not app:
+        raise fastapi.HTTPException(404)
+    return app
+
+
 class SetIconsRequestBody(pydantic.BaseModel):
     icon_large: pydantic.FileUrl | None = None
     icon_preview: pydantic.FileUrl | None = None
@@ -42,7 +51,11 @@ class SetIconsRequestBody(pydantic.BaseModel):
 
 
 @apps_router.put("/app/package/{package_name}/set_images", response_model=nux.models.app.AppScheme)
-def set_images(package_name, body: SetIconsRequestBody, session=SessionDependecy()):
+def set_images(
+    package_name,
+    body: SetIconsRequestBody,
+    session: sqlalchemy.orm.Session = SessionDependecy()
+):
     app = nux.models.app.get_app(session, android_package_name=package_name)
     if app is None:
         raise fastapi.HTTPException(
@@ -52,5 +65,6 @@ def set_images(package_name, body: SetIconsRequestBody, session=SessionDependecy
     app.icon_preview = body.icon_preview
     app.icon_large = body.icon_preview
     app.image_wide = body.image_wide
+    session.merge(app)
     session.commit()
     return app

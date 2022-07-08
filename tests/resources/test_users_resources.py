@@ -8,9 +8,9 @@ def test_get_me(client, user_auth_header):
     assert "nickname" in response.json()
 
 
-def test_get_user_by_nickname(client):
-    create_user(client, "mommy")
-    response = client.get("/user/mommy")
+def test_get_user_by_id(client, user_auth_header):
+    user = client.get("/get_me", headers=user_auth_header)
+    response = client.get(f"/user/{user['id']}")
     assert response.status_code == 200
     assert response.json()["nickname"] == "mommy"
 

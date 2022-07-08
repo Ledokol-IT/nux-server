@@ -20,8 +20,10 @@ def get_me(user=CurrentUserDependecy()):
 
 @user_router.get("/user/{user_id}",
                  response_model=nux.models.user.UserSchemeSecure)
-def get_user_by_nickname(user_id: str, session=SessionDependecy()):
+def get_user_by_id(user_id: str, session=SessionDependecy()):
     user = nux.models.user.get_user(session, id=user_id)
+    if not user:
+        raise fastapi.HTTPException(404)
     return user
 
 
