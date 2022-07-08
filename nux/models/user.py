@@ -34,6 +34,10 @@ class User(nux.database.Base):
         sa.String,
         nullable=True,
     )  # type: ignore
+    profile_pic: str = sa.Column(
+        sa.String,
+        nullable=True
+    )  # type: ignore
 
     status: 'nux.models.status.UserStatus' = orm.relationship(
         lambda: nux.models.status.UserStatus,

@@ -1,5 +1,6 @@
 import fastapi
 import pydantic
+import sqlalchemy.orm
 
 from nux.auth import CurrentUserDependecy
 from nux.database import SessionDependecy
@@ -89,3 +90,25 @@ def set_messaging_token(
 ):
     current_user.firebase_messaging_token = body.firebase_messaging_token
     session.commit()
+
+
+class SetProfilePicRequestBody(pydantic.BaseModel):
+    profile_pic: pydantic.FileUrl
+
+
+@user_router.put("/user/{user_id}/profile_pic", response_model=nux.models.user.UserScheme)
+def set_images(
+    user_id,
+    body: SetProfilePicRequestBody,
+    session: sqlalchemy.orm.Session = SessionDependecy()
+):
+    user = nux.models.user.get_user(session, user_id)
+    if user is None:
+        raise fastapi.HTTPException(
+            404,
+            detail="bad user"
+        )
+    user.profile_pic = body.profile_pic
+    session.merge(user)
+    session.commit()
+    return user
