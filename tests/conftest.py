@@ -27,7 +27,7 @@ def app():
     options = nux.config.parse_args(args)
     sqlalchemy_utils.create_database(options.postgres_url)
 
-    nux.database.create_all(options)
+    nux.database.run_migrations(options.postgres_url)
     app = create_app(options)
     try:
         yield app

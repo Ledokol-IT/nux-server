@@ -16,7 +16,7 @@ def create_app(options):
     app = fastapi.FastAPI(
         title="NUX (Ledokol)"
     )
-    nux.database.connect_to_db(options)
+    nux.database.connect_to_db(options.postgres_url)
     nux.firebase.setup_firebase(options)
     nux.notifications.setup_notifications(options)
 

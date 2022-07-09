@@ -29,6 +29,8 @@ Faker = "^13.14.0"
 [tool.poetry.scripts]
 run = "nux:run_app"
 create_all = "nux:create_all"
+make_migration = "nux:make_migration"
+run_migrations = "nux:run_migrations"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

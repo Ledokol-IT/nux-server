@@ -1,7 +1,6 @@
-import sqlalchemy.orm
 import fastapi.encoders
 import firebase_admin.messaging
-import pydantic
+import sqlalchemy.orm
 
 import nux.database
 import nux.events
@@ -11,6 +10,7 @@ import nux.models.user
 
 
 def setup_notifications(options):
+    _ = options
     nux.events.user_entered_app.on(send_notification_user_entered_app)
 
 
@@ -83,7 +83,6 @@ def make_message_invite_to_app(
     data = fastapi.encoders.jsonable_encoder(data)
     # firebase accept only strings as values
     data = {key: str(data[key]) for key in data if data[key] is not None}
-    print(data)
 
     return firebase_admin.messaging.Message(
         data=data,
@@ -97,7 +96,7 @@ def send_invite_to_app_from_friend(
     to_users: list['nux.models.user.User'],
     app: 'nux.models.app.App',
 ):
-    print(to_users[0].nickname)
+    _ = session
     if nux.firebase.firebase_app is None:
         return
 
