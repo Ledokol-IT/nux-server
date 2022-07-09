@@ -68,3 +68,23 @@ def set_images(
     session.merge(app)
     session.commit()
     return app
+
+
+class GetUserAppsResponse(pydantic.BaseModel):
+    apps: list[nux.models.app.AppScheme]
+
+
+@apps_router.get("/user/{user_id}/apps", response_model=GetUserAppsResponse)
+def get_user_apps(
+    user_id: str,
+    session: sqlalchemy.orm.Session = SessionDependecy(),
+):
+    user = nux.models.user.get_user(session, user_id)
+    if user is None:
+        raise fastapi.HTTPException(
+            404,
+            detail="bad user"
+        )
+    return {
+        "apps": nux.models.app.get_user_apps(session, user)
+    }

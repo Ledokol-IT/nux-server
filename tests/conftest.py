@@ -9,7 +9,7 @@ import sqlalchemy_utils
 from nux import create_app
 import nux.config
 import nux.database
-from tests.utils import app1_android_payload
+from tests.utils import app1_android_payload, create_user_token, create_user
 
 
 @pytest.fixture
@@ -45,21 +45,9 @@ def client(app):
 
 
 @pytest.fixture
-def user_token(client):
-    good_register_payload = {
-        "nickname": "test_nickname",
-        "password": "fakeGoodPassword!",
-    }
-    response = client.post(
-        "/register",
-        json=good_register_payload,
-    )
-    return response.json()["access_token"]
+def user_auth_header(client):
+    return create_user(client, "main_test_user")
 
-
-@pytest.fixture
-def user_auth_header(user_token):
-    return {'Authorization': f'Bearer {user_token}'}
 
 @pytest.fixture
 def sync_app1(client, user_auth_header):
@@ -71,7 +59,6 @@ def sync_app1(client, user_auth_header):
         headers=user_auth_header,
     )
     return response.json()["apps"][0]
-    
 
 
 @pytest.fixture

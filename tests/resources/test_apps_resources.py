@@ -47,3 +47,10 @@ def test_get_app_ok(client, sync_app1):
     response = client.get(f"/app/{sync_app1['id']}")
     assert response.status_code == 200
     assert response.json()["android_package_name"] == sync_app1["android_package_name"]
+
+
+def test_get_apps(client, sync_app1, user_auth_header):
+    user = client.get("/get_me", headers=user_auth_header).json()
+    response = client.get(f"/user/{user['id']}/apps")
+    assert response.status_code == 200
+    assert response.json()["apps"][0]["android_package_name"] == sync_app1["android_package_name"]

@@ -97,7 +97,7 @@ class SetProfilePicRequestBody(pydantic.BaseModel):
 
 
 @user_router.put("/user/{user_id}/profile_pic", response_model=nux.models.user.UserScheme)
-def set_images(
+def set_profile_pic_admin(
     user_id,
     body: SetProfilePicRequestBody,
     session: sqlalchemy.orm.Session = SessionDependecy()
@@ -112,3 +112,14 @@ def set_images(
     session.merge(user)
     session.commit()
     return user
+
+
+@user_router.put("/current_user/profile_pic", response_model=nux.models.user.UserScheme)
+def set_profile_pic(
+    body: SetProfilePicRequestBody,
+    session: sqlalchemy.orm.Session = SessionDependecy(),
+    current_user: 'nux.models.user.User' = CurrentUserDependecy(),
+):
+    current_user.profile_pic = body.profile_pic
+    session.commit()
+    return current_user

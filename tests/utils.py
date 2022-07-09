@@ -1,13 +1,20 @@
-def create_user(client, nickname):
+def create_user_token(client, nickname: str):
     payload = {
         "nickname": nickname,
         "password": "fakeGoodPassword!",
+        "name": nickname.capitalize(),
     }
     response = client.post(
         "/register",
         json=payload,
     )
-    return {"Authorization": f'Bearer {response.json()["access_token"]}'}
+    return response.json()["access_token"]
+
+
+def create_user(client, nickname: str):
+    return {
+        "Authorization": f'Bearer {create_user_token(client, nickname)}'
+    }
 
 
 app1_android_payload = {

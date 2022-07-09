@@ -29,6 +29,10 @@ class User(nux.database.Base):
                       nullable=True)  # type: ignore
     nickname: str = sa.Column(sa.String, index=True,
                               nullable=False)  # type: ignore
+    name: str = sa.Column(
+        sa.String,
+        nullable=False,
+    )  # type: ignore
     hashed_password: str = sa.Column(sa.String, nullable=False)  # type: ignore
     firebase_messaging_token: str = sa.Column(
         sa.String,
@@ -59,6 +63,7 @@ class User(nux.database.Base):
 
 class UserSchemeBase(pydantic.BaseModel):
     nickname: str
+    name: str
 
 
 class UserSchemeCreate(UserSchemeBase):
@@ -68,6 +73,7 @@ class UserSchemeCreate(UserSchemeBase):
 class UserSchemeSecure(UserSchemeBase):
     id: str
     status: t.Optional['nux.models.status.UserStatusSchemeSecure']
+    profile_pic: str | None
 
     class Config:
         orm_mode = True
@@ -84,6 +90,7 @@ class UserScheme(UserSchemeSecure):
 def create_user(user_data: UserSchemeCreate):
     user = User()
     user.nickname = user_data.nickname
+    user.name = user_data.name
     user.set_password(user_data.password)
     user.status = nux.models.status.create_empty_status()
     return user

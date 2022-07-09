@@ -4,6 +4,7 @@ import pytest
 good_register_payload = {
     "nickname": "test_nickname",
     "password": "fakeGoodPassword!",
+    "name": "Tester",
 }
 
 
