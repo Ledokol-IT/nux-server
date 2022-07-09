@@ -31,6 +31,7 @@ run = "nux:run_app"
 create_all = "nux:create_all"
 make_migration = "nux:make_migration"
 run_migrations = "nux:run_migrations"
+alembic = "nux:alembic"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
