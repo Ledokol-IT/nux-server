@@ -22,7 +22,7 @@ def app():
         "--pg-host", "localhost:5432",
         "--secret-key", "123",
         "--firebase-dry-run",
-        "--google-creds", "./ledokol-it-google-auth.json"
+        "--google-creds", "./google_creds.json"
     ]
     options = nux.config.parse_args(args)
     sqlalchemy_utils.create_database(options.postgres_url)

@@ -1,4 +1,4 @@
 __pycache__
 .venv
-ledokol-it-google-auth.json
+google_creds.json
 .DS_Store

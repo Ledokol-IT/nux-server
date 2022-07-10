@@ -46,6 +46,7 @@ jobs:
         python -m pip install --upgrade pip
         curl -sSL 'https://install.python-poetry.org' | python
         poetry install
+        echo '${{ secrets.GOOGLE_CREDS }}' >> google_creds.json
     - name: Lint the code with pycodestyle
       run: |
         poetry run flake8 nux --count --select=E9,F63,F7,F82 --show-source --statistics
