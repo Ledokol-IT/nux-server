@@ -90,7 +90,10 @@ def register(user_data: UserSchemeCreate, session=SessionDependecy()):
     return create_token(user)
 
 
-def get_current_user(token: str = fastapi.Depends(oauth2_scheme), session=SessionDependecy()) -> User:
+def get_current_user(
+    token: str = fastapi.Depends(oauth2_scheme),
+    session=SessionDependecy()
+) -> User:
     credentials_exception = fastapi.HTTPException(
         status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -111,5 +114,7 @@ def get_current_user(token: str = fastapi.Depends(oauth2_scheme), session=Sessio
 
 
 def CurrentUserDependecy() -> User:
-    """Actualy it's fake type and it returns fastapi.Depends(get_current_user)"""
+    """Actualy it's fake type and it
+    returns fastapi.Depends(get_current_user)
+    """
     return fastapi.Depends(get_current_user, use_cache=True)

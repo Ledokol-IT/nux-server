@@ -20,7 +20,6 @@ def create_app(options):
     nux.firebase.setup_firebase(options)
     nux.notifications.setup_notifications(options)
 
-
     @app.get("/")
     def index():
         return {"hello": "world"}

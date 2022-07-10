@@ -37,7 +37,10 @@ def sync_installed_apps(
 
 
 @apps_router.get("/app/{app_id}", response_model=nux.models.app.AppScheme)
-def get_app_by_id(app_id, session: sqlalchemy.orm.Session = SessionDependecy()):
+def get_app_by_id(
+    app_id,
+    session: sqlalchemy.orm.Session = SessionDependecy()
+):
     app = nux.models.app.get_app(session, id=app_id)
     if not app:
         raise fastapi.HTTPException(404)
@@ -50,7 +53,8 @@ class SetIconsRequestBody(pydantic.BaseModel):
     image_wide: pydantic.FileUrl | None = None
 
 
-@apps_router.put("/app/package/{package_name}/set_images", response_model=nux.models.app.AppScheme)
+@apps_router.put("/app/package/{package_name}/set_images",
+                 response_model=nux.models.app.AppScheme)
 def set_images(
     package_name,
     body: SetIconsRequestBody,

@@ -90,18 +90,21 @@ def update_status_in_app(
         user.status.last_update = datetime.datetime.utcnow()
         session.merge(user.status)
     else:
-        new_status = UserStatus()
-        new_status.current_app = app
-        new_status.last_update = new_status.started_at = datetime.datetime.now()
-        new_status.finished = False
-        user.status = new_status
+        status = UserStatus()
+        status.current_app = app
+        status.last_update = status.started_at = datetime.datetime.now()
+        status.finished = False
+        user.status = status
         session.merge(user)
 
         events.user_entered_app(session, user, app)
     return user.status
 
 
-def update_status_leave_app(session: orm.Session, user: 'nux.models.user.User'):
+def update_status_leave_app(
+    session: orm.Session,
+    user: 'nux.models.user.User'
+):
     if user.status is None:
         return None
     else:

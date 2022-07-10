@@ -101,7 +101,11 @@ def send_invite_to_app_from_friend(
         return
 
     none_or_messages = (
-        make_message_invite_to_app(from_user, friend, app) for friend in to_users
+        make_message_invite_to_app(
+            from_user,
+            friend,
+            app
+        ) for friend in to_users
     )
     messages = [m for m in none_or_messages if m is not None]
     nux.firebase.send_messages(messages)

@@ -4,7 +4,6 @@ import sqlalchemy.orm
 
 from nux.auth import CurrentUserDependecy
 from nux.database import SessionDependecy
-from nux.models.app import AppSchemeCreateAndroid
 import nux.notifications
 import nux.models.user
 import nux.models.app
@@ -51,7 +50,8 @@ def invite_friends_to_game(
     current_user: 'nux.models.user.User' = CurrentUserDependecy(),
 ):
     not_validated_friends = (
-        nux.models.user.get_user(session, friend_id) for friend_id in body.friends_ids
+        nux.models.user.get_user(session, friend_id)
+        for friend_id in body.friends_ids
     )
     friends = []
     for friend in not_validated_friends:
@@ -96,7 +96,8 @@ class SetProfilePicRequestBody(pydantic.BaseModel):
     profile_pic: pydantic.FileUrl
 
 
-@user_router.put("/user/{user_id}/profile_pic", response_model=nux.models.user.UserScheme)
+@user_router.put("/user/{user_id}/profile_pic",
+                 response_model=nux.models.user.UserScheme)
 def set_profile_pic_admin(
     user_id,
     body: SetProfilePicRequestBody,
@@ -114,7 +115,8 @@ def set_profile_pic_admin(
     return user
 
 
-@user_router.put("/current_user/profile_pic", response_model=nux.models.user.UserScheme)
+@user_router.put("/current_user/profile_pic",
+                 response_model=nux.models.user.UserScheme)
 def set_profile_pic(
     body: SetProfilePicRequestBody,
     session: sqlalchemy.orm.Session = SessionDependecy(),

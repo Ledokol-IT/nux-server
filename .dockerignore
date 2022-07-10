@@ -3,6 +3,3 @@
 **/__pycache__/
 .gitignore
 nux_local.conf
-ledokol-it-google-auth.json
-.DS_Store
-

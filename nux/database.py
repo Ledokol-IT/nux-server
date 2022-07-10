@@ -25,6 +25,7 @@ def connect_to_db(postgres_url: str):
     engine = sqlalchemy.create_engine(postgres_url)
     Session = sqlalchemy.orm.sessionmaker(bind=engine)
 
+
 def make_alembic_config(postgres_url):
     import alembic.config
     # then, load the Alembic configuration and generate the
@@ -32,6 +33,7 @@ def make_alembic_config(postgres_url):
     alembic_cfg = alembic.config.Config("./alembic.ini")
     alembic_cfg.set_main_option('sqlalchemy.url', postgres_url)
     return alembic_cfg
+
 
 def create_all(postgres_url: str):
     connect_to_db(postgres_url)

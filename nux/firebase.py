@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 DISABLED = True
 firebase_app = None
 
+
 def setup_firebase(options):
     global firebase_app, DRY_RUN, DISABLED
 
@@ -36,6 +37,7 @@ def send_messages(
         app=firebase_app,
         dry_run=DRY_RUN,
     )
+
 
 def send_message(
     message: firebase_admin.messaging.Message,
