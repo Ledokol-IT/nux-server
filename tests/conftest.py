@@ -16,10 +16,10 @@ from tests.utils import app1_android_payload, create_user_token, create_user
 def app():
     tmp_db = '.'.join([uuid.uuid4().hex, 'pytest'])
     args = [
-        # "--pg-user", "web",
-        # "--pg-password", "pass",
+        "--pg-user", "web",
+        "--pg-password", "pass",
         "--pg-db", tmp_db,
-        # "--pg-host", "localhost:5432",
+        "--pg-host", "localhost:5432",
         "--secret-key", "123",
         "--firebase-dry-run",
         "--google-creds", "./ledokol-it-google-auth.json"
