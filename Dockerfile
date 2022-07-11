@@ -1,4 +1,4 @@
-FROM python:3.10.4-slim-buster AS build
+FROM python:3.10.4-slim-buster AS base
 
 ARG BUILD_TYPE
 
@@ -67,7 +67,7 @@ RUN poetry version && poetry run pip install -U pip
 
 
 
-FROM base as image-dev
+FROM base AS image-dev
 # Project initialization:
 # hadolint ignore=SC2046
 RUN poetry install \
@@ -84,7 +84,7 @@ ENTRYPOINT ["scripts/start_dev.sh"]
 
 
 
-FROM base as image-prod
+FROM base AS image-prod
 
 RUN poetry install \
     --no-interaction --no-ansi \
