@@ -49,6 +49,9 @@ jobs:
       - name: Run ansible
         run: |
           chmod og= ansible/id_rsa
+          mkdir -p ~/.ssh
+          mv ansible/known_hosts ~/.ssh/known_hosts
+          export ANSIBLE_HOST_KEY_CHECKING=False
           export ANSIBLE_PRIVATE_KEY_FILE=ansible/id_rsa
           export ANSIBLE_INVENTORY=ansible/inventory.ini
           touch $TMPDIR/vars.yml
