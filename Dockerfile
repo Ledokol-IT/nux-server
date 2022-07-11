@@ -1,4 +1,4 @@
-FROM python:3.10.4-slim-buster AS development_build
+FROM python:3.10.4-slim-buster AS build
 
 ARG BUILD_TYPE
 
@@ -62,16 +62,16 @@ RUN groupadd -r web && useradd -d /code -r -g web web \
 # Copy only requirements, to cache them in docker layer
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
+RUN poetry version && poetry run pip install -U pip
+
+
+
+
+FROM base as image-dev
 # Project initialization:
 # hadolint ignore=SC2046
-RUN echo "$BUILD_TYPE" && poetry version \
-  # Install deps:
-  && poetry run pip install -U pip \
-  && poetry install \
-    $(if [ "$BUILD_TYPE" = 'production' ]; then echo '--no-dev'; fi) \
+RUN poetry install \
     --no-interaction --no-ansi \
-  # Cleaning poetry installation's cache for production:
-  && if [ "$BUILD_TYPE" = 'production' ]; then rm -rf "$POETRY_CACHE_DIR"; fi
 
 COPY --chown=web:web . /code
 
@@ -79,6 +79,23 @@ COPY --chown=web:web . /code
 USER web
 
 RUN ["chmod", "+x", "/code/scripts/start_dev.sh"]
-
-# We customize how our app is loaded with the custom entrypoint:
 ENTRYPOINT ["scripts/start_dev.sh"]
+
+
+
+
+FROM base as image-prod
+
+RUN poetry install \
+    --no-interaction --no-ansi \
+    --no-dev \
+  # Cleaning poetry installation's cache for production:
+  && rm -rf "$POETRY_CACHE_DIR"
+
+COPY --chown=web:web . /code
+
+# Running as non-root user:
+USER web
+
+RUN ["chmod", "+x", "/code/scripts/start_prod.sh"]
+ENTRYPOINT ["scripts/start_prod.sh"]
