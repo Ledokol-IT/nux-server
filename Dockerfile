@@ -71,7 +71,7 @@ FROM base AS image-dev
 # Project initialization:
 # hadolint ignore=SC2046
 RUN poetry install \
-    --no-interaction --no-ansi \
+    --no-interaction --no-ansi
 
 COPY --chown=web:web . /code
 
