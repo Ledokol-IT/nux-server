@@ -27,7 +27,5 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tag_with_ref: true # Info: https://github.com/docker/build-push-action/tree/releases/v1#tag_with_ref
-          tag_with_sha: true # Info: https://github.com/docker/build-push-action/tree/releases/v1#tag_with_sha
           tags: i3cheese/nux:latest
           target: image-prod
