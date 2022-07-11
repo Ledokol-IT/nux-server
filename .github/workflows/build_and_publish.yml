@@ -43,7 +43,7 @@ jobs:
           echo $USER >&2
       - name: Run ansible
         run: |
-          echo '${{ secrets.ID_RSA }}' >> id_rsa
+          echo "${{ secrets.ID_RSA }}" >> id_rsa
           chmod og= id_rsa
           export ANSIBLE_PRIVATE_KEY_FILE=id_rsa
           export ANSIBLE_INVENTORY=ansible/inventory.ini
