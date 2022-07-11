@@ -2,3 +2,4 @@ __pycache__
 .venv
 google_creds.json
 .DS_Store
+ansible/id_rsa

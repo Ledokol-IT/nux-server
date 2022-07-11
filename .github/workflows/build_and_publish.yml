@@ -39,13 +39,18 @@ jobs:
     container: willhallonline/ansible
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          echo $USER >&2
+      - name: Decrypt id_rsa
+        run: |
+          apt-get update 
+          apt-get install gpg
+          ./ansible/decode_id_rsa.sh
+        env:
+          ID_RSA_PASSPHRASE: ${{ secrets.ID_RSA_PASSPHRASE }}
       - name: Run ansible
         run: |
           echo "${{ secrets.ID_RSA }}" >> id_rsa
           chmod og= id_rsa
-          export ANSIBLE_PRIVATE_KEY_FILE=id_rsa
+          export ANSIBLE_PRIVATE_KEY_FILE=ansible/id_rsa
           export ANSIBLE_INVENTORY=ansible/inventory.ini
           touch $TMPDIR/vars.yml
           echo "DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}" >> $TMPDIR/vars.yml
