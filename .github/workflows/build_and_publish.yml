@@ -56,7 +56,7 @@ jobs:
           export ANSIBLE_INVENTORY=ansible/inventory.ini
           touch $TMPDIR/vars.yml
           echo "DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}" >> $TMPDIR/vars.yml
-          echo "DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}" >> $TMPDIR/vars.yml
+          echo "DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}" >> $TMPDIR/vars.yml
           echo "POSTGRES_USER: ${{ secrets.POSTGRES_USER }}" >> $TMPDIR/vars.yml
           echo "POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}" >> $TMPDIR/vars.yml
           echo "POSTGRES_DB: ${{ secrets.POSTGRES_DB }}" >> $TMPDIR/vars.yml
