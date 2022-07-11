@@ -31,3 +31,26 @@ jobs:
         with:
           push: true
           tags: i3cheese/nux:latest
+          target: image-prod
+  ansible:
+    needs: docker
+    runs-on: ubuntu-latest
+    container: willhallonline/ansible
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run ansible
+        run: |
+          echo '${{ secrets.ID_RSA }}' >> id_rsa
+          chmod og= id_rsa
+          export ANSIBLE_PRIVATE_KEY_FILE=id_rsa
+          export ANSIBLE_INVENTORY=ansible/inventory.ini
+          touch $TMPDIR/vars.yml
+          echo "DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}" >> $TMPDIR/vars.yml
+          echo "DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}" >> $TMPDIR/vars.yml
+          echo "POSTGRES_USER: ${{ secrets.POSTGRES_USER }}" >> $TMPDIR/vars.yml
+          echo "POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}" >> $TMPDIR/vars.yml
+          echo "POSTGRES_DB: ${{ secrets.POSTGRES_DB }}" >> $TMPDIR/vars.yml
+          echo "POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}" >> $TMPDIR/vars.yml
+          echo "NUX_SECRET_KEY: ${{ secrets.NUX_SECRET_KEY }}" >> $TMPDIR/vars.yml
+          ansible-playbook -vv ansible/playbook.yml --extra-vars "@$TMPDIR/vars.yml"
+  

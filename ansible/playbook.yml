@@ -1,0 +1,48 @@
+- name: Gathering facts
+  hosts: all
+  remote_user: ansible
+  become: true
+  gather_facts: true
+
+- hosts: api
+  tasks:
+    - name: Login to Docker Hub
+      community.docker.docker_login:
+        username: "{{ lookup('env', 'DOCKERHUB_USERNAME') }}"
+        password: "{{ lookup('env', 'DOCKERHUB_TOKEN') }}"
+    - name: Run server
+      community.docker.docker_compose:
+        project_name: nux server api
+        definition:
+          services:
+            app:
+              image: "i3cheese/nux:latest"
+              restart: always
+              ports:
+                - "80:8080"
+              environment:
+                NUX_PORT: "8080"
+                POSTGRES_HOST: "{{ lookup('env', 'POSTGRES_HOST') }}"
+                POSTGRES_USER: "{{ lookup('env', 'POSTGRES_USER') }}"
+                POSTGRES_PASSWORD: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
+                POSTGRES_DB: "{{ lookup('env', 'POSTGRES_DB') }}"
+                NUX_SECRET_KEY: "{{ lookup('env', 'NUX_SECRET_KEY') }}"
+        pull: yes
+      register: output
+    - name: Pause for 2 minutes
+      pause:
+        seconds: 120
+
+    - name: log db
+      ansible.builtin.shell: docker logs messenger_db_1
+      register: db_log
+    - name: Print return information from the previous task
+      ansible.builtin.debug:
+        var: db_log
+    - name: log app
+      ansible.builtin.shell: docker logs messenger_app_1
+      register: app_log
+    - name: Print return information from the previous task
+      ansible.builtin.debug:
+        var: app_log
+
