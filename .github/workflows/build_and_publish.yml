@@ -33,11 +33,14 @@ jobs:
           tags: i3cheese/nux:latest
           target: image-prod
   ansible:
-    needs: docker
+    # needs: docker
+    # TODO: uncoment
     runs-on: ubuntu-latest
     container: willhallonline/ansible
     steps:
       - uses: actions/checkout@v3
+      - run: |
+          echo $USER >&2
       - name: Run ansible
         run: |
           echo '${{ secrets.ID_RSA }}' >> id_rsa
