@@ -9,8 +9,12 @@ on:
 
 jobs:
   # Run code tests before building the image, to ensure it is good to go
+  tests:
+      uses: "./.github/workflows/lint_and_test.yml"
+      secrets: inherit
   docker:
     name: Build and push Docker image to Docker Hub
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       -
@@ -33,8 +37,7 @@ jobs:
           tags: i3cheese/nux:latest
           target: image-prod
   ansible:
-    # needs: docker
-    # TODO: uncoment
+    needs: docker
     runs-on: ubuntu-latest
     container: willhallonline/ansible
     steps:
