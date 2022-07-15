@@ -27,20 +27,4 @@
                 NUX_SECRET_KEY: "{{NUX_SECRET_KEY}}"
         pull: yes
       register: output
-    - name: Pause for 2 minutes
-      pause:
-        seconds: 120
-
-    - name: log db
-      ansible.builtin.shell: docker logs messenger_db_1
-      register: db_log
-    - name: Print return information from the previous task
-      ansible.builtin.debug:
-        var: db_log
-    - name: log app
-      ansible.builtin.shell: docker logs messenger_app_1
-      register: app_log
-    - name: Print return information from the previous task
-      ansible.builtin.debug:
-        var: app_log
 
