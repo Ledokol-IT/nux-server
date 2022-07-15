@@ -66,11 +66,14 @@ def set_images(
             400,
             detail="bad app"
         )
-    app.icon_preview = body.icon_preview
-    app.icon_large = body.icon_preview
-    app.image_wide = body.image_wide
-    session.merge(app)
+    if body.icon_preview:
+        app.icon_preview = body.icon_preview
+    if body.icon_large:
+        app.icon_large = body.icon_large
+    if body.image_wide:
+        app.image_wide = body.image_wide
     session.commit()
+    session.merge(app)
     return app
 
 
