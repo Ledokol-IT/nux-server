@@ -26,6 +26,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: create google_creds
+        run: |
+          echo '${{ secrets.GOOGLE_CREDS }}' >> './google_creds.json'
+      -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
