@@ -42,7 +42,6 @@ class App(nux.database.Base):
     id: str = sa.Column(
         sa.String,
         primary_key=True,
-        index=True,
         default=lambda: str(uuid.uuid4())
     )  # type: ignore
 
@@ -59,10 +58,6 @@ class App(nux.database.Base):
         pg_types.ENUM(CATEGORY),
         nullable=False,
         default=CATEGORY.OTHER,
-    )  # type: ignore
-    android_category: str | None = sa.Column(
-        sa.String,
-        nullable=True,
     )  # type: ignore
     icon_preview: str | None = sa.Column(
         sa.String,
@@ -85,7 +80,7 @@ class AppSchemeBase(pydantic.BaseModel):
 
 class AppSchemeCreateAndroid(AppSchemeBase):
     android_package_name: str
-    android_category: str | None
+    android_category: int | None
 
 
 class AppScheme(AppSchemeBase):
@@ -103,11 +98,10 @@ def create_app_android(app_data: AppSchemeCreateAndroid):
     app = App()
     app.android_package_name = app_data.android_package_name
     app.name = app_data.name
-    app.android_category = app_data.android_category
 
     match_category = {
         None: CATEGORY.OTHER,
-        "CATEGORY_GAME": CATEGORY.GAME,
+        0: CATEGORY.GAME,
     }
     if app_data.android_category in match_category:
         app.category = match_category[app_data.android_category]

@@ -12,7 +12,7 @@ def create_android_app_payload(
         package_name = fake.domain_name(levels=4)
     if category is None:
         category = fake.random_element(elements=[
-            "CATEGORY_GAME",
+            0,
             None,
         ])
     if name is None:

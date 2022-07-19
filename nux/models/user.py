@@ -21,13 +21,12 @@ class User(nux.database.Base):
     id: str = sa.Column(
         sa.String,
         primary_key=True,
-        index=True,
         default=lambda: str(uuid.uuid4())
     )  # type: ignore
     # In +79999999999 format
     phone = sa.Column(sa.String, index=True, unique=True,
                       nullable=True)  # type: ignore
-    nickname: str = sa.Column(sa.String, index=True,
+    nickname: str = sa.Column(sa.String, index=True, unique=True,
                               nullable=False)  # type: ignore
     name: str = sa.Column(
         sa.String,
