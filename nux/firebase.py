@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 
@@ -14,8 +15,8 @@ firebase_app = None
 def setup_firebase(options):
     global firebase_app, DRY_RUN, DISABLED
     if options.google_creds:
-        print(repr(options.google_creds))
-        creds = json.loads(options.google_creds)
+        creds = base64.b64decode(options.google_creds)
+        creds = json.loads(creds)
         credentials = firebase_admin.credentials.Certificate(
             creds,
         )
