@@ -1,3 +1,4 @@
+import json
 import logging
 
 import firebase_admin
@@ -12,16 +13,20 @@ firebase_app = None
 
 def setup_firebase(options):
     global firebase_app, DRY_RUN, DISABLED
-
-    if options.google_creds is None:
+    if options.google_creds:
+        creds = json.loads(options.google_creds)
+        credentials = firebase_admin.credentials.Certificate(
+            creds,
+        )
+    elif options.google_creds_file:
+        credentials = firebase_admin.credentials.Certificate(
+            options.google_creds_file,
+        )
+    else:
         logger.error(
             "Google credentials not found. Firebase will not be initialized")
         firebase_app = None
         return
-
-    credentials = firebase_admin.credentials.Certificate(
-        options.google_creds,
-    )
     DRY_RUN = options.firebase_dry_run
 
     if firebase_app is None:

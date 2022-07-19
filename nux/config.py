@@ -29,9 +29,11 @@ def parse_args(args=None):
     add_data_base_args(p)
     p.add_argument("--secret-key", env_var="NUX_SECRET_KEY", required=True)
     p.add_argument("--port", default=8000, env_var="NUX_PORT", type=int)
-    p.add_argument("--google-creds",
-                   env_var="GOOGLE_APPLICATION_CREDENTIALS",
+    p.add_argument("--google-creds-file",
+                   env_var="GOOGLE_CREDS_FILE",
                    default="google_creds.json")
+    p.add_argument("--google-creds",
+                   env_var="GOOGLE_CREDS",)
     p.add_argument("--firebase-dry-run", action="store_true")
 
     options: argparse.Namespace = p.parse_known_args(args)[0]

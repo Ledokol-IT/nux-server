@@ -26,10 +26,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: create google_creds
-        run: |
-          echo '${{ secrets.GOOGLE_CREDS }}' >> './google_creds.json'
-      -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -65,5 +61,6 @@ jobs:
           echo "POSTGRES_DB: ${{ secrets.POSTGRES_DB }}" >> $TMPDIR/vars.yml
           echo "POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}" >> $TMPDIR/vars.yml
           echo "NUX_SECRET_KEY: ${{ secrets.NUX_SECRET_KEY }}" >> $TMPDIR/vars.yml
+          echo "GOOGLE_CREDS: '${{ secrets.GOOGLE_CREDS }}'" >> $TMPDIR/vars.yml
           ansible-playbook -vv ansible/playbook.yml --extra-vars "@$TMPDIR/vars.yml"
   

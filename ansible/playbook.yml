@@ -25,6 +25,7 @@
                 POSTGRES_PASSWORD: "{{POSTGRES_PASSWORD}}"
                 POSTGRES_DB: "{{POSTGRES_DB}}"
                 NUX_SECRET_KEY: "{{NUX_SECRET_KEY}}"
+                GOOGLE_CREDS: '{{GOOGLE_CREDS}}'
         pull: yes
       register: output
 
