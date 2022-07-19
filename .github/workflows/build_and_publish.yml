@@ -61,6 +61,6 @@ jobs:
           echo "POSTGRES_DB: ${{ secrets.POSTGRES_DB }}" >> $TMPDIR/vars.yml
           echo "POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}" >> $TMPDIR/vars.yml
           echo "NUX_SECRET_KEY: ${{ secrets.NUX_SECRET_KEY }}" >> $TMPDIR/vars.yml
-          echo "GOOGLE_CREDS: '${{ secrets.GOOGLE_CREDS }}'" >> $TMPDIR/vars.yml
+          echo "GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}" >> $TMPDIR/vars.yml
           ansible-playbook -vv ansible/playbook.yml --extra-vars "@$TMPDIR/vars.yml"
   

@@ -14,6 +14,7 @@ firebase_app = None
 def setup_firebase(options):
     global firebase_app, DRY_RUN, DISABLED
     if options.google_creds:
+        print(repr(options.google_creds))
         creds = json.loads(options.google_creds)
         credentials = firebase_admin.credentials.Certificate(
             creds,
