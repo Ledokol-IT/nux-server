@@ -92,6 +92,22 @@ def set_messaging_token(
     session.commit()
 
 
+class SetDoNotDisturbeRequestBody(pydantic.BaseModel):
+    do_not_disturbe_mode: bool
+
+
+@user_router.put("/current_user/do_not_disturbe",
+                 response_model=nux.models.user.UserScheme)
+def set_do_not_disturbe(
+    body: SetDoNotDisturbeRequestBody,
+    session=SessionDependecy(),
+    current_user: "nux.models.user.User" = CurrentUserDependecy(),
+):
+    current_user.do_not_disturbe_mode = body.do_not_disturbe_mode
+    session.commit()
+    return current_user
+
+
 class SetProfilePicRequestBody(pydantic.BaseModel):
     profile_pic: pydantic.FileUrl
 

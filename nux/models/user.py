@@ -53,6 +53,12 @@ class User(nux.database.Base):
         back_populates="user"
     )
 
+    do_not_disturbe_mode: bool = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+    )  # type: ignore
+
     def check_password(self, password: str) -> bool:
         return pwd_context.verify(password, self.hashed_password)
 
@@ -73,6 +79,7 @@ class UserSchemeSecure(UserSchemeBase):
     id: str
     status: t.Optional['nux.models.status.UserStatusSchemeSecure']
     profile_pic: str | None
+    do_not_disturbe_mode: bool
 
     class Config:
         orm_mode = True

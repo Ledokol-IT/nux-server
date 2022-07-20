@@ -26,4 +26,24 @@ def test_get_friends(client, user_auth_header):
     assert len(data) > 0
     assert "nickname" in data[0]
     assert data[0]["nickname"] == "good_friend"
-    assert "status" in data[0]#
+    assert "status" in data[0]
+
+
+def test_do_not_disturbe_false_by_default(client, user_auth_header):
+    response = client.get("/get_me",
+                          headers=user_auth_header)
+    assert response.json()["do_not_disturbe_mode"] == False
+
+
+def test_do_not_disturbe_set_to_true(client, user_auth_header):
+    response = client.put(
+        "/current_user/do_not_disturbe",
+        json={
+            "do_not_disturbe_mode": True,
+        },
+        headers=user_auth_header
+    )
+    assert response.status_code == 200
+    response = client.get("/get_me",
+                          headers=user_auth_header)
+    assert response.json()["do_not_disturbe_mode"] == True
