@@ -1,3 +1,4 @@
+import logging
 import fastapi.encoders
 import firebase_admin.messaging
 import sqlalchemy.orm
@@ -13,6 +14,7 @@ def setup_notifications(options):
     _ = options
     nux.events.user_entered_app.on(send_notification_user_entered_app)
 
+logger = logging.getLogger(__name__)
 
 def is_user_ready_to_notification(user: nux.models.user.User) -> bool:
     if not user.firebase_messaging_token:
@@ -56,6 +58,7 @@ def send_notification_user_entered_app(
     user: 'nux.models.user.User',
     app: 'nux.models.app.App'
 ):
+    logger.debug(f"{user.nickname} entered the {app.android_package_name}")
     if nux.firebase.firebase_app is None:
         return
 
