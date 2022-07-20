@@ -3,3 +3,4 @@ __pycache__
 google_creds.json
 .DS_Store
 # ansible/id_rsa
+secrets.txt

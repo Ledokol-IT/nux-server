@@ -14,7 +14,9 @@ def setup_notifications(options):
     _ = options
     nux.events.user_entered_app.on(send_notification_user_entered_app)
 
+
 logger = logging.getLogger(__name__)
+
 
 def is_user_ready_to_notification(user: nux.models.user.User) -> bool:
     if not user.firebase_messaging_token:
