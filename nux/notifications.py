@@ -14,6 +14,14 @@ def setup_notifications(options):
     nux.events.user_entered_app.on(send_notification_user_entered_app)
 
 
+def is_user_ready_to_notification(user: nux.models.user.User) -> bool:
+    if not user.firebase_messaging_token:
+        return False
+    if user.do_not_disturbe_mode:
+        return False
+    return True
+
+
 def make_message_user_entered_app(
     from_user: 'nux.models.user.User',
     app: 'nux.models.app.App',
@@ -23,7 +31,7 @@ def make_message_user_entered_app(
     user -- user joined the app
     friend -- user to notify
     """
-    if not to_user.firebase_messaging_token:
+    if not is_user_ready_to_notification(to_user):
         return None
     data = {
         "type": "friend_entered_app",
@@ -68,8 +76,7 @@ def make_message_invite_to_app(
     user -- user joined the app
     friend -- user to notify
     """
-    print(to_user.nickname)
-    if not to_user.firebase_messaging_token:
+    if not is_user_ready_to_notification(to_user):
         return None
     data = {
         "type": "invite_to_app",
