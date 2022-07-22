@@ -9,7 +9,7 @@ from nux.models.app import AppSchemeCreateAndroid, determine_app_android
 status_router = fastapi.APIRouter()
 
 
-@status_router.put("/status/set/android",
+@status_router.put("/status/in_app/android",
                    response_model=nux.models.status.UserStatusScheme)
 def set_status(
     app: AppSchemeCreateAndroid = fastapi.Body(embed=True),
@@ -26,13 +26,13 @@ def set_status(
     return status
 
 
-@status_router.put("/status/leave",
+@status_router.put("/status/not_in_app",
                    response_model=nux.models.status.UserStatusScheme)
 def unset_status(
     current_user=CurrentUserDependecy(),
     session=SessionDependecy(),
 ):
-    status = nux.models.status.update_status_leave_app(session, current_user)
+    status = nux.models.status.update_status_not_in_app(session, current_user)
     session.commit()
     if session is not None:
         session.refresh(status)

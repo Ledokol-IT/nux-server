@@ -139,7 +139,7 @@ def get_friends(
         .filter(User.id != user.id)
     )
     if order == "online":
-        query = query.order_by(nux.models.status.UserStatus.last_update)
+        query = query.order_by(nux.models.status.UserStatus.dt_last_update)
 
     friends = query.all()
 
