@@ -15,6 +15,14 @@ def run_app():
     )
 
 
+def print_shit():
+    from nux.s3 import setup_s3, print_shit
+    p = nux.config.add_s3_options(nux.config.init_arg_parser())
+    options = nux.config.parse_args_from_parser(p)
+    setup_s3(options.aws_access_key_id, options.aws_secret_access_key)
+    print_shit()
+
+
 def run_migrations():
     options = nux.config.parse_args()
     nux.database.run_migrations(options.postgres_url)

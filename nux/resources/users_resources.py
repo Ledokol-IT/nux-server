@@ -7,6 +7,7 @@ from nux.database import SessionDependecy
 import nux.notifications
 import nux.models.user
 import nux.models.app
+import nux.s3
 
 user_router = fastapi.APIRouter()
 
@@ -134,10 +135,11 @@ def set_profile_pic_admin(
 @user_router.put("/current_user/profile_pic",
                  response_model=nux.models.user.UserScheme)
 def set_profile_pic(
-    body: SetProfilePicRequestBody,
     session: sqlalchemy.orm.Session = SessionDependecy(),
     current_user: 'nux.models.user.User' = CurrentUserDependecy(),
+    profile_pic: fastapi.UploadFile = fastapi.File(),
 ):
-    current_user.profile_pic = body.profile_pic
+    url = nux.s3.upload_fastapi_file(profile_pic, 'users', 'profile_pic', None)
+    current_user.profile_pic = url
     session.commit()
     return current_user

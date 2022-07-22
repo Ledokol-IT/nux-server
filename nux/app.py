@@ -1,3 +1,4 @@
+import logging
 import fastapi
 
 from nux.auth import auth_router
@@ -6,6 +7,7 @@ import nux.database
 import nux.events
 import nux.firebase
 import nux.notifications
+import nux.s3
 from nux.resources.apps_resources import apps_router
 from nux.resources.status_resources import status_router
 from nux.resources.users_resources import user_router
@@ -16,9 +18,11 @@ def create_app(options):
     app = fastapi.FastAPI(
         title="NUX (Ledokol)"
     )
+    logging.basicConfig(level=logging.DEBUG)
     nux.database.connect_to_db(options.postgres_url)
     nux.firebase.setup_firebase(options)
     nux.notifications.setup_notifications(options)
+    nux.s3.setup_s3(options.aws_access_key_id, options.aws_secret_access_key)
 
     @app.get("/")
     def index():

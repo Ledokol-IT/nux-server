@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import fastapi
 import pydantic
 import sqlalchemy.orm
 
 from nux.auth import CurrentUserDependecy
 from nux.database import SessionDependecy
-import nux.models.user
 import nux.models.app
+import nux.models.user
+import nux.s3
 
 
 apps_router = fastapi.APIRouter()
@@ -57,8 +60,11 @@ class SetIconsRequestBody(pydantic.BaseModel):
                  response_model=nux.models.app.AppScheme)
 def set_images(
     package_name,
-    body: SetIconsRequestBody,
-    session: sqlalchemy.orm.Session = SessionDependecy()
+    icon_large: fastapi.UploadFile | None = fastapi.File(default=None),
+    icon_preview: fastapi.UploadFile | None = fastapi.File(default=None),
+    image_wide: fastapi.UploadFile | None = fastapi.File(default=None),
+    current_user: nux.models.user.User = CurrentUserDependecy(),
+    session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
     app = nux.models.app.get_app(session, android_package_name=package_name)
     if app is None:
@@ -66,12 +72,21 @@ def set_images(
             400,
             detail="bad app"
         )
-    if body.icon_preview:
-        app.icon_preview = body.icon_preview
-    if body.icon_large:
-        app.icon_large = body.icon_large
-    if body.image_wide:
-        app.image_wide = body.image_wide
+    if icon_large is not None:
+        app.icon_large = nux.s3.upload_fastapi_file(
+            icon_large,
+            "icons", "icon_large", package_name
+        )
+    if icon_preview is not None:
+        app.icon_preview = nux.s3.upload_fastapi_file(
+            icon_preview,
+            "icons", "icon_preview", package_name
+        )
+    if image_wide is not None:
+        app.image_wide = nux.s3.upload_fastapi_file(
+            image_wide,
+            "icons", "image_wide", package_name
+        )
     session.commit()
     session.merge(app)
     return app
