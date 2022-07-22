@@ -16,6 +16,20 @@ def test_get_user_by_id(client):
     assert response.json()["nickname"] == "mommy"
 
 
+def test_get_user_by_phone(client):
+    create_user(client, "test_nick", '79999999999')
+    response = client.get("/user/?phone=79999999999")
+    assert response.status_code == 200
+    assert response.json()["phone"] == "79999999999"
+
+
+def test_get_user_by_nickname(client):
+    create_user(client, "test_nick")
+    response = client.get("/user/?nickname=test_nick")
+    assert response.status_code == 200
+    assert response.json()["nickname"] == "test_nick"
+
+
 def test_get_friends(client, user_auth_header):
     create_user(client, "good_friend")
 

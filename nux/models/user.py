@@ -77,6 +77,7 @@ class UserSchemeBase(pydantic.BaseModel):
 
 class UserSchemeCreate(UserSchemeBase):
     password: str
+    phone: str | None
 
 
 class UserSchemeSecure(UserSchemeBase):
@@ -103,6 +104,7 @@ def create_user(user_data: UserSchemeCreate):
     user.name = user_data.name
     user.set_password(user_data.password)
     user.status = nux.models.status.create_empty_status()
+    user.phone = user_data.phone
     return user
 
 

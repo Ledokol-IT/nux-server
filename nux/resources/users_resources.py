@@ -9,6 +9,9 @@ import nux.models.user
 import nux.models.app
 import nux.s3
 
+from typing import Union
+
+
 user_router = fastapi.APIRouter()
 
 
@@ -23,6 +26,29 @@ def get_me(user=CurrentUserDependecy()):
                  response_model=nux.models.user.UserSchemeSecure)
 def get_user_by_id(user_id: str, session=SessionDependecy()):
     user = nux.models.user.get_user(session, id=user_id)
+    if not user:
+        raise fastapi.HTTPException(404)
+    return user
+
+
+@ user_router.get("/user/",
+                  response_model=nux.models.user.UserSchemeSecure)
+def get_user_by_parameter(
+        phone: Union[str, None]=None,
+        nickname: Union[str, None]=None,
+        session=SessionDependecy()
+):
+    user = None
+    if phone and nickname:
+        user_phone = nux.models.user.get_user(session, phone=phone)
+        user_nickname = nux.models.user.get_user(session, nickname=nickname)
+        if user_phone and user_nickname and user_phone.id == user_nickname.id:
+            user = user_phone
+    elif phone:
+        user = nux.models.user.get_user(session, phone=phone)
+    elif nickname:
+        user = nux.models.user.get_user(session, nickname=nickname)
+
     if not user:
         raise fastapi.HTTPException(404)
     return user
