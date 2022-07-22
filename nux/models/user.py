@@ -45,6 +45,7 @@ class User(nux.database.Base):
         sa.String,
         nullable=True
     )  # type: ignore
+    DEFAULT_PROFILE_PIC = "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"
 
     status: 'nux.models.status.UserStatus' = orm.relationship(
         lambda: nux.models.status.UserStatus,
@@ -82,8 +83,13 @@ class UserSchemeCreate(UserSchemeBase):
 class UserSchemeSecure(UserSchemeBase):
     id: str
     status: t.Optional['nux.models.status.UserStatusSchemeSecure']
-    profile_pic: str | None
+    profile_pic: str
     do_not_disturbe_mode: bool
+
+    @pydantic.validator('profile_pic', pre=True)
+    def set_default_profile_pic(cls, v):
+        return v or User.DEFAULT_PROFILE_PIC
+        
 
     class Config:
         orm_mode = True

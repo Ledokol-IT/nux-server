@@ -7,6 +7,11 @@ def test_get_me(client, user_auth_header):
 
     assert "nickname" in response.json()
 
+def test_default_pic(client, user_auth_header):
+    response = client.get("/get_me", headers=user_auth_header)
+    assert response.status_code == 200
+
+    assert response.json()["profile_pic"] is not None
 
 def test_get_user_by_id(client):
     user_auth = create_user(client, "mommy")
@@ -14,6 +19,11 @@ def test_get_user_by_id(client):
     response = client.get(f"/user/{user['id']}")
     assert response.status_code == 200
     assert response.json()["nickname"] == "mommy"
+
+
+def test_get_user_non_exist(client):
+    response = client.get("/user/xxxx")
+    assert response.status_code == 404
 
 
 def test_get_friends(client, user_auth_header):

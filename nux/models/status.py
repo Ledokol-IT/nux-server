@@ -81,7 +81,6 @@ class UserStatusSchemeSecure(pydantic.BaseModel):
     dt_entered_app: datetime.datetime | None
     dt_leaved_app: datetime.datetime | None
     in_app: bool
-    # if not passed determined in validator
     online: bool
 
     class Config:
