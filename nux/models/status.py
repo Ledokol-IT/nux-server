@@ -13,7 +13,7 @@ import nux.events
 
 
 class UserStatus(nux.database.Base):
-    __tablename__ = "user_statuses"
+    __tablename__ = "user_statuses_v2"
 
     id: str = sa.Column(
         sa.String,
@@ -31,39 +31,57 @@ class UserStatus(nux.database.Base):
         back_populates="status",
     )
 
-    current_app_id: str = sa.Column(
+    app_id: str = sa.Column(
         sa.String,
         sa.ForeignKey("apps.id"),
         nullable=True,
     )  # type: ignore
-    current_app: nux.models.app.App | None = orm.relationship(
+    app: nux.models.app.App | None = orm.relationship(
         lambda: nux.models.app.App)
 
-    last_update: datetime.datetime = sa.Column(
+    dt_last_update: datetime.datetime = sa.Column(
         sa.DateTime,
         nullable=False,
     )  # type: ignore
-    started_at: datetime.datetime = sa.Column(
+    dt_entered_app: datetime.datetime | None = sa.Column(
         sa.DateTime,
-        nullable=False,
+        nullable=True,
     )  # type: ignore
-
-    finished: bool = sa.Column(
+    dt_leaved_app: datetime.datetime | None = sa.Column(
+        sa.DateTime,
+        nullable=True,
+    )  # type: ignore
+    in_app: bool = sa.Column(
         sa.Boolean,
         nullable=False,
+        default=False,
+    )  # type: ignore
+    _online: bool = sa.Column(
+        'online',
+        sa.Boolean,
+        nullable=False,
+        default=False,
     )  # type: ignore
 
+    ONLINE_TTL = datetime.timedelta(seconds=30)
 
-class UserStatusSchemeBase(pydantic.BaseModel):
-    last_update: datetime.datetime
-    started_at: datetime.datetime
-    finished: bool
-    pass
+    @property
+    def online(self):
+        return datetime.datetime.now() - self.dt_last_update < self.ONLINE_TTL
+
+    @online.setter
+    def online(self, v):
+        self._online = v
 
 
-class UserStatusSchemeSecure(UserStatusSchemeBase):
+class UserStatusSchemeSecure(pydantic.BaseModel):
     id: str
-    current_app: t.Optional['nux.models.app.AppScheme']
+    app: t.Optional['nux.models.app.AppScheme']
+    dt_last_update: datetime.datetime
+    dt_entered_app: datetime.datetime | None
+    dt_leaved_app: datetime.datetime | None
+    in_app: bool
+    online: bool
 
     class Config:
         orm_mode = True
@@ -74,10 +92,15 @@ class UserStatusScheme(UserStatusSchemeSecure):
 
 
 def create_empty_status():
-    new_status = UserStatus()
-    new_status.last_update = new_status.started_at = datetime.datetime.now()
-    new_status.finished = True
-    return new_status
+    status = UserStatus()
+    status.app = None
+    status.dt_last_update = datetime.datetime.now()
+    status.dt_entered_app = None
+    status.dt_leaved_app = None
+    status.in_app = False
+    status.online = True
+
+    return status
 
 
 def update_status_in_app(
@@ -86,28 +109,31 @@ def update_status_in_app(
     app: 'nux.models.app.App',
     events: 'nux.events.NuxEvents',
 ):
-    if user.status is not None and user.status.current_app == app:
-        user.status.last_update = datetime.datetime.utcnow()
-        session.merge(user.status)
+    if user.status is not None and user.status.app == app:
+        user.status.dt_last_update = datetime.datetime.utcnow()
     else:
-        status = UserStatus()
-        status.current_app = app
-        status.last_update = status.started_at = datetime.datetime.now()
-        status.finished = False
+        status = create_empty_status()
+        status.app = app
+        status.dt_entered_app = datetime.datetime.now()
+        status.dt_leaved_app = None
+        status.in_app = True
         user.status = status
-        session.merge(user)
 
         events.user_entered_app(session, user, app)
     return user.status
 
 
-def update_status_leave_app(
+def update_status_not_in_app(
     session: orm.Session,
     user: 'nux.models.user.User'
 ):
+    now = datetime.datetime.now()
     if user.status is None:
         return None
-    else:
-        user.status.finished = True
-    session.merge(user.status)
+
+    user.status.dt_last_update = now
+    user.status.online = True
+    if user.status.in_app:
+        user.status.in_app = False
+        user.status.dt_leaved_app = now
     return user.status

@@ -3,7 +3,7 @@ from tests.utils import app1_android_payload
 
 def test_set_status_ok(client, user_auth_header):
     response = client.put(
-        "/status/set/android",
+        "/status/in_app/android",
         json={
             "app": app1_android_payload,
         },
@@ -11,14 +11,14 @@ def test_set_status_ok(client, user_auth_header):
     )
     assert response.status_code == 200
     data = response.json()
-    response_app = data["current_app"]
+    response_app = data["app"]
     assert response_app["android_package_name"] == app1_android_payload["android_package_name"]
-    assert data["finished"] == False
+    assert data["in_app"] == True
 
 
 def test_set_and_get_status(client, user_auth_header):
     response = client.put(
-        "/status/set/android",
+        "/status/in_app/android",
         json={
             "app": app1_android_payload,
         },
@@ -31,12 +31,12 @@ def test_set_and_get_status(client, user_auth_header):
         headers=user_auth_header,
     )
     assert response.json()[
-        "status"]["current_app"]["android_package_name"] == app1_android_payload["android_package_name"]
+        "status"]["app"]["android_package_name"] == app1_android_payload["android_package_name"]
 
 
 def test_set_and_unset_status(client, user_auth_header):
     response = client.put(
-        "/status/set/android",
+        "/status/in_app/android",
         json={
             "app": app1_android_payload,
         },
@@ -45,9 +45,9 @@ def test_set_and_unset_status(client, user_auth_header):
     assert response.status_code == 200
 
     response = client.put(
-        "/status/leave",
+        "/status/not_in_app",
         headers=user_auth_header,
     )
     assert response.status_code == 200
-    assert response.json()["finished"] == True
+    assert response.json()["in_app"] == False
 

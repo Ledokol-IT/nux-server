@@ -25,7 +25,7 @@ def friend_id(client, friend_with_token_auth):
 
 def test_notifications_sent_then_user_entered_app(client, user_auth_header, friend_with_token_auth):
     response = client.put(
-        "/status/set/android",
+        "/status/in_app/android",
         json={
             "app": tests.utils.app1_android_payload,
         },
