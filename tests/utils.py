@@ -1,12 +1,27 @@
+import string
 from typing import Union
+import unittest.mock
+import random
 
 
-def create_user_token(client, nickname: str, phone: Union[str, None]=None):
+def create_user_token(
+    client,
+    nickname: str | None = None,
+    phone: str | None = None,
+):
+    nickname = nickname or ''.join(
+        random.choices(string.ascii_lowercase, k=10))
+    phone = phone or '+7900' + ''.join(
+        random.choices(string.digits, k=7))
     payload = {
-        "nickname": nickname,
-        "password": "fakeGoodPassword!",
-        "name": nickname.capitalize(),
-        "phone": phone
+        "user": {
+            "nickname": nickname,
+            "password": "fakeGoodPassword!",
+            "name": nickname.capitalize(),
+            "phone": phone,
+        },
+        "phone_confirmation": get_phone_confirmation(
+            client, phone, 'registration'),
     }
     response = client.post(
         "/register",
@@ -15,7 +30,11 @@ def create_user_token(client, nickname: str, phone: Union[str, None]=None):
     return response.json()["access_token"]
 
 
-def create_user(client, nickname: str, phone: Union[str, None]=None):
+def create_user(
+    client,
+    nickname: str | None = None,
+    phone: str | None = None,
+):
     return {
         "Authorization": f'Bearer {create_user_token(client, nickname, phone)}'
     }
@@ -26,3 +45,26 @@ app1_android_payload = {
     "android_package_name": "com.example.good_app",
     "android_category": 0,
 }
+
+
+@unittest.mock.patch("nux.sms.send_confirmation_code")
+def get_phone_confirmation(
+        client,
+        phone,
+        reason,
+        patched_send_confirmation_code
+):
+    response = client.post(
+        '/confirmation/phone',
+        json={
+            "phone": phone,
+            "reason": reason,
+        },
+    )
+
+    id = response.json()["id"]
+    code = patched_send_confirmation_code.call_args.args[1]
+    return {
+        "code": code,
+        "id": id,
+    }

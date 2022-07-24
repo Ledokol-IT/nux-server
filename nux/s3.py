@@ -24,7 +24,6 @@ class S3NotInitializedError(Exception):
 def setup_s3(aws_access_key_id, aws_secret_access_key):
     global s3, s3_session
 
-    print(aws_access_key_id, aws_secret_access_key)
     s3_session = boto3.session.Session(
     )
     s3 = s3_session.client(

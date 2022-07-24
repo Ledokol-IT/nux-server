@@ -7,11 +7,13 @@ def test_get_me(client, user_auth_header):
 
     assert "nickname" in response.json()
 
+
 def test_default_pic(client, user_auth_header):
     response = client.get("/get_me", headers=user_auth_header)
     assert response.status_code == 200
 
     assert response.json()["profile_pic"] is not None
+
 
 def test_get_user_by_id(client):
     user_auth = create_user(client, "mommy")
@@ -27,10 +29,14 @@ def test_get_user_non_exist(client):
 
 
 def test_get_user_by_phone(client):
-    create_user(client, "test_nick", '79999999999')
-    response = client.get("/user/?phone=79999999999")
+    phone = "+79009009000"
+    nickname = "test_nick"
+    create_user(client, phone=phone, nickname=nickname)
+    response = client.get("/user", params={
+        "phone": phone,
+    })
     assert response.status_code == 200
-    assert response.json()["phone"] == "79999999999"
+    assert response.json()["nickname"] == nickname
 
 
 def test_get_user_by_nickname(client):

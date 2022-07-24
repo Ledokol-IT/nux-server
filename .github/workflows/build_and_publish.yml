@@ -66,5 +66,8 @@ jobs:
           echo "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}" >> $TMPDIR/vars.yml
           echo "AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $TMPDIR/vars.yml
 
+          echo "SMSAERO_EMAIL: ${{ secrets.SMSAERO_EMAIL }}" >> $TMPDIR/vars.yml
+          echo "SMSAERO_APIKEY: ${{ secrets.SMSAERO_APIKEY }}" >> $TMPDIR/vars.yml
+
           ansible-playbook -vv ansible/playbook.yml --extra-vars "@$TMPDIR/vars.yml"
   

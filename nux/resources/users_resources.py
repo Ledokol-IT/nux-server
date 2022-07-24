@@ -31,11 +31,11 @@ def get_user_by_id(user_id: str, session=SessionDependecy()):
     return user
 
 
-@ user_router.get("/user/",
-                  response_model=nux.models.user.UserSchemeSecure)
+@user_router.get("/user/",
+                 response_model=nux.models.user.UserSchemeSecure)
 def get_user_by_parameter(
-        phone: Union[str, None]=None,
-        nickname: Union[str, None]=None,
+        phone: Union[str, None] = None,
+        nickname: Union[str, None] = None,
         session=SessionDependecy()
 ):
     user = None

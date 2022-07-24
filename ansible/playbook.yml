@@ -28,6 +28,8 @@
                 AWS_ACCESS_KEY_ID: "{{AWS_ACCESS_KEY_ID}}"
                 NUX_SECRET_KEY: "{{NUX_SECRET_KEY}}"
                 GOOGLE_CREDS: "{{GOOGLE_CREDS}}"
+                SMSAERO_EMAIL: "{{SMSAERO_EMAIL}}"
+                SMSAERO_APIKEY: "{{SMSAERO_APIKEY}}"
         pull: yes
       register: output
 

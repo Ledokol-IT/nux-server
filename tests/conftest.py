@@ -13,6 +13,11 @@ from tests.utils import app1_android_payload, create_user_token, create_user
 
 
 @pytest.fixture
+def session():
+    return nux.database.Session()
+
+
+@pytest.fixture
 def app():
     tmp_db = '.'.join([uuid.uuid4().hex, 'pytest'])
     args = [
@@ -22,10 +27,12 @@ def app():
         "--pg-host", "localhost:5432",
         "--secret-key", "123",
         "--firebase-dry-run",
+        "--sms-disable",
     ]
     options = nux.config.parse_args(args)
     sqlalchemy_utils.create_database(options.postgres_url)
 
+    # nux.database.create_all(options.postgres_url)
     nux.database.run_migrations(options.postgres_url)
     app = create_app(options)
     try:

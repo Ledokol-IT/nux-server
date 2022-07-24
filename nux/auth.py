@@ -8,6 +8,8 @@ from sqlalchemy.orm.session import Session
 
 from nux.database import SessionDependecy
 import nux.config as config
+import nux.confirmation
+import nux.models.user
 from nux.models.user import User, get_user, create_user, UserSchemeCreate
 
 auth_router = fastapi.APIRouter()
@@ -59,7 +61,7 @@ def authenticate_user(
 
 
 @auth_router.post("/token", response_model=Token)
-def login_for_access_token(
+def login_with_password(
     form_data: fastapi.security.OAuth2PasswordRequestForm = fastapi.Depends(),
     session=SessionDependecy(),
 ):
@@ -75,9 +77,48 @@ def login_for_access_token(
     return create_token(user)
 
 
+@auth_router.post("/login", response_model=Token)
+def login_with_phone_confirmation(
+    phone_confirmation: nux.confirmation.PhoneConfirmationRequestScheme,
+    phone: str = fastapi.Body(),
+    session=SessionDependecy(),
+):
+    if not nux.confirmation.check_phone_confirmation(
+        session,
+        id=phone_confirmation.id,
+        phone=phone,
+        code=phone_confirmation.code,
+        reason='login',
+    ):
+        raise fastapi.HTTPException(401, "Bad phone confirmation")
+    user = nux.models.user.get_user(session, phone=phone)
+    if not user:
+        raise fastapi.HTTPException(
+            status_code=401,
+            detail="Phone not registered",
+        )
+    return create_token(user)
+
+
+class RegistrationUserDataRequestScheme(UserSchemeCreate):
+    phone: str
+
+
 @auth_router.post("/register", response_model=Token)
-def register(user_data: UserSchemeCreate, session=SessionDependecy()):
-    user = create_user(user_data)
+def register(
+        user: RegistrationUserDataRequestScheme,
+        phone_confirmation: nux.confirmation.PhoneConfirmationRequestScheme,
+        session=SessionDependecy()
+):
+    if not nux.confirmation.check_phone_confirmation(
+        session,
+        id=phone_confirmation.id,
+        phone=user.phone,
+        code=phone_confirmation.code,
+        reason='registration',
+    ):
+        raise fastapi.HTTPException(401, "Bad phone confirmation")
+    user = create_user(user)
     if user is None:
         raise fastapi.HTTPException(
             status_code=500,
@@ -86,7 +127,6 @@ def register(user_data: UserSchemeCreate, session=SessionDependecy()):
     session.add(user)
     session.commit()
     session.refresh(user)
-
     return create_token(user)
 
 

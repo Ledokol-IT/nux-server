@@ -19,6 +19,14 @@ def add_s3_options(p: configargparse.ArgParser):
     return p
 
 
+def add_sms_options(p: configargparse.ArgParser):
+    p.add_argument("--smsaero-email", env_var="SMSAERO_EMAIL")
+    p.add_argument("--smsaero-apikey", env_var="SMSAERO_APIKEY")
+    p.add_argument("--sms-disable",
+                   env_var="NUX_SMS_DISABLE", action="store_true")
+    return p
+
+
 def get_pg_url(options: configargparse.Namespace):
     postgres_url = (
         "postgresql://"
@@ -47,6 +55,7 @@ def parse_args(args=None):
     p = init_arg_parser()
     add_data_base_args(p)
     add_s3_options(p)
+    add_sms_options(p)
     p.add_argument("--secret-key", env_var="NUX_SECRET_KEY", required=True)
     p.add_argument("--port", default=8000, env_var="NUX_PORT", type=int)
     p.add_argument("--google-creds-file",

@@ -40,6 +40,7 @@ def create_all(postgres_url: str):
     import nux.models.user as _
     import nux.models.status as _
     import nux.models.app as _
+    import nux.confirmation as _
 
     Base.metadata.create_all(engine)
 

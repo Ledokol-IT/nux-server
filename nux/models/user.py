@@ -1,3 +1,4 @@
+from __future__ import annotations
 import typing as t
 import uuid
 
@@ -24,7 +25,7 @@ class User(nux.database.Base):
         default=lambda: str(uuid.uuid4())
     )  # type: ignore
     # In +79999999999 format
-    phone: str = sa.Column(
+    phone: str | None = sa.Column(
         sa.String,
         index=True,
         unique=True,
@@ -36,24 +37,26 @@ class User(nux.database.Base):
         sa.String,
         nullable=False,
     )  # type: ignore
-    hashed_password: str = sa.Column(sa.String, nullable=False)  # type: ignore
-    firebase_messaging_token: str = sa.Column(
+    hashed_password: str | None = sa.Column(
+        sa.String, nullable=True)  # type: ignore
+    firebase_messaging_token: str | None = sa.Column(
         sa.String,
         nullable=True,
     )  # type: ignore
-    profile_pic: str = sa.Column(
+    profile_pic: str | None = sa.Column(
         sa.String,
         nullable=True
     )  # type: ignore
-    DEFAULT_PROFILE_PIC = "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"
+    DEFAULT_PROFILE_PIC = \
+        "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"
 
-    status: 'nux.models.status.UserStatus' = orm.relationship(
+    status: nux.models.status.UserStatus | None = orm.relationship(
         lambda: nux.models.status.UserStatus,
         uselist=False,
         back_populates="_user",
     )
 
-    apps_stats: 'nux.models.app.UserInAppStatistic' = orm.relationship(
+    apps_stats: list[nux.models.app.UserInAppStatistic] = orm.relationship(
         lambda: nux.models.app.UserInAppStatistic,
         back_populates="user"
     )
@@ -65,6 +68,8 @@ class User(nux.database.Base):
     )  # type: ignore
 
     def check_password(self, password: str) -> bool:
+        if self.hashed_password is None:
+            return False
         return pwd_context.verify(password, self.hashed_password)
 
     def set_password(self, password: str):
@@ -77,8 +82,8 @@ class UserSchemeBase(pydantic.BaseModel):
 
 
 class UserSchemeCreate(UserSchemeBase):
-    password: str
-    phone: str | None
+    password: str | None = None
+    phone: str | None = None
 
 
 class UserSchemeSecure(UserSchemeBase):
@@ -90,7 +95,6 @@ class UserSchemeSecure(UserSchemeBase):
     @pydantic.validator('profile_pic', pre=True)
     def set_default_profile_pic(cls, v):
         return v or User.DEFAULT_PROFILE_PIC
-        
 
     class Config:
         orm_mode = True
@@ -108,7 +112,8 @@ def create_user(user_data: UserSchemeCreate):
     user = User()
     user.nickname = user_data.nickname
     user.name = user_data.name
-    user.set_password(user_data.password)
+    if user_data.password is not None:
+        user.set_password(user_data.password)
     user.status = nux.models.status.create_empty_status()
     user.phone = user_data.phone
     return user
@@ -143,11 +148,13 @@ def get_friends(
 ) -> list[User]:
     query = (
         session.query(User)
-        .join(User.status)
         .filter(User.id != user.id)
     )
     if order == "online":
-        query = query.order_by(nux.models.status.UserStatus.dt_last_update)
+        query = (query
+                 .join(User.status)
+                 .order_by(nux.models.status.UserStatus.dt_last_update)
+                 )
 
     friends = query.all()
 
