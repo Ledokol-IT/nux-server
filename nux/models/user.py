@@ -61,7 +61,7 @@ class User(nux.database.Base):
         back_populates="user"
     )
 
-    do_not_disturbe_mode: bool = sa.Column(
+    do_not_disturb: bool = sa.Column(
         sa.Boolean,
         nullable=False,
         default=False,
@@ -90,7 +90,7 @@ class UserSchemeSecure(UserSchemeBase):
     id: str
     status: t.Optional['nux.models.status.UserStatusSchemeSecure']
     profile_pic: str
-    do_not_disturbe_mode: bool
+    do_not_disturb: bool
 
     @pydantic.validator('profile_pic', pre=True)
     def set_default_profile_pic(cls, v):

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def is_user_ready_to_notification(user: nux.models.user.User) -> bool:
     if not user.firebase_messaging_token:
         return False
-    if user.do_not_disturbe_mode:
+    if user.do_not_disturb:
         return False
     return True
 
