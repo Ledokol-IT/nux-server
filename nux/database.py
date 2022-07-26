@@ -11,7 +11,6 @@ Base = sqlalchemy.orm.declarative_base()
 
 
 def session_generator() -> t.Generator[sqlalchemy.orm.Session, None, None]:
-    print("Generate session")
     with Session() as session:
         yield session
 

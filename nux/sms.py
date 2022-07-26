@@ -83,7 +83,6 @@ def send_message(phone, text):
         logging.warning("SmsAero not available, message not send")
         return
     response = _sms_aero.send(phone, text)
-    print(response)
     return MessageStatus(**response['data'])
 
 

@@ -41,8 +41,8 @@ def create_user(
 
 
 app1_android_payload = {
-    "name": "123 Good App",
-    "android_package_name": "com.example.good_app",
+    "name": "Call of Duty",
+    "android_package_name": "com.activision.callofduty.shooter",
     "android_category": 0,
 }
 

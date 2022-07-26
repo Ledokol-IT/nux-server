@@ -72,6 +72,12 @@ class App(nux.database.Base):
         nullable=True,
     )  # type: ignore
 
+    approved: bool = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        server_default="FALSE",
+    )  # type: ignore
+
 
 class AppSchemeBase(pydantic.BaseModel):
     android_package_name: str | None
@@ -157,13 +163,17 @@ def delete_app_from_user(
 
 def get_user_apps(
     session: orm.Session,
-    user: 'nux.models.user.User'
+    user: 'nux.models.user.User',
+    approved: bool = True,
 ) -> list[App]:
-    return (
-        session.query(App).join(UserInAppStatistic)
+    q = (
+        session.query(App)
+        .join(UserInAppStatistic)
         .where(UserInAppStatistic.user_id == user.id)
-        .all()
     )
+    if approved:
+        q = q.where(App.approved)
+    return q.all()
 
 
 def set_apps_to_user(

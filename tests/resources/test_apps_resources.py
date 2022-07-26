@@ -39,14 +39,12 @@ def test_sync_apps_ok(client, user_auth_header):
     assert response.status_code == 200
     data = response.json()
     assert "apps" in data
-    apps_response = data["apps"]
-    assert len(apps_response) == len(apps)
 
 
-def test_get_app_ok(client, sync_app1):
-    response = client.get(f"/app/{sync_app1['id']}")
+def test_get_approved_app_ok(client):
+    response = client.get(f"/app/1")
     assert response.status_code == 200
-    assert response.json()["android_package_name"] == sync_app1["android_package_name"]
+    assert response.json()["android_package_name"] == "com.activision.callofduty.shooter"
 
 
 def test_get_apps(client, sync_app1, user_auth_header):
