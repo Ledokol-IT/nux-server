@@ -181,7 +181,7 @@ def set_apps_to_user(
     user: 'nux.models.user.User',
     apps: Iterable[App],
 ):
-    user_apps = set(get_user_apps(session, user))
+    user_apps = set(get_user_apps(session, user, approved=False))
     apps = set(apps)
     to_add = apps.difference(user_apps)
     to_delete = user_apps.difference(apps)
