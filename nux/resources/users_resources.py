@@ -22,33 +22,54 @@ def get_me(user=CurrentUserDependecy()):
     return user
 
 
-@user_router.get("/user/{user_id}",
-                 response_model=nux.models.user.UserSchemeSecure)
-def get_user_by_id(user_id: str, session=SessionDependecy()):
-    user = nux.models.user.get_user(session, id=user_id)
-    if not user:
-        raise fastapi.HTTPException(404)
-    return user
-
-
-@user_router.get("/user/",
+@user_router.get("/users/",
                  response_model=nux.models.user.UserSchemeSecure)
 def get_user_by_parameter(
         phone: Union[str, None] = None,
         nickname: Union[str, None] = None,
         session=SessionDependecy()
 ):
+    """Accept only one parameter"""
     user = None
     if phone and nickname:
-        user_phone = nux.models.user.get_user(session, phone=phone)
-        user_nickname = nux.models.user.get_user(session, nickname=nickname)
-        if user_phone and user_nickname and user_phone.id == user_nickname.id:
-            user = user_phone
+        raise fastapi.HTTPException(400)
     elif phone:
         user = nux.models.user.get_user(session, phone=phone)
     elif nickname:
         user = nux.models.user.get_user(session, nickname=nickname)
 
+    if not user:
+        raise fastapi.HTTPException(404)
+    return user
+
+
+class CheckExistingUserResponseScheme(pydantic.BaseModel):
+    exists: bool
+
+
+@user_router.get("/users/check/",
+                 response_model=CheckExistingUserResponseScheme)
+def check_existing_user(
+        phone: Union[str, None] = None,
+        nickname: Union[str, None] = None,
+        session=SessionDependecy()
+):
+    """Accepts only one parameter"""
+    user = None
+    if phone and nickname:
+        raise fastapi.HTTPException(400)
+    elif phone:
+        user = nux.models.user.get_user(session, phone=phone)
+    elif nickname:
+        user = nux.models.user.get_user(session, nickname=nickname)
+
+    return {"exists": user is not None}
+
+
+@user_router.get("/user/{user_id}",
+                 response_model=nux.models.user.UserSchemeSecure)
+def get_user_by_id(user_id: str, session=SessionDependecy()):
+    user = nux.models.user.get_user(session, id=user_id)
     if not user:
         raise fastapi.HTTPException(404)
     return user

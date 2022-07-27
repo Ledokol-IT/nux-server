@@ -32,7 +32,7 @@ def test_get_user_by_phone(client):
     phone = "+79009009000"
     nickname = "test_nick"
     create_user(client, phone=phone, nickname=nickname)
-    response = client.get("/user", params={
+    response = client.get("/users", params={
         "phone": phone,
     })
     assert response.status_code == 200
@@ -41,9 +41,28 @@ def test_get_user_by_phone(client):
 
 def test_get_user_by_nickname(client):
     create_user(client, "test_nick")
-    response = client.get("/user/?nickname=test_nick")
+    response = client.get("/users/?nickname=test_nick")
     assert response.status_code == 200
     assert response.json()["nickname"] == "test_nick"
+
+
+def test_check_user_by_phone_existing(client):
+    phone = "+79009009000"
+    create_user(client, phone=phone)
+    response = client.get("/users/check", params={
+        "phone": phone,
+    })
+    assert response.status_code == 200
+    assert response.json()["exists"] == True
+
+
+def test_check_user_by_phone_non_existing(client):
+    phone = "+79009009000"
+    response = client.get("/users/check", params={
+        "phone": phone,
+    })
+    assert response.status_code == 200
+    assert response.json()["exists"] == False
 
 
 def test_get_friends(client, user_auth_header):
