@@ -80,7 +80,8 @@ class MessageStatus(pydantic.BaseModel):
 
 def send_message(phone, text):
     if _sms_aero is None:
-        logging.warning("SmsAero not available, message not send")
+        logging.warning("SmsAero not available, message not send\n"
+                        f"Phone: {phone}\n{text}")
         return
     response = _sms_aero.send(phone, text)
     return MessageStatus(**response['data'])
