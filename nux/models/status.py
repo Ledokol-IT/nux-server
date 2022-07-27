@@ -137,3 +137,7 @@ def update_status_not_in_app(
         user.status.in_app = False
         user.status.dt_leaved_app = now
     return user.status
+
+
+def clear_offline_users_by_ttl(session: orm.Session) -> None:
+    pass

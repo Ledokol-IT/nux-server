@@ -513,6 +513,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "ischedule"
+version = "1.2.5"
+description = "Single-thread interval scheduler"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "jmespath"
 version = "1.0.1"
 description = "JSON Matching Expressions"
@@ -973,7 +981,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e947b7885489931bdf770411101d1fc2c937ed379531e14b5ac4383cda7bb09f"
+content-hash = "0bd1c3c03e9685867f40a4dd7ee6d11f64043b5d17949ff27fa555066672edfc"
 
 [metadata.files]
 alembic = [
@@ -1338,6 +1346,7 @@ iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
+ischedule = []
 jmespath = []
 mako = [
     {file = "Mako-1.2.0-py3-none-any.whl", hash = "sha256:23aab11fdbbb0f1051b93793a58323ff937e98e34aece1c4219675122e57e4ba"},
