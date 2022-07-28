@@ -17,22 +17,17 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: pass
           POSTGRES_USER: web
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps tcp port 5432 on service container to the host
           - 5432:5432
 
     steps:
@@ -46,10 +41,6 @@ jobs:
         python -m pip install --upgrade pip
         curl -sSL 'https://install.python-poetry.org' | python
         poetry install
-    - name: Lint the code with pycodestyle
-      run: |
-        poetry run flake8 nux --count --select=E9,F63,F7,F82 --show-source --statistics
-        poetry run pycodestyle nux
     - name: Run pytest
       run: |
         poetry run pytest
@@ -59,3 +50,7 @@ jobs:
         POSTGRES_USER: web
         POSTGRES_HOST: "localhost:5432"
         GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
+    - name: Lint the code with pycodestyle
+      run: |
+        poetry run flake8 nux --count --select=E9,F63,F7,F82 --show-source --statistics
+        poetry run pycodestyle nux tests

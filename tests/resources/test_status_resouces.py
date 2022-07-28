@@ -14,8 +14,9 @@ def test_set_status_ok(client, user_auth_header):
     assert response.status_code == 200
     data = response.json()
     response_app = data["app"]
-    assert response_app["android_package_name"] == app1_android_payload["android_package_name"]
-    assert data["in_app"] == True
+    assert response_app["android_package_name"] \
+        == app1_android_payload["android_package_name"]
+    assert data["in_app"] is True
 
 
 def test_set_and_get_status(client, user_auth_header):
@@ -32,8 +33,8 @@ def test_set_and_get_status(client, user_auth_header):
         "/get_me",
         headers=user_auth_header,
     )
-    assert response.json()[
-        "status"]["app"]["android_package_name"] == app1_android_payload["android_package_name"]
+    assert response.json()["status"]["app"]["android_package_name"] \
+        == app1_android_payload["android_package_name"]
 
 
 def test_set_and_unset_status(client, user_auth_header):
@@ -51,7 +52,7 @@ def test_set_and_unset_status(client, user_auth_header):
         headers=user_auth_header,
     )
     assert response.status_code == 200
-    assert response.json()["in_app"] == False
+    assert response.json()["in_app"] is False
 
 
 def test_clear_status_ok(client, session, user_auth_header):
@@ -73,7 +74,7 @@ def test_clear_status_ok(client, session, user_auth_header):
         "/get_me",
         headers=user_auth_header,
     )
-    assert response.json()["status"]["online"] == False
+    assert response.json()["status"]["online"] is False
 
 
 def test_clear_status_momentaly(client, session, user_auth_header):
@@ -93,4 +94,4 @@ def test_clear_status_momentaly(client, session, user_auth_header):
         "/get_me",
         headers=user_auth_header,
     )
-    assert response.json()["status"]["online"] == True
+    assert response.json()["status"]["online"] is True

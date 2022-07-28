@@ -44,11 +44,13 @@ def test_sync_apps_ok(client, user_auth_header):
 def test_get_approved_app_ok(client):
     response = client.get(f"/app/1")
     assert response.status_code == 200
-    assert response.json()["android_package_name"] == "com.activision.callofduty.shooter"
+    expected_package_name = "com.activision.callofduty.shooter"
+    assert response.json()["android_package_name"] == expected_package_name
 
 
 def test_get_apps(client, sync_app1, user_auth_header):
     user = client.get("/get_me", headers=user_auth_header).json()
     response = client.get(f"/user/{user['id']}/apps")
     assert response.status_code == 200
-    assert response.json()["apps"][0]["android_package_name"] == sync_app1["android_package_name"]
+    assert response.json()["apps"][0]["android_package_name"] \
+        == sync_app1["android_package_name"]

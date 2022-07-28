@@ -53,7 +53,7 @@ def test_check_user_by_phone_existing(client):
         "phone": phone,
     })
     assert response.status_code == 200
-    assert response.json()["exists"] == True
+    assert response.json()["exists"] is True
 
 
 def test_check_user_by_phone_non_existing(client):
@@ -62,7 +62,7 @@ def test_check_user_by_phone_non_existing(client):
         "phone": phone,
     })
     assert response.status_code == 200
-    assert response.json()["exists"] == False
+    assert response.json()["exists"] is False
 
 
 def test_get_friends(client, user_auth_header):
@@ -81,7 +81,7 @@ def test_get_friends(client, user_auth_header):
 def test_do_not_disturb_false_by_default(client, user_auth_header):
     response = client.get("/get_me",
                           headers=user_auth_header)
-    assert response.json()["do_not_disturb"] == False
+    assert response.json()["do_not_disturb"] is False
 
 
 def test_do_not_disturb_set_to_true(client, user_auth_header):
@@ -95,4 +95,4 @@ def test_do_not_disturb_set_to_true(client, user_auth_header):
     assert response.status_code == 200
     response = client.get("/get_me",
                           headers=user_auth_header)
-    assert response.json()["do_not_disturb"] == True
+    assert response.json()["do_not_disturb"] is True
