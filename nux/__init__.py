@@ -23,9 +23,11 @@ def print_shit():
     print_shit()
 
 
-def run_clear_status():
+def run_db_tasks():
     import nux.config
     import nux.periodic_tasks
+    import logging
+    logging.basicConfig(level=logging.INFO)
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
     options = nux.config.parse_args_from_parser(p)
     nux.periodic_tasks.clear_statuses(options.postgres_url)

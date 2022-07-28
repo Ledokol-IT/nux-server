@@ -32,7 +32,7 @@ flake8 = "^4.0.1"
 
 [tool.poetry.scripts]
 run = "nux:run_app"
-run_clear_status = "nux:run_clear_status"
+run_db_tasks = "nux:run_db_tasks"
 create_all = "nux:create_all"
 make_migration = "nux:make_migration"
 run_migrations = "nux:run_migrations"

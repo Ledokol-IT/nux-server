@@ -24,7 +24,7 @@ def clear_statuses(postgres_url, seconds=10):
     logger.info("Start clearing statuses.\n"
                 "Ctrl+C to stop.")
     ischedule.schedule(task, interval=seconds)
-    
+
     try:
         ischedule.run_loop()
     except KeyboardInterrupt:

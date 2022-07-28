@@ -30,3 +30,13 @@ services:
       .env
     depends_on:
       - postgres
+  db_tasks:
+    build:
+      dockerfile: Dockerfile
+      context: "."
+      target: image-dev
+    env_file:
+      .env
+    entrypoint: "scripts/run_db_tasks.sh"
+    depends_on:
+      - postgres
