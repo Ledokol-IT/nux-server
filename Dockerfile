@@ -66,7 +66,6 @@ RUN poetry version && poetry run pip install -U pip
 
 
 
-
 FROM base AS image-dev
 # Project initialization:
 # hadolint ignore=SC2046
@@ -75,11 +74,11 @@ RUN poetry install \
 
 COPY --chown=web:web . /code
 
+RUN ["chmod", "-R", "+x", "/code/scripts/"]
 # Running as non-root user:
 USER web
 
-RUN ["chmod", "+x", "/code/scripts/start_dev.sh"]
-ENTRYPOINT ["scripts/start_dev.sh"]
+ENTRYPOINT ["scripts/run_dev.sh"]
 
 
 
@@ -94,8 +93,9 @@ RUN poetry install \
 
 COPY --chown=web:web . /code
 
+RUN ["chmod", "-R", "+x", "/code/scripts/"]
+
 # Running as non-root user:
 USER web
 
-RUN ["chmod", "+x", "/code/scripts/start_prod.sh"]
-ENTRYPOINT ["scripts/start_prod.sh"]
+ENTRYPOINT ["scripts/run_prod.sh"]

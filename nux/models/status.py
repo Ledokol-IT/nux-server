@@ -56,7 +56,7 @@ class UserStatus(nux.database.Base):
         nullable=False,
         default=False,
     )  # type: ignore
-    _online: bool = sa.Column(
+    online: bool = sa.Column(
         'online',
         sa.Boolean,
         nullable=False,
@@ -64,14 +64,6 @@ class UserStatus(nux.database.Base):
     )  # type: ignore
 
     ONLINE_TTL = datetime.timedelta(seconds=30)
-
-    @property
-    def online(self):
-        return datetime.datetime.now() - self.dt_last_update < self.ONLINE_TTL
-
-    @online.setter
-    def online(self, v):
-        self._online = v
 
 
 class UserStatusSchemeSecure(pydantic.BaseModel):
@@ -123,6 +115,12 @@ def update_status_in_app(
     return user.status
 
 
+def status_leave_app(status: UserStatus):
+    if status.in_app:
+        status.in_app = False
+        status.dt_leaved_app = datetime.datetime.now()
+
+
 def update_status_not_in_app(
     session: orm.Session,
     user: 'nux.models.user.User'
@@ -133,7 +131,20 @@ def update_status_not_in_app(
 
     user.status.dt_last_update = now
     user.status.online = True
-    if user.status.in_app:
-        user.status.in_app = False
-        user.status.dt_leaved_app = now
+    status_leave_app(user.status)
     return user.status
+
+
+def clear_offline_users_by_ttl(session: orm.Session) -> None:
+    now = datetime.datetime.now()
+    min_online_time = now - UserStatus.ONLINE_TTL
+    statuses = (
+        session.query(UserStatus)
+        .where(UserStatus.online)
+        .where(UserStatus.dt_last_update < min_online_time)
+        .all()
+    )
+    for status in statuses:
+        status_leave_app(status)
+        status.dt_last_update = datetime.datetime.now()
+        status.online = False

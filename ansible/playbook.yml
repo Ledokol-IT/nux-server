@@ -30,6 +30,15 @@
                 GOOGLE_CREDS: "{{GOOGLE_CREDS}}"
                 SMSAERO_EMAIL: "{{SMSAERO_EMAIL}}"
                 SMSAERO_APIKEY: "{{SMSAERO_APIKEY}}"
+            db_tasks:
+              image: "i3cheese/nux:latest"
+              entrypoint: "/code/scripts/run_db_tasks.sh"
+              restart: always
+              environment:
+                POSTGRES_HOST: "{{POSTGRES_HOST}}"
+                POSTGRES_USER: "{{POSTGRES_USER}}"
+                POSTGRES_PASSWORD: "{{POSTGRES_PASSWORD}}"
+                POSTGRES_DB: "{{POSTGRES_DB}}"
         pull: yes
       register: output
 
