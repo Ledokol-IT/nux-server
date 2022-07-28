@@ -287,6 +287,17 @@ pycodestyle = ">=2.8.0,<2.9.0"
 pyflakes = ">=2.4.0,<2.5.0"
 
 [[package]]
+name = "freezegun"
+version = "1.2.1"
+description = "Let your Python tests travel through time"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+python-dateutil = ">=2.7"
+
+[[package]]
 name = "google-api-core"
 version = "2.8.2"
 description = "Google API client core library"
@@ -981,7 +992,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "0bd1c3c03e9685867f40a4dd7ee6d11f64043b5d17949ff27fa555066672edfc"
+content-hash = "4344649e9b78f691a62b094e4853aa796e6fe8bd6fa11cf21058950142283fec"
 
 [metadata.files]
 alembic = [
@@ -1140,6 +1151,7 @@ firebase-admin = [
     {file = "firebase_admin-5.2.0.tar.gz", hash = "sha256:cd1a47ff43e5d83cf8d6e2c478387860c363876d9b9149b5034a13b81f8b4bda"},
 ]
 flake8 = []
+freezegun = []
 google-api-core = [
     {file = "google-api-core-2.8.2.tar.gz", hash = "sha256:06f7244c640322b508b125903bb5701bebabce8832f85aba9335ec00b3d02edc"},
     {file = "google_api_core-2.8.2-py3-none-any.whl", hash = "sha256:93c6a91ccac79079ac6bbf8b74ee75db970cc899278b97d53bc012f35908cf50"},

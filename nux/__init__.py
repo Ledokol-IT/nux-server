@@ -31,7 +31,6 @@ def run_db_tasks():
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
     options = nux.config.parse_args_from_parser(p)
     nux.periodic_tasks.clear_statuses(options.postgres_url)
-        
 
 
 def run_migrations():
