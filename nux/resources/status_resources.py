@@ -34,6 +34,5 @@ def unset_status(
 ):
     status = nux.models.status.update_status_not_in_app(session, current_user)
     session.commit()
-    if session is not None:
-        session.refresh(status)
+    session.refresh(status)
     return status

@@ -127,7 +127,8 @@ def update_status_not_in_app(
 ):
     now = datetime.datetime.now()
     if user.status is None:
-        return None
+        user.status = create_empty_status()
+        return user.status
 
     user.status.dt_last_update = now
     user.status.online = True
