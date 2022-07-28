@@ -39,6 +39,9 @@ class CATEGORY(enum.Enum):
 class App(nux.database.Base):
     __tablename__ = "apps"
 
+    DEFAULT_ICON_PREVIEW = "https://storage.yandexcloud.net/nux/icons/common/preview_icon.png"
+    DEFAULT_ICON_LARGE = "https://storage.yandexcloud.net/nux/icons/common/large_icon.png"
+
     id: str = sa.Column(
         sa.String,
         primary_key=True,
@@ -95,6 +98,15 @@ class AppScheme(AppSchemeBase):
     icon_preview: str | None
     image_wide: str | None
     icon_large: str | None
+
+    @pydantic.validator("app_icon", pre=True)
+    def set_default_app_icon_preview(cls, value):
+        return value or App.DEFAULT_ICON_PREVIEW
+
+
+    @pydantic.validator("app_icon", pre=True)
+    def set_default_app_icon_large(cls, value):
+        return value or App.DEFAULT_ICON_LARGE
 
     class Config:
         orm_mode = True
