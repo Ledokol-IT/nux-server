@@ -1,11 +1,11 @@
-from typing import Iterable
-import uuid
 import enum
+import uuid
+from typing import Iterable
 
 import pydantic
 import sqlalchemy as sa
-import sqlalchemy.orm as orm
 import sqlalchemy.dialects.postgresql as pg_types
+import sqlalchemy.orm as orm
 
 import nux.database
 import nux.models.user
@@ -41,6 +41,7 @@ class App(nux.database.Base):
 
     DEFAULT_ICON_PREVIEW = "https://storage.yandexcloud.net/nux/icons/common/preview_icon.png"
     DEFAULT_ICON_LARGE = "https://storage.yandexcloud.net/nux/icons/common/large_icon.png"
+    DEFAULT_ICON_WIDE = "https://storage.yandexcloud.net/nux/icons/common/wide_icon.png"
 
     id: str = sa.Column(
         sa.String,
@@ -99,14 +100,17 @@ class AppScheme(AppSchemeBase):
     image_wide: str | None
     icon_large: str | None
 
-    @pydantic.validator("app_icon", pre=True)
+    @pydantic.validator("app_icon_preview", pre=True)
     def set_default_app_icon_preview(cls, value):
         return value or App.DEFAULT_ICON_PREVIEW
 
-
-    @pydantic.validator("app_icon", pre=True)
+    @pydantic.validator("app_icon_large", pre=True)
     def set_default_app_icon_large(cls, value):
         return value or App.DEFAULT_ICON_LARGE
+
+    @pydantic.validator("app_icon_wide", pre=True)
+    def set_default_app_icon_wide(cls, value):
+        return value or App.DEFAULT_ICON_WIDE
 
     class Config:
         orm_mode = True
@@ -129,8 +133,8 @@ def create_app_android(app_data: AppSchemeCreateAndroid):
 
 
 def determine_app_android(
-    session: orm.Session,
-    app_data: AppSchemeCreateAndroid
+        session: orm.Session,
+        app_data: AppSchemeCreateAndroid
 ) -> tuple[bool, App]:
     """
     Return `(True, new_app)` if no mathed app is found,
@@ -149,9 +153,9 @@ def determine_app_android(
 
 
 def add_app_to_user(
-    session: orm.Session,
-    user: 'nux.models.user.User',
-    app: App,
+        session: orm.Session,
+        user: 'nux.models.user.User',
+        app: App,
 ):
     app_stats = UserInAppStatistic()
     app_stats.app = app
@@ -160,9 +164,9 @@ def add_app_to_user(
 
 
 def delete_app_from_user(
-    session: orm.Session,
-    user: 'nux.models.user.User',
-    app: App,
+        session: orm.Session,
+        user: 'nux.models.user.User',
+        app: App,
 ):
     app_stats = session.query(UserInAppStatistic).get({
         "user_id": user.id,
@@ -174,14 +178,14 @@ def delete_app_from_user(
 
 
 def get_user_apps(
-    session: orm.Session,
-    user: 'nux.models.user.User',
-    approved: bool = True,
+        session: orm.Session,
+        user: 'nux.models.user.User',
+        approved: bool = True,
 ) -> list[App]:
     q = (
         session.query(App)
-        .join(UserInAppStatistic)
-        .where(UserInAppStatistic.user_id == user.id)
+            .join(UserInAppStatistic)
+            .where(UserInAppStatistic.user_id == user.id)
     )
     if approved:
         q = q.where(App.approved)
@@ -189,9 +193,9 @@ def get_user_apps(
 
 
 def set_apps_to_user(
-    session: orm.Session,
-    user: 'nux.models.user.User',
-    apps: Iterable[App],
+        session: orm.Session,
+        user: 'nux.models.user.User',
+        apps: Iterable[App],
 ):
     user_apps = set(get_user_apps(session, user, approved=False))
     apps = set(apps)
@@ -204,8 +208,8 @@ def set_apps_to_user(
 
 
 def get_app(
-    session: orm.Session,
-    id: str | None = None, android_package_name: str | None = None
+        session: orm.Session,
+        id: str | None = None, android_package_name: str | None = None
 ) -> App | None:
     cnt_args = sum(map(lambda x: x is not None, [id, android_package_name]))
     if cnt_args != 1:
