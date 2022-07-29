@@ -103,6 +103,8 @@ def update_status_in_app(
 ):
     if user.status is not None and user.status.app == app:
         user.status.dt_last_update = datetime.datetime.utcnow()
+    elif app.category == nux.models.app.CATEGORY.OTHER:
+        update_status_not_in_app(session, user)
     else:
         status = create_empty_status()
         status.app = app
