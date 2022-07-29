@@ -39,9 +39,9 @@ class CATEGORY(enum.Enum):
 class App(nux.database.Base):
     __tablename__ = "apps"
 
-    DEFAULT_ICON_PREVIEW = "https://storage.yandexcloud.net/nux/icons/common/preview_icon.png"
-    DEFAULT_ICON_LARGE = "https://storage.yandexcloud.net/nux/icons/common/large_icon.png"
-    DEFAULT_ICON_WIDE = "https://storage.yandexcloud.net/nux/icons/common/wide_icon.png"
+    DEFAULT_ICON_PREVIEW = "https://storage.yandexcloud.net/nux/icons/common/preview_icon.png"  # noqa
+    DEFAULT_ICON_LARGE = "https://storage.yandexcloud.net/nux/icons/common/large_icon.png"  # noqa
+    DEFAULT_ICON_WIDE = "https://storage.yandexcloud.net/nux/icons/common/wide_icon.png"  # noqa
 
     id: str = sa.Column(
         sa.String,
@@ -100,15 +100,15 @@ class AppScheme(AppSchemeBase):
     image_wide: str | None
     icon_large: str | None
 
-    @pydantic.validator("app_icon_preview", pre=True)
+    @pydantic.validator("icon_preview", pre=True, check_fields=False)
     def set_default_app_icon_preview(cls, value):
         return value or App.DEFAULT_ICON_PREVIEW
 
-    @pydantic.validator("app_icon_large", pre=True)
+    @pydantic.validator("icon_large", pre=True, check_fields=False)
     def set_default_app_icon_large(cls, value):
         return value or App.DEFAULT_ICON_LARGE
 
-    @pydantic.validator("app_icon_wide", pre=True)
+    @pydantic.validator("icon_wide", pre=True, check_fields=False)
     def set_default_app_icon_wide(cls, value):
         return value or App.DEFAULT_ICON_WIDE
 
@@ -184,8 +184,8 @@ def get_user_apps(
 ) -> list[App]:
     q = (
         session.query(App)
-            .join(UserInAppStatistic)
-            .where(UserInAppStatistic.user_id == user.id)
+        .join(UserInAppStatistic)
+        .where(UserInAppStatistic.user_id == user.id)
     )
     if approved:
         q = q.where(App.approved)
