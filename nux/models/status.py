@@ -101,8 +101,12 @@ def update_status_in_app(
     app: 'nux.models.app.App',
     events: 'nux.events.NuxEvents',
 ):
-    if user.status is not None and user.status.app == app:
-        user.status.dt_last_update = datetime.datetime.utcnow()
+    if (
+            user.status is not None
+            and user.status.app == app
+            and user.status.in_app
+    ):
+        user.status.dt_last_update = datetime.datetime.now()
     elif app.category == nux.models.app.CATEGORY.OTHER:
         update_status_not_in_app(session, user)
     else:
