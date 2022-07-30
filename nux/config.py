@@ -50,7 +50,7 @@ def parse_args_from_parser(
     options = p.parse_known_args(args)[0]
     try:
         options.postgres_url = get_pg_url(options)
-    except AttributeError:
+    except KeyError:
         pass
     return options
 

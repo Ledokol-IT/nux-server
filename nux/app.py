@@ -10,6 +10,7 @@ import nux.default_profile_pics
 import nux.events
 import nux.firebase
 import nux.notifications
+import nux.default_profile_pics
 from nux.resources.apps_resources import apps_router
 from nux.resources.status_resources import status_router
 from nux.resources.users_resources import user_router
@@ -27,6 +28,7 @@ def create_app(options):
     nux.firebase.setup_firebase(options)
     nux.notifications.setup_notifications(options)
     nux.s3.setup_s3(options.aws_access_key_id, options.aws_secret_access_key)
+    nux.default_profile_pics.setup()
     if not options.sms_disable:
         nux.sms.setup_sms(options.smsaero_email, options.smsaero_apikey)
 
