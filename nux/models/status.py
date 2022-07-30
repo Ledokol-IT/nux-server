@@ -103,8 +103,8 @@ def update_status_in_app(
 ):
     if (
             user.status is not None
-            and user.status.app == app
             and user.status.in_app
+            and user.status.app == app
     ):
         user.status.dt_last_update = datetime.datetime.now()
     elif app.category == nux.models.app.CATEGORY.OTHER:

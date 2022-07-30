@@ -10,7 +10,8 @@ def test_registration_ok(client):
             "user": {
                 "phone": phone,
                 "nickname": "nickname",
-                "name": "A name"
+                "name": "A name",
+                "default_profile_pic_id": "random",
             },
             "phone_confirmation": get_phone_confirmation(
                 client, phone, 'registration'),

@@ -4,10 +4,12 @@ import uuid
 
 import passlib.context
 import pydantic
+from pydantic.fields import Field
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
+import nux.default_profile_pics
 import nux.models.app
 import nux.models.status
 
@@ -45,7 +47,11 @@ class User(nux.database.Base):
     )  # type: ignore
     profile_pic: str | None = sa.Column(
         sa.String,
-        nullable=True
+        nullable=True,
+    )  # type: ignore
+    _default_profile_pic_id: str | None = sa.Column(
+        sa.String,
+        nullable=True,
     )  # type: ignore
     DEFAULT_PROFILE_PIC = \
         "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"
@@ -84,6 +90,17 @@ class UserSchemeBase(pydantic.BaseModel):
 class UserSchemeCreate(UserSchemeBase):
     password: str | None = None
     phone: str | None = None
+    default_profile_pic_id: str | None = None
+
+    @pydantic.validator("default_profile_pic_id")
+    def check_default_profile_pic_id(cls, v):
+        if v is None:
+            return None
+        if v == "random":
+            return None
+        if v not in nux.default_profile_pics.profile_pics_ids:
+            raise ValueError("This profile pic id does not exist")
+        return v
 
 
 class UserSchemeSecure(UserSchemeBase):
@@ -116,6 +133,15 @@ def create_user(user_data: UserSchemeCreate):
         user.set_password(user_data.password)
     user.status = nux.models.status.create_empty_status()
     user.phone = user_data.phone
+
+    user._default_profile_pic_id = (
+        user_data.default_profile_pic_id
+        or nux.default_profile_pics.get_random_id()
+    )
+    user.profile_pic = nux.default_profile_pics.get_url_by_id(
+        user._default_profile_pic_id
+    )
+
     return user
 
 

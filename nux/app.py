@@ -1,18 +1,20 @@
 import logging
+
 import fastapi
 
 from nux.auth import auth_router
 import nux.config
+import nux.confirmation
 import nux.database
+import nux.default_profile_pics
 import nux.events
 import nux.firebase
 import nux.notifications
-import nux.s3
-import nux.sms
-import nux.confirmation
 from nux.resources.apps_resources import apps_router
 from nux.resources.status_resources import status_router
 from nux.resources.users_resources import user_router
+import nux.s3
+import nux.sms
 
 
 def create_app(options):
@@ -37,5 +39,6 @@ def create_app(options):
     app.include_router(status_router)
     app.include_router(apps_router)
     app.include_router(nux.confirmation.confirmation_router)
+    app.include_router(nux.default_profile_pics.router)
 
     return app
