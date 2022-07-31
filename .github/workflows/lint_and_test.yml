@@ -50,6 +50,8 @@ jobs:
         POSTGRES_USER: web
         POSTGRES_HOST: "localhost:5432"
         GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     - name: Lint the code with pycodestyle
       run: |
         poetry run flake8 nux --count --select=E9,F63,F7,F82 --show-source --statistics

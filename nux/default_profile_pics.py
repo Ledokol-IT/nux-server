@@ -37,7 +37,6 @@ def setup():
     global profile_pics_data, profile_pics_ids, profile_pics_dict
     profile_pics_data = _fetch_profile_data()
 
-
     profile_pics_dict = {p.id: p for p in profile_pics_data}
     profile_pics_ids = list(profile_pics_dict.keys())
 

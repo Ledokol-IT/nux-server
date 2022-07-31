@@ -45,6 +45,7 @@ def setup_s3(aws_access_key_id, aws_secret_access_key):
     )
     assert s3 is not None
 
+
 def _get_url(filename):
     return f"{ENDPOINT_URL}/{BUCKET_NAME}/{filename}"
 
@@ -60,7 +61,6 @@ def list_objects(*path, patern=r".*\..*") -> list[str]:
     keys = (_get_url(key) for key in keys)
     keys = list(keys)
     return keys
-
 
 
 def generate_random_string():
