@@ -12,6 +12,7 @@ import nux.database
 import nux.default_profile_pics
 import nux.models.app
 import nux.models.status
+import nux.pydantic_types
 
 
 pwd_context = passlib.context.CryptContext(
@@ -89,7 +90,7 @@ class UserSchemeBase(pydantic.BaseModel):
 
 class UserSchemeCreate(UserSchemeBase):
     password: str | None = None
-    phone: str | None = None
+    phone: nux.pydantic_types.Phone | None = None
     default_profile_pic_id: str | None = None
 
     @pydantic.validator("default_profile_pic_id")

@@ -16,9 +16,12 @@ import fastapi
 import pydantic
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import and_
 
 import nux.database
+import nux.pydantic_types
 import nux.sms
+from nux.utils import now
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,7 @@ class PhoneConfirmation(nux.database.Base):
     phone: str = sa.Column(
         sa.String,
         nullable=False,
+        index=True,
     )  # type: ignore
     code: str = sa.Column(
         sa.String,
@@ -41,15 +45,33 @@ class PhoneConfirmation(nux.database.Base):
         sa.String,
         nullable=False,
     )  # type: ignore
-    dt_created: datetime.datetime = sa.Column(
+    dt_sent: datetime.datetime = sa.Column(
         sa.DateTime,
+        nullable=False,
+    )  # type: ignore
+    retries: int = sa.Column(
+        sa.Integer,
         nullable=False,
     )  # type: ignore
     TTL = datetime.timedelta(minutes=10)
 
     @property
     def expiration_dt(self):
-        return self.dt_created + self.TTL
+        return self.dt_sent + self.TTL
+
+    @property
+    def dt_can_retry_after(self):
+        if self.retries == 1:
+            return self.dt_sent + datetime.timedelta(seconds=30)
+        elif self.retries == 2:
+            return self.dt_sent + datetime.timedelta(minutes=1)
+        elif self.retries == 3:
+            return self.dt_sent + datetime.timedelta(minutes=10)
+        else:
+            return self.dt_sent + datetime.timedelta(minutes=30)
+
+    def is_reseted(self):
+        return now() - self.dt_sent > datetime.timedelta(minutes=30)
 
 
 def generate_code():
@@ -60,8 +82,8 @@ def generate_code():
 class PhoneConfirmationScheme(pydantic.BaseModel):
     id: str
     phone: str
-    dt_created: datetime.datetime
     expiration_dt: datetime.datetime
+    dt_can_retry_after: datetime.datetime
 
     class Config:
         orm_mode = True
@@ -82,12 +104,19 @@ def create_phone_confirmation(
     confirmation.id = str(uuid.uuid4())
     confirmation.phone = phone
     confirmation.code = code
-    confirmation.dt_created = datetime.datetime.now()
+    confirmation.dt_sent = now()
     confirmation.reason = reason
+    confirmation.retries = 0
 
-    nux.sms.send_confirmation_code(phone, code)
     session.add(confirmation)
     return confirmation
+
+
+def send_confirmation_code(confirmation: PhoneConfirmation):
+    print(confirmation.phone, confirmation.code)
+    nux.sms.send_confirmation_code(confirmation.phone, confirmation.code)
+    confirmation.retries += 1
+    confirmation.dt_sent = now()
 
 
 def check_phone_confirmation(
@@ -98,6 +127,7 @@ def check_phone_confirmation(
         reason: str,
 ) -> bool:
     confirmation = session.query(PhoneConfirmation).get(id)
+    print(phone, code)
     if confirmation is None:
         return False
     if (
@@ -106,7 +136,7 @@ def check_phone_confirmation(
         or (
             confirmation.code != code
         )
-        or confirmation.expiration_dt < datetime.datetime.now()
+        or confirmation.expiration_dt < now()
     ):
         return False
     return True
@@ -116,7 +146,7 @@ confirmation_router = fastapi.APIRouter()
 
 
 class PhoneConfirmationRequestBody(pydantic.BaseModel):
-    phone: str
+    phone: nux.pydantic_types.Phone
     reason: Literal['registration', 'login']
 
 
@@ -126,6 +156,31 @@ def post_phone_confirmation(
         body: PhoneConfirmationRequestBody,
         session: Session = nux.database.SessionDependecy(),
 ):
-    confirmaion = create_phone_confirmation(session, body.phone, body.reason)
+    phone = body.phone
+    reason = body.reason
+    confirmation: PhoneConfirmation | None = session.query(
+        PhoneConfirmation
+    ).where(
+        and_(
+            PhoneConfirmation.phone == phone,
+            PhoneConfirmation.reason == reason,
+        )
+    ).first()
+    if confirmation is not None and confirmation.is_reseted():
+        session.delete(confirmation)
+        confirmation = None
+    if confirmation is not None:
+        if now() < confirmation.dt_can_retry_after:
+            raise fastapi.HTTPException(425)
+        else:
+            confirmation.retries += 1
+    else:
+        confirmation = create_phone_confirmation(
+            session,
+            body.phone,
+            body.reason
+        )
+        session.add(confirmation)
+    send_confirmation_code(confirmation)
     session.commit()
-    return confirmaion
+    return confirmation

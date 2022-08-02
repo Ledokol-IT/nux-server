@@ -10,6 +10,7 @@ import nux.database
 import nux.models.user
 import nux.models.app
 import nux.events
+from nux.utils import now
 
 
 class UserStatus(nux.database.Base):
@@ -86,7 +87,7 @@ class UserStatusScheme(UserStatusSchemeSecure):
 def create_empty_status():
     status = UserStatus()
     status.app = None
-    status.dt_last_update = datetime.datetime.now()
+    status.dt_last_update = now()
     status.dt_entered_app = None
     status.dt_leaved_app = None
     status.in_app = False
@@ -106,13 +107,13 @@ def update_status_in_app(
             and user.status.in_app
             and user.status.app == app
     ):
-        user.status.dt_last_update = datetime.datetime.now()
+        user.status.dt_last_update = now()
     elif app.category == nux.models.app.CATEGORY.OTHER:
         update_status_not_in_app(session, user)
     else:
         status = create_empty_status()
         status.app = app
-        status.dt_entered_app = datetime.datetime.now()
+        status.dt_entered_app = now()
         status.dt_leaved_app = None
         status.in_app = True
         user.status = status
@@ -124,27 +125,25 @@ def update_status_in_app(
 def status_leave_app(status: UserStatus):
     if status.in_app:
         status.in_app = False
-        status.dt_leaved_app = datetime.datetime.now()
+        status.dt_leaved_app = now()
 
 
 def update_status_not_in_app(
     session: orm.Session,
     user: 'nux.models.user.User'
 ):
-    now = datetime.datetime.now()
     if user.status is None:
         user.status = create_empty_status()
         return user.status
 
-    user.status.dt_last_update = now
+    user.status.dt_last_update = now()
     user.status.online = True
     status_leave_app(user.status)
     return user.status
 
 
 def clear_offline_users_by_ttl(session: orm.Session) -> None:
-    now = datetime.datetime.now()
-    min_online_time = now - UserStatus.ONLINE_TTL
+    min_online_time = now() - UserStatus.ONLINE_TTL
     statuses = (
         session.query(UserStatus)
         .where(UserStatus.online)
@@ -153,5 +152,5 @@ def clear_offline_users_by_ttl(session: orm.Session) -> None:
     )
     for status in statuses:
         status_leave_app(status)
-        status.dt_last_update = datetime.datetime.now()
+        status.dt_last_update = now()
         status.online = False

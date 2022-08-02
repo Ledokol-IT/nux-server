@@ -10,6 +10,7 @@ from nux.database import SessionDependecy
 import nux.config as config
 import nux.confirmation
 import nux.models.user
+import nux.pydantic_types
 from nux.models.user import User, get_user, create_user, UserSchemeCreate
 
 auth_router = fastapi.APIRouter()
@@ -80,7 +81,7 @@ def login_with_password(
 @auth_router.post("/login", response_model=Token)
 def login_with_phone_confirmation(
     phone_confirmation: nux.confirmation.PhoneConfirmationRequestScheme,
-    phone: str = fastapi.Body(),
+    phone: nux.pydantic_types.Phone = fastapi.Body(),
     session=SessionDependecy(),
 ):
     if not nux.confirmation.check_phone_confirmation(
@@ -101,7 +102,7 @@ def login_with_phone_confirmation(
 
 
 class RegistrationUserDataRequestScheme(UserSchemeCreate):
-    phone: str
+    phone: nux.pydantic_types.Phone
 
 
 @auth_router.post("/register", response_model=Token)
