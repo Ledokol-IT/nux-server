@@ -57,11 +57,11 @@ first_approved_apps = [
         "android_package_name": "com.activision.callofduty.shooter",
     },
     {
-        "name": "Among us",
+        "name": "Among Us",
         "android_package_name": "com.innersloth.spacemafia",
     },
     {
-        "name": "Brawl stars",
+        "name": "Brawl Stars",
         "android_package_name": "com.supercell.brawlstars",
     },
     {
@@ -69,7 +69,7 @@ first_approved_apps = [
         "android_package_name": "com.tencent.ig",
     },
     {
-        "name": "Clash of clans",
+        "name": "Clash of Clans",
         "android_package_name": "com.supercell.clashofclans",
     },
     {
@@ -81,7 +81,7 @@ first_approved_apps = [
         "android_package_name": "com.roblox.client",
     },
     {
-        "name": "Clash royal",
+        "name": "Clash Royale",
         "android_package_name": "com.supercell.clashroyale",
     },
     {
@@ -89,7 +89,7 @@ first_approved_apps = [
         "android_package_name": "com.axlebolt.standoff2",
     },
     {
-        "name": "Дурак онлайн",
+        "name": "Дурак Онлайн",
         "android_package_name": "com.rstgames.durak",
     },
     {
