@@ -30,7 +30,11 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.execute("DELETE FROM confirmations")
     op.add_column('confirmations', sa.Column(
-        'dt_created', postgresql.TIMESTAMP(), autoincrement=False, nullable=False))
+        'dt_created',
+        postgresql.TIMESTAMP(),
+        autoincrement=False,
+        nullable=False,
+    ))
     op.drop_index(op.f('ix_confirmations_phone'), table_name='confirmations')
     op.drop_column('confirmations', 'retries')
     op.drop_column('confirmations', 'dt_sent')

@@ -120,6 +120,7 @@ def create_app_android(app_data: AppSchemeCreateAndroid):
     app = App()
     app.android_package_name = app_data.android_package_name
     app.name = app_data.name
+    app.approved = False
 
     match_category = {
         None: CATEGORY.OTHER,

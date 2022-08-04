@@ -19,6 +19,30 @@ def test_post_phone_confirmation(patched_send_confirmation_code, client):
 
 
 @unittest.mock.patch("nux.sms.send_confirmation_code")
+def test_post_phone_confirmation_twice(patched_send_confirmation_code, client):
+    phone = "+79069469277"
+    response = client.post(
+        '/confirmation/phone',
+        json={
+            "phone": phone,
+            "reason": "registration",
+        },
+    )
+    assert response.status_code == 200
+    patched_send_confirmation_code.assert_called_once()
+
+    response = client.post(
+        '/confirmation/phone',
+        json={
+            "phone": phone,
+            "reason": "registration",
+        },
+    )
+    assert response.status_code == 425
+    patched_send_confirmation_code.assert_called_once()  # once from first call
+
+
+@unittest.mock.patch("nux.sms.send_confirmation_code")
 def test_phone_confirmation_check(
         patched_send_confirmation_code,
         client,
