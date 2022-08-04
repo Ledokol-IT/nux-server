@@ -65,6 +65,7 @@ class UserStatus(nux.database.Base):
     )  # type: ignore
 
     ONLINE_TTL = datetime.timedelta(seconds=30)
+    SECOND_TIME_TTL = datetime.timedelta(minutes=5)
 
 
 class UserStatusSchemeSecure(pydantic.BaseModel):
@@ -111,6 +112,14 @@ def update_status_in_app(
     elif not app.approved:
         update_status_not_in_app(session, user)
     else:
+        if not (
+                user.status is not None
+                and user.status.app == app
+                and user.status.dt_leaved_app
+                and now() - user.status.dt_leaved_app < user.SECOND_TIME_TTL
+        ):
+            events.user_entered_app(session, user, app)
+
         status = create_empty_status()
         status.app = app
         status.dt_entered_app = now()
@@ -118,7 +127,6 @@ def update_status_in_app(
         status.in_app = True
         user.status = status
 
-        events.user_entered_app(session, user, app)
     return user.status
 
 
