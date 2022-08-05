@@ -48,6 +48,22 @@ def make_migration():
     nux.database.make_migration(options.postgres_url)
 
 
+def delete_user():
+    import nux.config
+    import nux.database
+    from nux.models.user import get_user
+    p = nux.config.add_data_base_args(nux.config.init_arg_parser())
+    p.add_argument("--phone")
+    p.add_argument("--nickname")
+    p.add_argument("--id")
+    options = nux.config.parse_args_from_parser(p)
+    nux.database.connect_to_db(options.postgres_url)
+    with nux.database.Session() as session:
+        u = get_user(session, phone=options.phone, id=options.id, nickname=options.nickname)
+        session.delete(u)
+        session.commit()
+
+
 def alembic():
     import alembic.config
 

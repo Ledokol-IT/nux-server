@@ -65,7 +65,8 @@ class User(nux.database.Base):
 
     apps_stats: list[nux.models.app.UserInAppStatistic] = orm.relationship(
         lambda: nux.models.app.UserInAppStatistic,
-        back_populates="user"
+        cascade="all,delete",
+        back_populates="user",
     )
 
     do_not_disturb: bool = sa.Column(

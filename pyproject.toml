@@ -39,6 +39,7 @@ make_migration = "nux:make_migration"
 run_migrations = "nux:run_migrations"
 alembic = "nux:alembic"
 print_shit = "nux:print_shit"
+delete_user = "nux:delete_user"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
