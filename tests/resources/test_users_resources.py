@@ -16,7 +16,7 @@ def test_default_pic(client, user_auth_header):
 
 
 def test_get_user_by_id(client):
-    user_auth = create_user(client, "mommy")
+    user_auth = create_user(client, nickname="mommy")
     user = client.get("/get_me", headers=user_auth).json()
     response = client.get(f"/user/{user['id']}")
     assert response.status_code == 200
@@ -40,7 +40,7 @@ def test_get_user_by_phone(client):
 
 
 def test_get_user_by_nickname(client):
-    create_user(client, "test_nick")
+    create_user(client, nickname="test_nick")
     response = client.get("/users/?nickname=test_nick")
     assert response.status_code == 200
     assert response.json()["nickname"] == "test_nick"
@@ -63,19 +63,6 @@ def test_check_user_by_phone_non_existing(client):
     })
     assert response.status_code == 200
     assert response.json()["exists"] is False
-
-
-def test_get_friends(client, user_auth_header):
-    create_user(client, "good_friend")
-
-    response = client.get("/friends", headers=user_auth_header)
-    assert response.status_code == 200
-
-    data = response.json()
-    assert len(data) > 0
-    assert "nickname" in data[0]
-    assert data[0]["nickname"] == "good_friend"
-    assert "status" in data[0]
 
 
 def test_do_not_disturb_false_by_default(client, user_auth_header):

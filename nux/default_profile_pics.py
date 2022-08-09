@@ -16,7 +16,14 @@ class DefaultProfilePic(pydantic.BaseModel):
 
 
 def _fetch_profile_data():
-    urls = nux.s3.list_objects("default_icons", "avatar_profile")
+    try:
+        urls = nux.s3.list_objects("default_icons", "avatar_profile")
+    except nux.s3.S3NotInitializedError:
+        return [DefaultProfilePic(
+            id="pic",
+            url="http://example.com/pic.png",
+        )]
+
     data = []
     for url in urls:
         try:

@@ -59,7 +59,12 @@ def delete_user():
     options = nux.config.parse_args_from_parser(p)
     nux.database.connect_to_db(options.postgres_url)
     with nux.database.Session() as session:
-        u = get_user(session, phone=options.phone, id=options.id, nickname=options.nickname)
+        u = get_user(
+            session,
+            phone=options.phone,
+            id=options.id,
+            nickname=options.nickname
+        )
         session.delete(u)
         session.commit()
 

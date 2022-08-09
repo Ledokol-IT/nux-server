@@ -4,14 +4,13 @@ import uuid
 
 import passlib.context
 import pydantic
-from pydantic.fields import Field
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
 import nux.default_profile_pics
-import nux.models.app
-import nux.models.status
+import nux.models.app as mapp
+import nux.models.status as mstatus
 import nux.pydantic_types
 
 
@@ -27,6 +26,11 @@ class User(nux.database.Base):
         primary_key=True,
         default=lambda: str(uuid.uuid4())
     )  # type: ignore
+
+    @staticmethod
+    def _generate_id():
+        return str(uuid.uuid4())
+
     # In +79999999999 format
     phone: str | None = sa.Column(
         sa.String,
@@ -46,6 +50,13 @@ class User(nux.database.Base):
         sa.String,
         nullable=True,
     )  # type: ignore
+
+    do_not_disturb: bool = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+    )  # type: ignore
+
     profile_pic: str | None = sa.Column(
         sa.String,
         nullable=True,
@@ -57,23 +68,44 @@ class User(nux.database.Base):
     DEFAULT_PROFILE_PIC = \
         "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"
 
-    status: nux.models.status.UserStatus | None = orm.relationship(
-        lambda: nux.models.status.UserStatus,
+    status: mstatus.UserStatus | None = orm.relationship(
+        lambda: mstatus.UserStatus,
         uselist=False,
         back_populates="_user",
     )
-
-    apps_stats: list[nux.models.app.UserInAppStatistic] = orm.relationship(
-        lambda: nux.models.app.UserInAppStatistic,
+    apps_stats: list[mapp.UserInAppStatistic] = orm.relationship(
+        lambda: mapp.UserInAppStatistic,
         cascade="all,delete",
         back_populates="user",
     )
 
-    do_not_disturb: bool = sa.Column(
-        sa.Boolean,
-        nullable=False,
-        default=False,
-    )  # type: ignore
+    pending_friends_invites: list[mfriends.FriendsInvite]
+    pending_friends_invites = orm.relationship(
+        lambda: mfriends.FriendsInvite,
+        cascade="all,delete",
+        back_populates="to_user",
+        foreign_keys=lambda: [mfriends.FriendsInvite.to_user_id],
+    )
+    outgoing_friends_invites: list[mfriends.FriendsInvite]
+    outgoing_friends_invites = orm.relationship(
+        lambda: mfriends.FriendsInvite,
+        cascade="all,delete",
+        back_populates="from_user",
+        foreign_keys=lambda: [mfriends.FriendsInvite.from_user_id],
+    )
+
+    _friendships1: list[mfriends.Friendship] = orm.relationship(
+        lambda: mfriends.Friendship,
+        cascade="all,delete",
+        back_populates="user1",
+        foreign_keys=lambda: [mfriends.Friendship.user1_id],
+    )
+    _friendships2: list[mfriends.Friendship] = orm.relationship(
+        lambda: mfriends.Friendship,
+        cascade="all,delete",
+        back_populates="user2",
+        foreign_keys=lambda: [mfriends.Friendship.user2_id],
+    )
 
     def check_password(self, password: str) -> bool:
         if self.hashed_password is None:
@@ -107,7 +139,7 @@ class UserSchemeCreate(UserSchemeBase):
 
 class UserSchemeSecure(UserSchemeBase):
     id: str
-    status: t.Optional['nux.models.status.UserStatusSchemeSecure']
+    status: t.Optional['mstatus.UserStatusSchemeSecure']
     profile_pic: str
     do_not_disturb: bool
 
@@ -121,7 +153,7 @@ class UserSchemeSecure(UserSchemeBase):
 
 class UserScheme(UserSchemeSecure):
     phone: str | None
-    status: t.Optional['nux.models.status.UserStatusScheme']
+    status: t.Optional['mstatus.UserStatusScheme']
 
     class Config:
         orm_mode = True
@@ -129,11 +161,12 @@ class UserScheme(UserSchemeSecure):
 
 def create_user(user_data: UserSchemeCreate):
     user = User()
+    user.id = User._generate_id()
     user.nickname = user_data.nickname
     user.name = user_data.name
     if user_data.password is not None:
         user.set_password(user_data.password)
-    user.status = nux.models.status.create_empty_status()
+    user.status = mstatus.create_empty_status()
     user.phone = user_data.phone
 
     user._default_profile_pic_id = (
@@ -169,21 +202,4 @@ def get_user(
     return user
 
 
-def get_friends(
-    session: orm.Session,
-    user: User,
-    order: t.Literal["online"] | None = None,
-) -> list[User]:
-    query = (
-        session.query(User)
-        .filter(User.id != user.id)
-    )
-    if order == "online":
-        query = (query
-                 .join(User.status)
-                 .order_by(nux.models.status.UserStatus.dt_last_update)
-                 )
-
-    friends = query.all()
-
-    return friends
+import nux.models.friends as mfriends

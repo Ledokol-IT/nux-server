@@ -14,6 +14,8 @@ def add_data_base_args(p: configargparse.ArgParser):
 
 
 def add_s3_options(p: configargparse.ArgParser):
+    p.add_argument("--aws-disable",
+                   env_var="NUX_AWS_DISABLE", action="store_true")
     p.add_argument("--aws-access-key-id", env_var="AWS_ACCESS_KEY_ID")
     p.add_argument("--aws-secret-access-key", env_var="AWS_SECRET_ACCESS_KEY")
     return p

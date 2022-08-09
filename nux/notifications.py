@@ -8,9 +8,16 @@ import nux.events
 import nux.firebase
 import nux.models.app
 import nux.models.user
+import nux.models.friends as mfriends
+
+_is_setted_up = False
 
 
 def setup_notifications(options):
+    global _is_setted_up
+    if _is_setted_up:
+        return
+    _is_setted_up = True
     _ = options
     nux.events.user_entered_app.on(send_notification_user_entered_app)
 
@@ -64,7 +71,7 @@ def send_notification_user_entered_app(
     if nux.firebase.firebase_app is None:
         return
 
-    friends = nux.models.user.get_friends(session, user)
+    friends = mfriends.get_friends(session, user)
     none_or_messages = (
         make_message_user_entered_app(user, app, friend) for friend in friends
     )

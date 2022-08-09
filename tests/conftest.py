@@ -13,7 +13,7 @@ from tests.utils import app1_android_payload, create_user_token, create_user
 
 
 @pytest.fixture
-def session():
+def session(app):
     return nux.database.Session()
 
 
@@ -28,6 +28,9 @@ def app():
         "--secret-key", "123",
         "--firebase-dry-run",
         "--sms-disable",
+        "--aws-disable",
+        "--aws-access-key-id", "YCAJEjQ6RldyNLfUtBaMUJZWQ",
+        "--aws-secret-access-key", "YCPM8_Qc-Bf_gDKfFq3ct2b2GxQPZcJnhq7U0GR8",
     ]
     options = nux.config.parse_args(args)
     sqlalchemy_utils.create_database(options.postgres_url)
@@ -52,7 +55,7 @@ def client(app):
 
 @pytest.fixture
 def user_auth_header(client):
-    return create_user(client, "main_test_user")
+    return create_user(client, nickname="main_test_user")
 
 
 @pytest.fixture

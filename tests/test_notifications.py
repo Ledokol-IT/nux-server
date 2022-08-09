@@ -1,20 +1,22 @@
+import unittest.mock
+
 import pytest
-import tests.utils
+import threading
+
+from tests.utils import create_user, get_user, make_friends
+from tests.utils import app1_android_payload
 
 
-@pytest.fixture
-def friend_with_token_auth(client):
+def set_token(client, user):
     FIREBASE_TOKEN = "eVjN_YclQVeNyB2Q6-2Z7I:APA91bFBafO_bPKvBJhrUx_y20fmbokAq3ISv7npx-kuQhQpgaxgifLGJ8K919ZVzu4Ns7ZH02gZC5F-8MUSZni9KRMMeQKUBhhLR6M6XMMKQ3F3bbyzMfg09CqM53RWJrOInzEVXU92"  # noqa
-    friend_auth = tests.utils.create_user(client, "friend")
 
     client.put(
         "/current_user/firebase_messaging_token",
         json={
             "firebase_messaging_token": FIREBASE_TOKEN,
         },
-        headers=friend_auth,
+        headers=user,
     )
-    return friend_auth
 
 
 @pytest.fixture
@@ -23,28 +25,47 @@ def friend_id(client, friend_with_token_auth):
     return response.json()["id"]
 
 
+@unittest.mock.patch("nux.firebase.send_messages")
 def test_notifications_sent_then_user_entered_app(
-    client,
-    user_auth_header,
-    friend_with_token_auth
+        patched_firebase_send_messages,
+        client,
 ):
+    patched_firebase_send_messages.assert_not_called()
+    user = create_user(client)
+    friend = create_user(client)
+    make_friends(client, user, friend)
+    set_token(client, friend)
+
     response = client.put(
         "/status/in_app/android",
         json={
-            "app": tests.utils.app1_android_payload,
+            "app": app1_android_payload,
         },
-        headers=user_auth_header,
+        headers=user,
     )
     assert response.status_code == 200
+    patched_firebase_send_messages.assert_called_once()
 
 
-def test_invite(client, user_auth_header, friend_id, sync_app1):
+@unittest.mock.patch("nux.firebase.send_messages")
+def test_invite(
+        patched_firebase_send_messages,
+        client,
+        user_auth_header,
+        sync_app1
+):
+    user = user_auth_header
+    friend = create_user(client)
+    make_friends(client, user, friend)
+    set_token(client, friend)
+    friend_id = get_user(client, friend)["id"]
     response = client.post(
         "/friends/invite",
         json={
             "app_id": sync_app1["id"],
             "friends_ids": [friend_id],
         },
-        headers=user_auth_header,
+        headers=user,
     )
     assert response.status_code == 200
+    patched_firebase_send_messages.assert_called_once()

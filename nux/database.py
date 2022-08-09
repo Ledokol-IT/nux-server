@@ -1,5 +1,4 @@
 import typing as t
-import alembic
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -35,11 +34,13 @@ def make_alembic_config(postgres_url):
 
 
 def create_all(postgres_url: str):
-    connect_to_db(postgres_url)
     import nux.models.user as _
     import nux.models.status as _
     import nux.models.app as _
+    import nux.models.friends as _
     import nux.confirmation as _
+
+    connect_to_db(postgres_url)
 
     Base.metadata.create_all(engine)
 
@@ -65,6 +66,12 @@ def run_migrations(postgres_url: str):
 def make_migration(postgres_url: str):
     import alembic.command
     import alembic.config
+
+    import nux.models.user as _
+    import nux.models.status as _
+    import nux.models.app as _
+    import nux.models.friends as _
+    import nux.confirmation as _
 
     migration_message = input("Enter message for migration: ")
 

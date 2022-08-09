@@ -32,12 +32,32 @@ def create_user_token(
 
 def create_user(
     client,
+    *,
     nickname: str | None = None,
     phone: str | None = None,
 ):
     return {
         "Authorization": f'Bearer {create_user_token(client, nickname, phone)}'
     }
+
+
+def get_user(client, headers):
+    return client.get("/get_me", headers=headers).json()
+
+
+def make_friends(client, user1, user2):
+    user1_id = get_user(client, user1)["id"]
+    user2_id = get_user(client, user2)["id"]
+    client.put(
+        "/friends/add",
+        json={"user_id": user2_id},
+        headers=user1,
+    )
+    client.put(
+        "/friends/add",
+        json={"user_id": user1_id},
+        headers=user2,
+    )
 
 
 app1_android_payload = {
