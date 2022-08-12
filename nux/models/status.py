@@ -7,8 +7,6 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
-import nux.models.user
-import nux.models.app
 import nux.events
 from nux.utils import now
 
@@ -162,3 +160,9 @@ def clear_offline_users_by_ttl(session: orm.Session) -> None:
         status_leave_app(status)
         status.dt_last_update = now()
         status.online = False
+
+
+import nux.models.user
+import nux.models.app
+UserStatusSchemeSecure.update_forward_refs()
+UserStatusScheme.update_forward_refs()

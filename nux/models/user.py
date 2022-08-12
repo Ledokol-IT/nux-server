@@ -9,8 +9,6 @@ import sqlalchemy.orm as orm
 
 import nux.database
 import nux.default_profile_pics
-import nux.models.app as mapp
-import nux.models.status as mstatus
 import nux.pydantic_types
 
 
@@ -202,4 +200,10 @@ def get_user(
     return user
 
 
+import nux.models.app as mapp
+import nux.models.status as mstatus
 import nux.models.friends as mfriends
+UserSchemeBase.update_forward_refs()
+UserSchemeCreate.update_forward_refs()
+UserSchemeSecure.update_forward_refs()
+UserScheme.update_forward_refs()

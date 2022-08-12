@@ -1,28 +1,68 @@
+from __future__ import annotations
 import logging
-import fastapi.encoders
+import uuid
+
 import firebase_admin.messaging
+import pydantic
 import sqlalchemy.orm
 
 import nux.database
 import nux.events
 import nux.firebase
 import nux.models.app
-import nux.models.user
 import nux.models.friends as mfriends
-
-_is_setted_up = False
-
-
-def setup_notifications(options):
-    global _is_setted_up
-    if _is_setted_up:
-        return
-    _is_setted_up = True
-    _ = options
-    nux.events.user_entered_app.on(send_notification_user_entered_app)
-
+import nux.models.user
 
 logger = logging.getLogger(__name__)
+
+
+class AppN(pydantic.BaseModel):
+    id: str
+    name: str
+    android_package_name: str
+    icon_preview: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserN(pydantic.BaseModel):
+    id: str
+    nickname: str
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+_Value = str | pydantic.BaseModel | dict[str, '_Value'] | None
+
+
+def _encode_dict(
+        d: dict[str, str],
+        prefix: str,
+        v: _Value
+):
+    match v:
+        case str():
+            d[prefix] = v
+        case pydantic.BaseModel():
+            _encode_dict(d, prefix, v.dict())
+        case dict():
+            if prefix:
+                prefix = prefix + '.'
+            for key, value in v.items():
+                _encode_dict(d, prefix + key, value)
+        case None:
+            pass
+
+
+def encode_message(*, type: str, **kwargs: _Value):
+    message = {}
+    message["type"] = type
+    message["id"] = str(uuid.uuid4())
+    _encode_dict(message, '', kwargs)
+    return message
 
 
 def is_user_ready_to_notification(user: nux.models.user.User) -> bool:
@@ -44,18 +84,11 @@ def make_message_user_entered_app(
     """
     if not is_user_ready_to_notification(to_user):
         return None
-    data = {
-        "type": "friend_entered_app",
-        "user_nickname": from_user.nickname,
-        "user_id": from_user.id,
-        "app_name": app.name,
-        "app_id": app.id,
-        "app_android_package_name": app.android_package_name,
-        "app_icon_preview": app.icon_preview,
-    }
-    data = fastapi.encoders.jsonable_encoder(data)
-    # firebase accept only strings as values
-    data = {key: str(data[key]) for key in data if data[key] is not None}
+    data = encode_message(
+        type="friend_entered_app",
+        user=UserN.from_orm(from_user),
+        app=AppN.from_orm(app),
+    )
     return firebase_admin.messaging.Message(
         data=data,
         token=to_user.firebase_messaging_token,
@@ -79,6 +112,54 @@ def send_notification_user_entered_app(
     nux.firebase.send_messages(messages)
 
 
+def send_notification_friends_inivite(
+    session: sqlalchemy.orm.Session,
+    from_user: 'nux.models.user.User',
+    to_user: 'nux.models.user.User',
+):
+    _ = session
+
+    logger.debug(f"{from_user!r} invited {to_user!r}")
+
+    if not is_user_ready_to_notification(to_user):
+        return None
+
+    from_user_n = UserN.from_orm(from_user)
+    data = encode_message(
+        type="friends_invite",
+        from_user=from_user_n,
+    )
+    message = firebase_admin.messaging.Message(
+        data=data,
+        token=to_user.firebase_messaging_token,
+    )
+    nux.firebase.send_message(message)
+
+
+def send_notification_accept_friends_invite(
+    session: sqlalchemy.orm.Session,
+    from_user: 'nux.models.user.User',
+    to_user: 'nux.models.user.User',
+):
+    _ = session
+
+    logger.debug(f"{from_user!r} accepted {to_user!r}")
+
+    if not is_user_ready_to_notification(to_user):
+        return None
+
+    from_user_n = UserN.from_orm(from_user)
+    data = encode_message(
+        type="accept_friends_invite",
+        from_user=from_user_n,
+    )
+    message = firebase_admin.messaging.Message(
+        data=data,
+        token=to_user.firebase_messaging_token,
+    )
+    nux.firebase.send_message(message)
+
+
 def make_message_invite_to_app(
     from_user: 'nux.models.user.User',
     to_user: 'nux.models.user.User',
@@ -90,18 +171,11 @@ def make_message_invite_to_app(
     """
     if not is_user_ready_to_notification(to_user):
         return None
-    data = {
-        "type": "invite_to_app",
-        "user_nickname": from_user.nickname,
-        "user_id": from_user.id,
-        "app_name": app.name,
-        "app_id": app.id,
-        "app_android_package_name": app.android_package_name,
-        "app_icon_preview": app.icon_preview,
-    }
-    data = fastapi.encoders.jsonable_encoder(data)
-    # firebase accept only strings as values
-    data = {key: str(data[key]) for key in data if data[key] is not None}
+    data = encode_message(
+        type="invite_to_app",
+        user=UserN.from_orm(from_user),
+        app=AppN.from_orm(app),
+    )
 
     return firebase_admin.messaging.Message(
         data=data,

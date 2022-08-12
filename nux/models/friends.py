@@ -105,7 +105,6 @@ def find_invite(
 
 def create_invite(
         session: orm.Session,
-        events: nux.events.NuxEvents | None,
         from_user: muser.User,
         to_user: muser.User,
 ):
@@ -119,7 +118,6 @@ def create_invite(
 
 def create_friendship(
         session: orm.Session,
-        events: nux.events.NuxEvents | None,
         user1: muser.User,
         user2: muser.User,
 ):
@@ -154,20 +152,19 @@ def add_user_as_friend(
         from_user: muser.User,
         to_user: muser.User,
 ):
-    print("I")
     if find_friendship(session, from_user, to_user):
-        print("n")
         return
     elif find_invite(session, from_user, to_user):
-        print("v")
         return
     elif invite := find_invite(session, to_user, from_user):
-        print("t")
         session.delete(invite)
-        create_friendship(session, events, from_user, to_user)
+        create_friendship(session, from_user, to_user)
+        if events:
+            events.accept_friends_invite(session, from_user, to_user)
     else:
-        print("INVITE CREATED")
-        create_invite(session, events, from_user, to_user)
+        create_invite(session, from_user, to_user)
+        if events:
+            events.friends_invite(session, from_user, to_user)
 
 
 def get_pending_friends_invites(

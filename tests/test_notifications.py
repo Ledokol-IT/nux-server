@@ -1,10 +1,10 @@
 import unittest.mock
 
 import pytest
-import threading
 
 from tests.utils import create_user, get_user, make_friends
 from tests.utils import app1_android_payload
+import nux.notifications
 
 
 def set_token(client, user):
@@ -69,3 +69,35 @@ def test_invite(
     )
     assert response.status_code == 200
     patched_firebase_send_messages.assert_called_once()
+
+
+def test_encode_message():
+    app = nux.notifications.AppN(
+        id="app_id",
+        name="app_name",
+        icon_preview="app_icon_preview",
+        android_package_name="app_android_package_name"
+    )
+    user = nux.notifications.UserN(
+        id="user_id",
+        nickname="user_nickname",
+        name="user_name",
+    )
+    message = nux.notifications.encode_message(
+        type="test",
+        app=app,
+        user=user,
+    )
+    expected_message = {
+        "app.id": "app_id",
+        "app.name": "app_name",
+        "app.icon_preview": "app_icon_preview",
+        "app.android_package_name": "app_android_package_name",
+        "user.id": "user_id",
+        "user.nickname": "user_nickname",
+        "user.name": "user_name",
+        "type": "test",
+    }
+    assert "id" in message
+    del message["id"]
+    assert expected_message == message

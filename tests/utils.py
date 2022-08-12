@@ -60,6 +60,18 @@ def make_friends(client, user1, user2):
     )
 
 
+def set_token(client, user):
+    FIREBASE_TOKEN = "eVjN_YclQVeNyB2Q6-2Z7I:APA91bFBafO_bPKvBJhrUx_y20fmbokAq3ISv7npx-kuQhQpgaxgifLGJ8K919ZVzu4Ns7ZH02gZC5F-8MUSZni9KRMMeQKUBhhLR6M6XMMKQ3F3bbyzMfg09CqM53RWJrOInzEVXU92"  # noqa
+
+    client.put(
+        "/current_user/firebase_messaging_token",
+        json={
+            "firebase_messaging_token": FIREBASE_TOKEN,
+        },
+        headers=user,
+    )
+
+
 app1_android_payload = {
     "name": "Call of Duty",
     "android_package_name": "com.activision.callofduty.shooter",

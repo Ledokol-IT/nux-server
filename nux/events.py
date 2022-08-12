@@ -1,44 +1,10 @@
-import threading
-from typing import Callable, Generic, ParamSpec
-
 import fastapi
 import sqlalchemy.orm
 
-import nux.models.user
-import nux.models.app
+import nux.models.user as muser
+import nux.models.app as mapp
 
-P = ParamSpec('P')
-
-
-class Event(Generic[P]):
-    def __init__(self, name: str, f: Callable[P, None]):
-        self.name = name
-        self.listeners = []
-
-    def emit(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        """Runs all events in separate thread"""
-        for listener in self.listeners:
-            listener(*args, **kwargs)
-
-    def on(self, f: Callable[P, None]) -> Callable[P, None]:
-        """Add an listener, may be used as decorator"""
-        self.listeners.append(f)
-        return f
-
-    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        self.emit(*args, **kwargs)
-
-
-def _user_entered_app_callback(
-    session: sqlalchemy.orm.Session,
-    user: 'nux.models.user.User',
-    app: 'nux.models.app.App'
-) -> None:
-    """Just to setup types"""
-    pass
-
-
-user_entered_app = Event("user_entered_app", _user_entered_app_callback)
+import nux.notifications
 
 
 class NuxEvents:
@@ -48,10 +14,32 @@ class NuxEvents:
     def user_entered_app(
         self,
         session: sqlalchemy.orm.Session,
-        user: 'nux.models.user.User',
-        app: 'nux.models.app.App'
+        user: 'muser.User',
+        app: 'mapp.App',
     ):
-        self.background_tasks.add_task(user_entered_app, session, user, app)
+        self.background_tasks.add_task(
+            nux.notifications.send_notification_user_entered_app, 
+            session, user, app)
+
+    def friends_invite(
+        self,
+        session: sqlalchemy.orm.Session,
+        from_user: muser.User,
+        to_user: muser.User,
+    ):
+        self.background_tasks.add_task(
+            nux.notifications.send_notification_friends_inivite, 
+            session, from_user, to_user)
+
+    def accept_friends_invite(
+        self,
+        session: sqlalchemy.orm.Session,
+        from_user: muser.User,
+        to_user: muser.User,
+    ):
+        self.background_tasks.add_task(
+            nux.notifications.send_notification_accept_friends_invite, 
+            session, from_user, to_user)
 
 
 def EventsDependecy() -> NuxEvents:
@@ -59,8 +47,6 @@ def EventsDependecy() -> NuxEvents:
 
 
 __all__ = (
-    "Event",
-    "user_entered_app",
     "NuxEvents",
     "EventsDependecy",
 )

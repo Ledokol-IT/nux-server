@@ -9,7 +9,6 @@ import nux.database
 import nux.default_profile_pics
 import nux.events
 import nux.firebase
-import nux.notifications
 import nux.default_profile_pics
 from nux.resources.apps_resources import apps_router
 from nux.resources.status_resources import status_router
@@ -27,7 +26,6 @@ def create_app(options):
     logging.basicConfig(level=logging.WARNING)
     nux.database.connect_to_db(options.postgres_url)
     nux.firebase.setup_firebase(options)
-    nux.notifications.setup_notifications(options)
     if not options.aws_disable:
         nux.s3.setup_s3(
             options.aws_access_key_id,
