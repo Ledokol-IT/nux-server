@@ -18,7 +18,7 @@ class NuxEvents:
         app: 'mapp.App',
     ):
         self.background_tasks.add_task(
-            nux.notifications.send_notification_user_entered_app, 
+            nux.notifications.send_notification_user_entered_app,
             session, user, app)
 
     def friends_invite(
@@ -28,7 +28,7 @@ class NuxEvents:
         to_user: muser.User,
     ):
         self.background_tasks.add_task(
-            nux.notifications.send_notification_friends_inivite, 
+            nux.notifications.send_notification_friends_inivite,
             session, from_user, to_user)
 
     def accept_friends_invite(
@@ -38,7 +38,7 @@ class NuxEvents:
         to_user: muser.User,
     ):
         self.background_tasks.add_task(
-            nux.notifications.send_notification_accept_friends_invite, 
+            nux.notifications.send_notification_accept_friends_invite,
             session, from_user, to_user)
 
 

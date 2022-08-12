@@ -221,6 +221,6 @@ def get_app(
     if id is not None:
         app = query.get(id)
     elif android_package_name is not None:
-        app = query.filter(App.android_package_name ==
-                           android_package_name).first()
+        app = query.filter(App.android_package_name
+                           == android_package_name).first()
     return app
