@@ -30,6 +30,7 @@ class UserN(pydantic.BaseModel):
     id: str
     nickname: str
     name: str
+    profile_pic: str | None
 
     class Config:
         orm_mode = True

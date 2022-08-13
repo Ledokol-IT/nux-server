@@ -49,7 +49,7 @@ def test_notifications_sent_then_user_entered_app(
 
 @unittest.mock.patch("nux.firebase.send_messages")
 def test_invite(
-        patched_firebase_send_messages,
+        patched_firebase_send_messages: unittest.mock.Mock,
         client,
         user_auth_header,
         sync_app1
@@ -69,6 +69,7 @@ def test_invite(
     )
     assert response.status_code == 200
     patched_firebase_send_messages.assert_called_once()
+    assert len(patched_firebase_send_messages.call_args[0]) == 1
 
 
 def test_encode_message():
@@ -82,6 +83,7 @@ def test_encode_message():
         id="user_id",
         nickname="user_nickname",
         name="user_name",
+        profile_pic=None,
     )
     message = nux.notifications.encode_message(
         type="test",
