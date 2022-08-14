@@ -148,20 +148,6 @@ def update_status_not_in_app(
     return user.status
 
 
-def clear_offline_users_by_ttl(session: orm.Session) -> None:
-    min_online_time = now() - UserStatus.ONLINE_TTL
-    statuses = (
-        session.query(UserStatus)
-        .where(UserStatus.online)
-        .where(UserStatus.dt_last_update < min_online_time)
-        .all()
-    )
-    for status in statuses:
-        status_leave_app(status)
-        status.dt_last_update = now()
-        status.online = False
-
-
 import nux.models.user
 import nux.models.app
 UserStatusSchemeSecure.update_forward_refs()

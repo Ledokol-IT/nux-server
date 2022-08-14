@@ -8,6 +8,7 @@ import nux.config
 
 def run_app():
     options = nux.config.parse_args()
+    nux.database.create_all(options.postgres_url)
     uvicorn.run(
         create_app(options=options),  # type: ignore
         port=options.port,
@@ -16,11 +17,14 @@ def run_app():
 
 
 def print_shit():
-    from nux.s3 import setup_s3, list_objects
-    p = nux.config.add_s3_options(nux.config.init_arg_parser())
-    options = nux.config.parse_args_from_parser(p)
-    setup_s3(options.aws_access_key_id, options.aws_secret_access_key)
-    print(list_objects('default_icons', 'avatar_profile'))
+    from nux.config import add_data_base_args,\
+        parse_args_from_parser, init_arg_parser
+    from nux.periodic_tasks._clear_statuses import ping_users
+    p = add_data_base_args(init_arg_parser())
+    o = parse_args_from_parser(p)
+    nux.database.create_all(o.postgres_url)
+    nux.database.connect_to_db(o.postgres_url)
+    ping_users()
 
 
 def run_db_tasks():
@@ -30,7 +34,7 @@ def run_db_tasks():
     logging.basicConfig(level=logging.INFO)
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
     options = nux.config.parse_args_from_parser(p)
-    nux.periodic_tasks.clear_statuses(options.postgres_url)
+    nux.periodic_tasks.run_tasks(options.postgres_url)
 
 
 def run_migrations():

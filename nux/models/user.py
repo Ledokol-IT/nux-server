@@ -22,7 +22,6 @@ class User(nux.database.Base):
     id: str = sa.Column(
         sa.String,
         primary_key=True,
-        default=lambda: str(uuid.uuid4())
     )  # type: ignore
 
     @staticmethod

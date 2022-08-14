@@ -9,6 +9,10 @@ import fastapi
 Base = sqlalchemy.orm.declarative_base()
 
 
+def Session() -> sqlalchemy.orm.Session:
+    return _Session()
+
+
 def session_generator() -> t.Generator[sqlalchemy.orm.Session, None, None]:
     with Session() as session:
         yield session
@@ -19,9 +23,9 @@ def SessionDependecy() -> sqlalchemy.orm.Session:
 
 
 def connect_to_db(postgres_url: str):
-    global Session, engine
+    global _Session, engine
     engine = sqlalchemy.create_engine(postgres_url)
-    Session = sqlalchemy.orm.sessionmaker(bind=engine)
+    _Session = sqlalchemy.orm.sessionmaker(bind=engine)
 
 
 def make_alembic_config(postgres_url):
@@ -39,6 +43,7 @@ def create_all(postgres_url: str):
     import nux.models.app as _
     import nux.models.friends as _
     import nux.confirmation as _
+    import nux.periodic_tasks._clear_statuses as _
 
     connect_to_db(postgres_url)
 
@@ -72,6 +77,7 @@ def make_migration(postgres_url: str):
     import nux.models.app as _
     import nux.models.friends as _
     import nux.confirmation as _
+    import nux.periodic_tasks._clear_statuses as _
 
     migration_message = input("Enter message for migration: ")
 

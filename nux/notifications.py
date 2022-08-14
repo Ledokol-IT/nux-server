@@ -74,7 +74,7 @@ def is_user_ready_to_notification(user: nux.models.user.User) -> bool:
     return True
 
 
-def make_message_user_entered_app(
+def _make_message_user_entered_app(
     from_user: 'nux.models.user.User',
     app: 'nux.models.app.App',
     to_user: 'nux.models.user.User',
@@ -107,7 +107,7 @@ def send_notification_user_entered_app(
 
     friends = mfriends.get_friends(session, user)
     none_or_messages = (
-        make_message_user_entered_app(user, app, friend) for friend in friends
+        _make_message_user_entered_app(user, app, friend) for friend in friends
     )
     messages = [m for m in none_or_messages if m is not None]
     nux.firebase.send_messages(messages)
@@ -161,15 +161,11 @@ def send_notification_accept_friends_invite(
     nux.firebase.send_message(message)
 
 
-def make_message_invite_to_app(
+def _make_message_invite_to_app(
     from_user: 'nux.models.user.User',
     to_user: 'nux.models.user.User',
     app: 'nux.models.app.App',
 ):
-    """
-    user -- user joined the app
-    friend -- user to notify
-    """
     if not is_user_ready_to_notification(to_user):
         return None
     data = encode_message(
@@ -195,11 +191,43 @@ def send_invite_to_app_from_friend(
         return
 
     none_or_messages = (
-        make_message_invite_to_app(
+        _make_message_invite_to_app(
             from_user,
             friend,
             app
         ) for friend in to_users
+    )
+    messages = [m for m in none_or_messages if m is not None]
+    nux.firebase.send_messages(messages)
+
+
+def _make_message_ping(
+    to_user: 'nux.models.user.User',
+):
+    if not is_user_ready_to_notification(to_user):
+        return None
+    data = encode_message(
+        type="ping",
+    )
+
+    return firebase_admin.messaging.Message(
+        data=data,
+        token=to_user.firebase_messaging_token,
+    )
+
+
+def send_ping(
+        session: sqlalchemy.orm.Session,
+        to_users: list['nux.models.user.User'],
+):
+    _ = session
+    if nux.firebase.firebase_app is None:
+        return
+
+    none_or_messages = (
+        _make_message_ping(
+            user
+        ) for user in to_users
     )
     messages = [m for m in none_or_messages if m is not None]
     nux.firebase.send_messages(messages)
