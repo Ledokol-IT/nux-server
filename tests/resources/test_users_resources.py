@@ -1,15 +1,15 @@
 from tests.utils import create_user
 
 
-def test_get_me(client, user_auth_header):
-    response = client.get("/get_me", headers=user_auth_header)
+def test_get_current_user(client, user_auth_header):
+    response = client.get("/current_user", headers=user_auth_header)
     assert response.status_code == 200
 
     assert "nickname" in response.json()
 
 
 def test_default_pic(client, user_auth_header):
-    response = client.get("/get_me", headers=user_auth_header)
+    response = client.get("/current_user", headers=user_auth_header)
     assert response.status_code == 200
 
     assert response.json()["profile_pic"] is not None
@@ -17,7 +17,7 @@ def test_default_pic(client, user_auth_header):
 
 def test_get_user_by_id(client):
     user_auth = create_user(client, nickname="mommy")
-    user = client.get("/get_me", headers=user_auth).json()
+    user = client.get("/current_user", headers=user_auth).json()
     response = client.get(f"/user/{user['id']}")
     assert response.status_code == 200
     assert response.json()["nickname"] == "mommy"
@@ -66,7 +66,7 @@ def test_check_user_by_phone_non_existing(client):
 
 
 def test_do_not_disturb_false_by_default(client, user_auth_header):
-    response = client.get("/get_me",
+    response = client.get("/current_user",
                           headers=user_auth_header)
     assert response.json()["do_not_disturb"] is False
 
@@ -80,7 +80,7 @@ def test_do_not_disturb_set_to_true(client, user_auth_header):
         headers=user_auth_header
     )
     assert response.status_code == 200
-    response = client.get("/get_me",
+    response = client.get("/current_user",
                           headers=user_auth_header)
     assert response.json()["do_not_disturb"] is True
 

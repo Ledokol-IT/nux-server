@@ -26,7 +26,7 @@ def test_clear_status_ok(
         clear_statuses()
 
     response = client.get(
-        "/get_me",
+        "/current_user",
         headers=user_auth_header,
     )
     assert response.json()["status"]["online"] is False
@@ -51,7 +51,7 @@ def test_clear_status_momentaly(client, user_auth_header):
     clear_statuses()
 
     response = client.get(
-        "/get_me",
+        "/current_user",
         headers=user_auth_header,
     )
     assert response.json()["status"]["online"] is True

@@ -30,7 +30,7 @@ def test_set_and_get_status(client, user_auth_header):
     assert response.status_code == 200
 
     response = client.get(
-        "/get_me",
+        "/current_user",
         headers=user_auth_header,
     )
     assert response.json()["status"]["app"]["android_package_name"] \

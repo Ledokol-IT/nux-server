@@ -15,9 +15,11 @@ from typing import Union
 user_router = fastapi.APIRouter()
 
 
-@user_router.get("/get_me",
+@user_router.get("/current_user",
                  response_model=nux.models.user.UserScheme)
-def get_me(user=CurrentUserDependecy()):
+@user_router.get("/get_me",  # TODO: remove
+                 response_model=nux.models.user.UserScheme)
+def get_current_user(user=CurrentUserDependecy()):
     """Get authenticated user"""
     return user
 

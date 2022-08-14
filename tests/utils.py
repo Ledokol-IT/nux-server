@@ -42,7 +42,7 @@ def create_user(
 
 
 def get_user(client, headers):
-    return client.get("/get_me", headers=headers).json()
+    return client.get("/current_user", headers=headers).json()
 
 
 def make_friends(client, user1, user2):

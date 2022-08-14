@@ -21,7 +21,7 @@ def set_token(client, user):
 
 @pytest.fixture
 def friend_id(client, friend_with_token_auth):
-    response = client.get("/get_me", headers=friend_with_token_auth)
+    response = client.get("/current_user", headers=friend_with_token_auth)
     return response.json()["id"]
 
 

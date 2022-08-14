@@ -1,5 +1,7 @@
 import faker
 
+from tests.utils import get_user
+
 fake = faker.Faker()
 
 
@@ -49,7 +51,7 @@ def test_get_approved_app_ok(client):
 
 
 def test_get_apps(client, sync_app1, user_auth_header):
-    user = client.get("/get_me", headers=user_auth_header).json()
+    user = get_user(client, user_auth_header)
     response = client.get(f"/user/{user['id']}/apps")
     assert response.status_code == 200
     assert response.json()["apps"][0]["android_package_name"] \
