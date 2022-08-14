@@ -113,29 +113,31 @@ class User(nux.database.Base):
         self.hashed_password = pwd_context.hash(password)
 
 
-class UserSchemeBase(pydantic.BaseModel):
-    nickname: str
-    name: str
-
-
-class UserSchemeCreate(UserSchemeBase):
-    password: str | None = None
-    phone: nux.pydantic_types.Phone | None = None
+class UserSchemeEdit(pydantic.BaseModel):
+    nickname: str | None = None
+    name: str | None = None
     default_profile_pic_id: str | None = None
 
     @pydantic.validator("default_profile_pic_id")
     def check_default_profile_pic_id(cls, v):
         if v is None:
             return None
-        if v == "random":
-            return None
         if v not in nux.default_profile_pics.profile_pics_ids:
             raise ValueError("This profile pic id does not exist")
         return v
 
 
-class UserSchemeSecure(UserSchemeBase):
+class UserSchemeCreate(UserSchemeEdit):
+    nickname: str
+    name: str
+    password: str | None = None
+    phone: nux.pydantic_types.Phone | None = None
+
+
+class UserSchemeSecure(pydantic.BaseModel):
     id: str
+    nickname: str
+    name: str
     status: t.Optional['mstatus.UserStatusSchemeSecure']
     profile_pic: str
     do_not_disturb: bool
@@ -177,6 +179,25 @@ def create_user(user_data: UserSchemeCreate):
     return user
 
 
+def edit_user(
+        session: orm.Session,
+        user: User,
+        user_data: UserSchemeEdit
+):
+    _ = session
+    if user_data.nickname is not None:
+        user.nickname = user_data.nickname
+    if user_data.name is not None:
+        user.name = user_data.name
+
+    if user_data.default_profile_pic_id is not None:
+        user._default_profile_pic_id = user_data.default_profile_pic_id
+        user.profile_pic = nux.default_profile_pics.get_url_by_id(
+            user._default_profile_pic_id
+        )
+    return user
+
+
 def get_user(
     session: orm.Session,
     id: str | None = None,
@@ -202,7 +223,7 @@ def get_user(
 import nux.models.app as mapp
 import nux.models.status as mstatus
 import nux.models.friends as mfriends
-UserSchemeBase.update_forward_refs()
+UserSchemeEdit.update_forward_refs()
 UserSchemeCreate.update_forward_refs()
 UserSchemeSecure.update_forward_refs()
 UserScheme.update_forward_refs()

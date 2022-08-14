@@ -2,15 +2,14 @@ from __future__ import annotations
 import datetime
 import logging
 
-import ischedule
 import sqlalchemy as sa
 from sqlalchemy import orm
 
 import nux.config
 import nux.database
 import nux.models.status
-import nux.models.user as muser
 import nux.models.status as mstatus
+import nux.models.user as muser
 import nux.notifications
 from nux.utils import now
 
@@ -41,6 +40,7 @@ class OfflineUser(nux.database.Base):
         interval = min(max_interval, initial_interval * 2 ** self.pinged_cnt)
         return self.dt_next_ping + interval
 
+
 def reset_offline_user(session: orm.Session, user_id: str):
     o = session.query(OfflineUser).get(user_id)
     if o is None:
@@ -49,6 +49,7 @@ def reset_offline_user(session: orm.Session, user_id: str):
     o.dt_next_ping = now()
     o.pinged_cnt = 0
     session.add(o)
+
 
 def clear_statuses():
     logger.debug("run clear_statuses")
@@ -83,6 +84,10 @@ def ping_users():
         ).all()
         users = []
         for user, offline in users_and_offline:
+            if user.status.online:
+                session.delete(offline)
+                continue
+
             offline.dt_next_ping = offline.get_dt_next_ping()
             offline.pinged_cnt += 1
 

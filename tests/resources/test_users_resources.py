@@ -83,3 +83,19 @@ def test_do_not_disturb_set_to_true(client, user_auth_header):
     response = client.get("/get_me",
                           headers=user_auth_header)
     assert response.json()["do_not_disturb"] is True
+
+
+def test_change_user(client, user_auth_header):
+    response = client.put(
+        "/current_user/edit",
+        headers=user_auth_header,
+        json={
+            "user": {
+                "nickname": "changed_nickname",
+            }
+        }
+    )
+    assert response.status_code == 200
+
+    assert "nickname" in response.json()
+    assert response.json()["nickname"] == "changed_nickname"

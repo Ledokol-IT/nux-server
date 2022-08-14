@@ -139,3 +139,18 @@ def set_profile_pic(
     current_user.profile_pic = url
     session.commit()
     return current_user
+
+
+@user_router.put("/current_user/edit",
+                 response_model=nux.models.user.UserScheme)
+def edit_user(
+    user_data: nux.models.user.UserSchemeEdit = fastapi.Body(
+        embed=True,
+        alias="user",
+    ),
+    session: sqlalchemy.orm.Session = SessionDependecy(),
+    current_user: 'nux.models.user.User' = CurrentUserDependecy(),
+):
+    nux.models.user.edit_user(session, current_user, user_data)
+    session.commit()
+    return current_user
