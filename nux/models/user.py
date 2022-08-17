@@ -68,7 +68,7 @@ class User(nux.database.Base):
     status: mstatus.UserStatus | None = orm.relationship(
         lambda: mstatus.UserStatus,
         uselist=False,
-        cascade="all,delete",
+        cascade="all,delete,delete-orphan",
         back_populates="_user",
     )
     apps_stats: list[mapp.UserInAppStatistic] = orm.relationship(
