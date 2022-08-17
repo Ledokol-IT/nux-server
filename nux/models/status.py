@@ -24,6 +24,7 @@ class UserStatus(nux.database.Base):
     user_id: str = sa.Column(
         sa.String,
         sa.ForeignKey("users.id"),
+        nullable=False,
     )  # type: ignore
     _user: 'nux.models.user.User' = orm.relationship(
         lambda: nux.models.user.User,

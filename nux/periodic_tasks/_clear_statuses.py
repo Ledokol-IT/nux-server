@@ -63,9 +63,6 @@ def clear_statuses():
         )
 
         for status in statuses:
-            if status.user_id is None:
-                session.delete(status)
-                continue
             mstatus.status_leave_app(status)
             status.dt_last_update = now()
             status.online = False

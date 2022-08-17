@@ -155,4 +155,5 @@ def edit_user(
 ):
     nux.models.user.edit_user(session, current_user, user_data)
     session.commit()
+    session.refresh(current_user)
     return current_user
