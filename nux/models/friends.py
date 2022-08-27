@@ -152,6 +152,8 @@ def add_user_as_friend(
         from_user: muser.User,
         to_user: muser.User,
 ):
+    if from_user == to_user:
+        raise AttributeError(f"{to_user=!r} == {from_user=!r}")
     if find_friendship(session, from_user, to_user):
         return
     elif find_invite(session, from_user, to_user):
@@ -208,6 +210,8 @@ def get_friends(
             query
             .join(muser.User.status)
             .order_by(mstatus.UserStatus.dt_last_update)
+            .order_by(mstatus.UserStatus.online)
+            .order_by(mstatus.UserStatus.in_app)
         )
 
     friends = query.all()

@@ -35,7 +35,7 @@ class OfflineUser(nux.database.Base):
     )  # type: ignore
 
     def get_dt_next_ping(self):
-        initial_interval = datetime.timedelta(minutes=5)
+        initial_interval = datetime.timedelta(seconds=20)
         max_interval = datetime.timedelta(hours=7)
         interval = min(max_interval, initial_interval * 2 ** self.pinged_cnt)
         return self.dt_next_ping + interval

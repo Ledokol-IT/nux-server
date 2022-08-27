@@ -40,6 +40,12 @@ def add_friend(
             status_code=HTTPStatus.NOT_FOUND,
             detail="bad user_id",
         )
+    if to_user == current_user:
+        raise fastapi.HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="can't send request to yourself",
+        )
+
 
     mfriends.add_user_as_friend(session, events, current_user, to_user)
     session.commit()

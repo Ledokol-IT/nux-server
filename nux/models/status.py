@@ -108,8 +108,6 @@ def update_status_in_app(
             and user.status.app == app
     ):
         user.status.dt_last_update = now()
-    elif not app.approved:
-        update_status_not_in_app(session, user)
     else:
         if not (
                 user.status is not None

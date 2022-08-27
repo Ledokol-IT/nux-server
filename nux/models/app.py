@@ -1,6 +1,6 @@
 import enum
 import uuid
-from typing import Iterable
+import typing as t
 
 import pydantic
 import sqlalchemy as sa
@@ -31,9 +31,7 @@ class UserInAppStatistic(nux.database.Base):
     app: 'App' = orm.relationship(lambda: App)
 
 
-class CATEGORY(enum.Enum):
-    GAME = "GAME"
-    OTHER = "OTHER"
+CATEGORY = t.Literal["GAME", "GAME,online", "OTHER"]
 
 
 class App(nux.database.Base):
@@ -59,9 +57,8 @@ class App(nux.database.Base):
         nullable=True,
     )  # type: ignore
     category: CATEGORY = sa.Column(
-        pg_types.ENUM(CATEGORY),
+        sa.String,
         nullable=False,
-        default=CATEGORY.OTHER,
     )  # type: ignore
     icon_preview: str | None = sa.Column(
         sa.String,
@@ -122,14 +119,14 @@ def create_app_android(app_data: AppSchemeCreateAndroid):
     app.name = app_data.name
     app.approved = False
 
-    match_category = {
-        None: CATEGORY.OTHER,
-        0: CATEGORY.GAME,
+    match_category: dict[t.Any, CATEGORY] = {
+        None: "OTHER",
+        0: "GAME",
     }
     if app_data.android_category in match_category:
         app.category = match_category[app_data.android_category]
     else:
-        app.category = CATEGORY.OTHER
+        app.category = "OTHER"
     return app
 
 
@@ -181,24 +178,32 @@ def delete_app_from_user(
 def get_user_apps(
         session: orm.Session,
         user: 'nux.models.user.User',
-        approved: bool = True,
+        *,
+        only_approved: bool = False,
+        only_games: bool = False,
+        only_online: bool = False,
 ) -> list[App]:
     q = (
         session.query(App)
         .join(UserInAppStatistic)
         .where(UserInAppStatistic.user_id == user.id)
     )
-    if approved:
+    if only_approved:
         q = q.where(App.approved)
+    if only_games:
+        q = q.where(App.category.contains('GAME'))  # type: ignore
+    if only_online:
+        q = q.where(App.category.contains('online'))  # type: ignore
+
     return q.all()
 
 
 def set_apps_to_user(
         session: orm.Session,
         user: 'nux.models.user.User',
-        apps: Iterable[App],
+        apps: t.Iterable[App],
 ):
-    user_apps = set(get_user_apps(session, user, approved=False))
+    user_apps = set(get_user_apps(session, user))
     apps = set(apps)
     to_add = apps.difference(user_apps)
     to_delete = user_apps.difference(apps)
