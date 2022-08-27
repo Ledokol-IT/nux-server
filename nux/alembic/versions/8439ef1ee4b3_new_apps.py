@@ -5,11 +5,18 @@ Revises: 4707aa768df3
 Create Date: 2022-08-27 18:45:56.347627
 
 """
+import uuid
+import typing as t
+
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import orm
+from sqlalchemy.dialects import postgresql
+from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.sql
 from sqlalchemy.sql import column
-from sqlalchemy.dialects import postgresql
+
+Base = declarative_base()
 
 # revision identifiers, used by Alembic.
 revision = '8439ef1ee4b3'
@@ -17,18 +24,62 @@ down_revision = '4707aa768df3'
 branch_labels = None
 depends_on = None
 
+CATEGORY = t.Literal["GAME", "GAME,online", "OTHER"]
+
+
+class App(Base):
+    __tablename__ = "apps"
+
+    id: str = sa.Column(
+        sa.String,
+        primary_key=True,
+        default=lambda: str(uuid.uuid4())
+    )  # type: ignore
+
+    android_package_name: str | None = sa.Column(
+        sa.String,
+        unique=True,
+        nullable=True,  # maybe we will support other os
+    )  # type: ignore
+    name: str = sa.Column(
+        sa.String,
+        nullable=True,
+    )  # type: ignore
+    category: CATEGORY = sa.Column(
+        sa.String,
+        nullable=False,
+    )  # type: ignore
+    icon_preview: str | None = sa.Column(
+        sa.String,
+        nullable=True,
+    )  # type: ignore
+    image_wide: str | None = sa.Column(
+        sa.String,
+        nullable=True,
+    )  # type: ignore
+    icon_large: str | None = sa.Column(
+        sa.String,
+        nullable=True,
+    )  # type: ignore
+
+    approved: bool = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        server_default="FALSE",
+    )  # type: ignore
+
 
 def generate_approved_game(id, android_package_name, name):
-    return {
-        "id": str(id),
-        "android_package_name": android_package_name,
-        "name": name,
-        "category": "GAME,online",
-        "approved": True,
-    }
+    app = App()
+    app.id = str(id)
+    app.android_package_name = android_package_name
+    app.name = name
+    app.category = "GAME,online"
+    app.approved = True
+    return app
 
 
-first_approved_apps = [
+new_approved_apps = [
     {
         "name": "CarX Drift Racing 2",
         "android_package_name": "com.carxtech.carxdr2",
@@ -92,26 +143,33 @@ def upgrade() -> None:
         type_=sa.String(),
         existing_nullable=False,
     )
-    return
-    apps_table = sqlalchemy.sql.table(
-        'apps',
-        column("id", sa.String),
-        column("android_package_name", sa.String),
-        column("name", sa.String),
-        column("category", sa.String),
-        column("icon_preview", sa.String),
-        column("image_wide", sa.String),
-        column("icon_large", sa.String),
-        column("approved", sa.Boolean),
-    )
-    op.bulk_insert(
-        apps_table,
-        [generate_approved_game(i, a["android_package_name"], a["name"])
-            for i, a in enumerate(first_approved_apps, 1)]
-    )
+    bind = op.get_bind()
+    session = orm.Session(bind=bind)
+
+    approved_apps = session.query(App).where(App.approved).all()
+    for app in approved_apps:
+        app.category = "GAME,online"
+    initial_id = 13
+    for id, app_data in enumerate(new_approved_apps, initial_id):
+        app = generate_approved_game(id, **app_data)
+        if old_app := session.query(App).where(App.android_package_name == app.android_package_name).first():
+            session.delete(old_app)
+        session.add(app)
+    
+    session.commit()
 
 
 def downgrade() -> None:
+    bind = op.get_bind()
+    session = orm.Session(bind=bind)
+    # create the teams table and the players.team_id column
+    App.__table__.create(bind)
+
+    approved_apps = session.query(App).where(App.category == "GAME,online").all()
+    for app in approved_apps:
+        app.category = "GAME"
+
+    session.commit()
     op.alter_column(
         'apps', 'category',
         existing_type=sa.String(),
