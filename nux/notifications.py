@@ -9,9 +9,6 @@ import sqlalchemy.orm
 import nux.database
 import nux.events
 import nux.firebase
-import nux.models.app
-import nux.models.friends as mfriends
-import nux.models.user
 
 logger = logging.getLogger(__name__)
 
@@ -233,3 +230,8 @@ def send_ping(
     )
     messages = [m for m in none_or_messages if m is not None]
     nux.firebase.send_messages(messages)
+
+
+import nux.models.app
+import nux.models.friends as mfriends
+import nux.models.user

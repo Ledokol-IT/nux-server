@@ -1,3 +1,4 @@
+import logging
 import os
 import configargparse
 import argparse
@@ -42,6 +43,7 @@ def init_arg_parser():
     p = configargparse.ArgParser(
         ignore_unknown_config_file_keys=True,
     )
+    p.add_argument("--logging-level", env_var="NUX_LOGGING_LEVEL", default="WARNING")
     return p
 
 
@@ -50,6 +52,12 @@ def parse_args_from_parser(
     args=None
 ) -> argparse.Namespace:
     options = p.parse_known_args(args)[0]
+    logging.basicConfig(level=options.logging_level)
+    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict if 'nux' in name]
+    for logger in loggers:
+        logger.setLevel(options.logging_level)
+    print(options.logging_level)
+
     try:
         options.postgres_url = get_pg_url(options)
     except KeyError:

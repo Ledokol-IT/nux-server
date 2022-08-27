@@ -1,8 +1,7 @@
+from __future__ import annotations
+
 import fastapi
 import sqlalchemy.orm
-
-import nux.models.user as muser
-import nux.models.app as mapp
 
 import nux.notifications
 
@@ -50,3 +49,6 @@ __all__ = (
     "NuxEvents",
     "EventsDependecy",
 )
+
+import nux.models.user as muser
+import nux.models.app as mapp

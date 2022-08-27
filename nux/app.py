@@ -23,7 +23,8 @@ def create_app(options):
     app = fastapi.FastAPI(
         title="NUX (Ledokol)"
     )
-    logging.basicConfig(level=logging.WARNING)
+    print(options.logging_level)
+    logging.basicConfig(level=options.logging_level)
     nux.database.connect_to_db(options.postgres_url)
     nux.firebase.setup_firebase(options)
     if not options.aws_disable:

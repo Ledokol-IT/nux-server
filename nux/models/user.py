@@ -113,6 +113,9 @@ class User(nux.database.Base):
     def set_password(self, password: str):
         self.hashed_password = pwd_context.hash(password)
 
+    def __repr__(self):
+        return f"User<id={self.id}, nickname={self.nickname}>"
+
 
 class UserSchemeEdit(pydantic.BaseModel):
     nickname: str | None = None

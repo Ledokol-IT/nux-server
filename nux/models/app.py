@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 import uuid
 import typing as t
@@ -8,7 +10,6 @@ import sqlalchemy.dialects.postgresql as pg_types
 import sqlalchemy.orm as orm
 
 import nux.database
-import nux.models.user
 
 
 class UserInAppStatistic(nux.database.Base):
@@ -229,3 +230,6 @@ def get_app(
         app = query.filter(App.android_package_name
                            == android_package_name).first()
     return app
+
+
+import nux.models.user

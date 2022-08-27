@@ -37,7 +37,10 @@ class OfflineUser(nux.database.Base):
     def get_dt_next_ping(self):
         initial_interval = datetime.timedelta(seconds=20)
         max_interval = datetime.timedelta(hours=7)
-        interval = min(max_interval, initial_interval * 2 ** self.pinged_cnt)
+        if self.pinged_cnt > 10:
+            interval = max_interval
+        else:
+            interval = min(max_interval, initial_interval * 2 ** self.pinged_cnt)
         return self.dt_next_ping + interval
 
 
@@ -70,6 +73,7 @@ def clear_statuses():
             status.dt_last_update = now()
             status.online = False
 
+            logger.debug(f"turn offline {status._user!r}")
             reset_offline_user(session, status.user_id)
 
         session.commit()
@@ -91,6 +95,7 @@ def ping_users():
                 session.delete(offline)
                 continue
 
+            logger.debug(f"ping {user!r}")
             offline.dt_next_ping = offline.get_dt_next_ping()
             offline.pinged_cnt += 1
 

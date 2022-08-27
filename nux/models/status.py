@@ -1,3 +1,4 @@
+from __future__ import annotations
 import datetime
 import typing as t
 import uuid
@@ -7,7 +8,6 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
-import nux.events
 from nux.utils import now
 
 
@@ -26,8 +26,8 @@ class UserStatus(nux.database.Base):
         sa.ForeignKey("users.id"),
         nullable=False,
     )  # type: ignore
-    _user: 'nux.models.user.User' = orm.relationship(
-        lambda: nux.models.user.User,
+    _user: 'muser.User' = orm.relationship(
+        lambda: muser.User,
         back_populates="status",
     )
 
@@ -36,8 +36,8 @@ class UserStatus(nux.database.Base):
         sa.ForeignKey("apps.id"),
         nullable=True,
     )  # type: ignore
-    app: nux.models.app.App | None = orm.relationship(
-        lambda: nux.models.app.App)
+    app: mapp.App | None = orm.relationship(
+        lambda: mapp.App)
 
     dt_last_update: datetime.datetime = sa.Column(
         sa.DateTime,
@@ -69,7 +69,7 @@ class UserStatus(nux.database.Base):
 
 class UserStatusSchemeSecure(pydantic.BaseModel):
     id: str
-    app: t.Optional['nux.models.app.AppScheme']
+    app: t.Optional[mapp.AppScheme]
     dt_last_update: datetime.datetime
     dt_entered_app: datetime.datetime | None
     dt_leaved_app: datetime.datetime | None
@@ -98,8 +98,8 @@ def create_empty_status():
 
 def update_status_in_app(
     session: orm.Session,
-    user: 'nux.models.user.User',
-    app: 'nux.models.app.App',
+    user: 'muser.User',
+    app: 'mapp.App',
     events: 'nux.events.NuxEvents',
 ):
     if (
@@ -135,7 +135,7 @@ def status_leave_app(status: UserStatus):
 
 def update_status_not_in_app(
     session: orm.Session,
-    user: 'nux.models.user.User'
+    user: 'muser.User'
 ):
     if user.status is None:
         user.status = create_empty_status()
@@ -147,7 +147,9 @@ def update_status_not_in_app(
     return user.status
 
 
-import nux.models.user
-import nux.models.app
+import nux.models.app as mapp
 UserStatusSchemeSecure.update_forward_refs()
 UserStatusScheme.update_forward_refs()
+
+import nux.models.user as muser
+import nux.events
