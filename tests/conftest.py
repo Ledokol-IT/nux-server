@@ -6,7 +6,7 @@ import pytest
 import sqlalchemy.exc
 import sqlalchemy_utils
 
-from nux import create_app
+from nux.app import create_app
 import nux.config
 import nux.database
 from tests.utils import app1_android_payload, create_user_token, create_user
