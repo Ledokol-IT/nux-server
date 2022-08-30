@@ -3,13 +3,21 @@ import typing as t
 import uuid
 
 import passlib.context
-import pydantic
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
 import nux.default_profile_pics
+import nux.models.app as mapp
+import nux.models.friends as mfriends
+import nux.models.status as mstatus
 import nux.pydantic_types
+from nux.schemes import (
+    UserScheme,
+    UserSchemeCreate,
+    UserSchemeEdit,
+    UserSchemeSecure,
+)
 
 
 pwd_context = passlib.context.CryptContext(
@@ -62,8 +70,6 @@ class User(nux.database.Base):
         sa.String,
         nullable=True,
     )  # type: ignore
-    DEFAULT_PROFILE_PIC = \
-        "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"
 
     status: mstatus.UserStatus | None = orm.relationship(
         lambda: mstatus.UserStatus,
@@ -115,51 +121,6 @@ class User(nux.database.Base):
 
     def __repr__(self):
         return f"User<id={self.id}, nickname={self.nickname}>"
-
-
-class UserSchemeEdit(pydantic.BaseModel):
-    nickname: str | None = None
-    name: str | None = None
-    default_profile_pic_id: str | None = None
-
-    @pydantic.validator("default_profile_pic_id")
-    def check_default_profile_pic_id(cls, v):
-        if v is None:
-            return None
-        if v not in nux.default_profile_pics.profile_pics_ids:
-            raise ValueError("This profile pic id does not exist")
-        return v
-
-
-class UserSchemeCreate(UserSchemeEdit):
-    nickname: str
-    name: str
-    password: str | None = None
-    phone: nux.pydantic_types.Phone | None = None
-
-
-class UserSchemeSecure(pydantic.BaseModel):
-    id: str
-    nickname: str
-    name: str
-    status: t.Optional['mstatus.UserStatusSchemeSecure']
-    profile_pic: str
-    do_not_disturb: bool
-
-    @pydantic.validator('profile_pic', pre=True)
-    def set_default_profile_pic(cls, v):
-        return v or User.DEFAULT_PROFILE_PIC
-
-    class Config:
-        orm_mode = True
-
-
-class UserScheme(UserSchemeSecure):
-    phone: str | None
-    status: t.Optional['mstatus.UserStatusScheme']
-
-    class Config:
-        orm_mode = True
 
 
 def create_user(user_data: UserSchemeCreate):
@@ -222,12 +183,3 @@ def get_user(
         user = query.filter(User.nickname == nickname).first()
 
     return user
-
-
-import nux.models.app as mapp
-import nux.models.status as mstatus
-import nux.models.friends as mfriends
-UserSchemeEdit.update_forward_refs()
-UserSchemeCreate.update_forward_refs()
-UserSchemeSecure.update_forward_refs()
-UserScheme.update_forward_refs()

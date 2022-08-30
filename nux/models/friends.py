@@ -1,16 +1,17 @@
 from __future__ import annotations
-
-import typing as t
 import datetime
-import pydantic
+import typing as t
 
 import sqlalchemy as sa
 from sqlalchemy import orm
 
 import nux.database
-import nux.models.status as mstatus
 import nux.events
+import nux.models.status as mstatus
+import nux.models.user as muser
 from nux.utils import now
+
+from nux.schemes import PendingFriendsInviteScheme, OutgoingFriendsInviteScheme
 
 
 class FriendsInvite(nux.database.Base):
@@ -44,22 +45,6 @@ class FriendsInvite(nux.database.Base):
         sa.DateTime,
         nullable=False,
     )  # type: ignore
-
-
-class PendingFriendsInviteScheme(pydantic.BaseModel):
-    dt_sent: datetime.datetime
-    from_user: muser.UserSchemeSecure
-
-    class Config:
-        orm_mode = True
-
-
-class OutgoingFriendsInviteScheme(pydantic.BaseModel):
-    dt_sent: datetime.datetime
-    to_user: muser.UserSchemeSecure
-
-    class Config:
-        orm_mode = True
 
 
 class Friendship(nux.database.Base):
@@ -217,8 +202,3 @@ def get_friends(
     friends = query.all()
 
     return friends
-
-
-import nux.models.user as muser
-PendingFriendsInviteScheme.update_forward_refs()
-OutgoingFriendsInviteScheme.update_forward_refs()

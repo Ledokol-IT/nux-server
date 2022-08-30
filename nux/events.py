@@ -1,9 +1,10 @@
-from __future__ import annotations
-
 import fastapi
 import sqlalchemy.orm
 
 import nux.notifications
+
+import nux.models.user as muser
+import nux.models.app as mapp
 
 
 class NuxEvents:
@@ -23,8 +24,8 @@ class NuxEvents:
     def friends_invite(
         self,
         session: sqlalchemy.orm.Session,
-        from_user: muser.User,
-        to_user: muser.User,
+        from_user: 'muser.User',
+        to_user: 'muser.User',
     ):
         self.background_tasks.add_task(
             nux.notifications.send_notification_friends_inivite,
@@ -33,15 +34,15 @@ class NuxEvents:
     def accept_friends_invite(
         self,
         session: sqlalchemy.orm.Session,
-        from_user: muser.User,
-        to_user: muser.User,
+        from_user: 'muser.User',
+        to_user: 'muser.User',
     ):
         self.background_tasks.add_task(
             nux.notifications.send_notification_accept_friends_invite,
             session, from_user, to_user)
 
 
-def EventsDependecy() -> NuxEvents:
+def EventsDependecy():
     return fastapi.Depends(NuxEvents)
 
 
@@ -49,6 +50,3 @@ __all__ = (
     "NuxEvents",
     "EventsDependecy",
 )
-
-import nux.models.user as muser
-import nux.models.app as mapp

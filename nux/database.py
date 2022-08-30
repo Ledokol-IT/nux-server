@@ -1,9 +1,9 @@
 import typing as t
 
-import sqlalchemy
-import sqlalchemy.orm
-import sqlalchemy.ext.declarative
 import fastapi
+import sqlalchemy
+import sqlalchemy.ext.declarative
+import sqlalchemy.orm
 
 
 Base = sqlalchemy.orm.declarative_base()

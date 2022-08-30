@@ -1,15 +1,13 @@
 from __future__ import annotations
-
-import enum
-import uuid
 import typing as t
+import uuid
 
-import pydantic
 import sqlalchemy as sa
-import sqlalchemy.dialects.postgresql as pg_types
 import sqlalchemy.orm as orm
 
 import nux.database
+import nux.models.user as muser
+from nux.schemes import AppSchemeCreateAndroid, AppScheme
 
 
 class UserInAppStatistic(nux.database.Base):
@@ -19,8 +17,8 @@ class UserInAppStatistic(nux.database.Base):
         sa.ForeignKey("users.id"),
         primary_key=True,
     )  # type: ignore
-    user: 'nux.models.user.User' = orm.relationship(
-        lambda: nux.models.user.User,
+    user: 'muser.User' = orm.relationship(
+        lambda: muser.User,
         back_populates="apps_stats"
     )
 
@@ -32,15 +30,8 @@ class UserInAppStatistic(nux.database.Base):
     app: 'App' = orm.relationship(lambda: App)
 
 
-CATEGORY = t.Literal["GAME", "GAME,online", "OTHER"]
-
-
 class App(nux.database.Base):
     __tablename__ = "apps"
-
-    DEFAULT_ICON_PREVIEW = "https://storage.yandexcloud.net/nux/icons/common/preview_icon.png"  # noqa
-    DEFAULT_ICON_LARGE = "https://storage.yandexcloud.net/nux/icons/common/large_icon.png"  # noqa
-    DEFAULT_ICON_WIDE = "https://storage.yandexcloud.net/nux/icons/common/wide_icon.png"  # noqa
 
     id: str = sa.Column(
         sa.String,
@@ -57,7 +48,7 @@ class App(nux.database.Base):
         sa.String,
         nullable=True,
     )  # type: ignore
-    category: CATEGORY = sa.Column(
+    category: str = sa.Column(
         sa.String,
         nullable=False,
     )  # type: ignore
@@ -81,46 +72,13 @@ class App(nux.database.Base):
     )  # type: ignore
 
 
-class AppSchemeBase(pydantic.BaseModel):
-    android_package_name: str | None
-    name: str
-
-
-class AppSchemeCreateAndroid(AppSchemeBase):
-    android_package_name: str
-    android_category: int | None
-
-
-class AppScheme(AppSchemeBase):
-    category: CATEGORY
-    id: str
-    icon_preview: str | None
-    image_wide: str | None
-    icon_large: str | None
-
-    @pydantic.validator("icon_preview", pre=True, check_fields=False)
-    def set_default_app_icon_preview(cls, value):
-        return value or App.DEFAULT_ICON_PREVIEW
-
-    @pydantic.validator("icon_large", pre=True, check_fields=False)
-    def set_default_app_icon_large(cls, value):
-        return value or App.DEFAULT_ICON_LARGE
-
-    @pydantic.validator("icon_wide", pre=True, check_fields=False)
-    def set_default_app_icon_wide(cls, value):
-        return value or App.DEFAULT_ICON_WIDE
-
-    class Config:
-        orm_mode = True
-
-
 def create_app_android(app_data: AppSchemeCreateAndroid):
     app = App()
     app.android_package_name = app_data.android_package_name
     app.name = app_data.name
     app.approved = False
 
-    match_category: dict[t.Any, CATEGORY] = {
+    match_category: dict[t.Any, str] = {
         None: "OTHER",
         0: "GAME",
     }
@@ -153,7 +111,7 @@ def determine_app_android(
 
 def add_app_to_user(
         session: orm.Session,
-        user: 'nux.models.user.User',
+        user: 'muser.User',
         app: App,
 ):
     app_stats = UserInAppStatistic()
@@ -164,7 +122,7 @@ def add_app_to_user(
 
 def delete_app_from_user(
         session: orm.Session,
-        user: 'nux.models.user.User',
+        user: 'muser.User',
         app: App,
 ):
     app_stats = session.query(UserInAppStatistic).get({
@@ -178,7 +136,7 @@ def delete_app_from_user(
 
 def get_user_apps(
         session: orm.Session,
-        user: 'nux.models.user.User',
+        user: 'muser.User',
         *,
         only_approved: bool = False,
         only_games: bool = False,
@@ -201,7 +159,7 @@ def get_user_apps(
 
 def set_apps_to_user(
         session: orm.Session,
-        user: 'nux.models.user.User',
+        user: 'muser.User',
         apps: t.Iterable[App],
 ):
     user_apps = set(get_user_apps(session, user))
@@ -230,6 +188,3 @@ def get_app(
         app = query.filter(App.android_package_name
                            == android_package_name).first()
     return app
-
-
-import nux.models.user

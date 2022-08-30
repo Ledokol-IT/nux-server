@@ -3,12 +3,15 @@ import datetime
 import typing as t
 import uuid
 
-import pydantic
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
+import nux.events
+import nux.models.app as mapp
+import nux.models.user as muser
 from nux.utils import now
+from nux.schemes import UserStatusSchemeSecure, UserStatusScheme
 
 
 class UserStatus(nux.database.Base):
@@ -65,23 +68,6 @@ class UserStatus(nux.database.Base):
 
     ONLINE_TTL = datetime.timedelta(seconds=30)
     SECOND_TIME_TTL = datetime.timedelta(minutes=5)
-
-
-class UserStatusSchemeSecure(pydantic.BaseModel):
-    id: str
-    app: t.Optional[mapp.AppScheme]
-    dt_last_update: datetime.datetime
-    dt_entered_app: datetime.datetime | None
-    dt_leaved_app: datetime.datetime | None
-    in_app: bool
-    online: bool
-
-    class Config:
-        orm_mode = True
-
-
-class UserStatusScheme(UserStatusSchemeSecure):
-    pass
 
 
 def create_empty_status():
@@ -145,11 +131,3 @@ def update_status_not_in_app(
     user.status.online = True
     status_leave_app(user.status)
     return user.status
-
-
-import nux.models.app as mapp
-UserStatusSchemeSecure.update_forward_refs()
-UserStatusScheme.update_forward_refs()
-
-import nux.models.user as muser
-import nux.events

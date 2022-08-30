@@ -154,7 +154,7 @@ def get_current_user(
     return user
 
 
-def CurrentUserDependecy() -> User:
+def CurrentUserDependecy():
     """Actualy it's fake type and it
     returns fastapi.Depends(get_current_user)
     """
