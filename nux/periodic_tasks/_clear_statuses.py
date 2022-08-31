@@ -56,7 +56,6 @@ def reset_offline_user(session: orm.Session, user_id: str):
 
 
 def clear_statuses():
-    logger.debug("run clear_statuses")
     with nux.database.Session() as session:
         min_online_time = now() - mstatus.UserStatus.ONLINE_TTL
         statuses = (
@@ -78,12 +77,9 @@ def clear_statuses():
             reset_offline_user(session, status.user_id)
 
         session.commit()
-    logger.debug("finish clear_statuses")
 
 
 def ping_users():
-    logger.debug("run ping_users")
-
     with nux.database.Session() as session:
         users_and_offline = (
             session.query(muser.User, OfflineUser)
@@ -105,5 +101,3 @@ def ping_users():
         session.commit()
 
         nux.notifications.send_ping(session, users)
-
-    logger.debug("finish ping_users")
