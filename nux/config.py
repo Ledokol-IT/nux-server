@@ -68,7 +68,6 @@ def parse_args_from_parser(
         name) for name in logging.root.manager.loggerDict if 'nux' in name]
     for logger in loggers:
         logger.setLevel(options.logging_level)
-    print(options.logging_level)
 
     try:
         options.postgres_url = get_pg_url(options)

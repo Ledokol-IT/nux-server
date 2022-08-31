@@ -208,7 +208,7 @@ def _make_message_ping(
     data = encode_message(
         type="ping",
     )
-    logger.critical(f"data ping {data}")
+    logger.debug(f"data ping {data}")
 
     return firebase_admin.messaging.Message(
         data=data,
@@ -220,7 +220,6 @@ def send_ping(
         session: sqlalchemy.orm.Session,
         to_users: list['nux.models.user.User'],
 ):
-    logger.debug(f"Ping {to_users}")
     _ = session
     if nux.firebase.firebase_app is None:
         return
@@ -232,6 +231,7 @@ def send_ping(
         ) for user in to_users
     )
     messages = [m for m in none_or_messages if m is not None]
+    logger.debug(messages)
     nux.firebase.send_messages(messages)
 
 
