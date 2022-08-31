@@ -1,3 +1,6 @@
+from nux.config import add_firebase_options
+
+
 def run_app():
     import uvicorn
 
@@ -34,6 +37,7 @@ def run_db_tasks():
 
     logging.basicConfig(level=logging.INFO)
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
+    add_firebase_options(p)
     options = nux.config.parse_args_from_parser(p)
     nux.periodic_tasks.run_tasks(options.postgres_url, options)
 

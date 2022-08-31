@@ -30,6 +30,16 @@ def add_sms_options(p: configargparse.ArgParser):
     return p
 
 
+def add_firebase_options(p: configargparse.ArgParser):
+    p.add_argument("--google-creds-file",
+                   env_var="GOOGLE_CREDS_FILE",
+                   default="google_creds.json")
+    p.add_argument("--google-creds",
+                   env_var="GOOGLE_CREDS",)
+    p.add_argument("--firebase-dry-run", action="store_true")
+    return p
+
+
 def get_pg_url(options: configargparse.Namespace):
     postgres_url = (
         "postgresql://"
@@ -43,7 +53,8 @@ def init_arg_parser():
     p = configargparse.ArgParser(
         ignore_unknown_config_file_keys=True,
     )
-    p.add_argument("--logging-level", env_var="NUX_LOGGING_LEVEL", default="WARNING")
+    p.add_argument("--logging-level",
+                   env_var="NUX_LOGGING_LEVEL", default="WARNING")
     return p
 
 
@@ -53,7 +64,8 @@ def parse_args_from_parser(
 ) -> argparse.Namespace:
     options = p.parse_known_args(args)[0]
     logging.basicConfig(level=options.logging_level)
-    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict if 'nux' in name]
+    loggers = [logging.getLogger(
+        name) for name in logging.root.manager.loggerDict if 'nux' in name]
     for logger in loggers:
         logger.setLevel(options.logging_level)
     print(options.logging_level)
@@ -71,14 +83,9 @@ def parse_args(args=None):
     add_data_base_args(p)
     add_s3_options(p)
     add_sms_options(p)
+    add_firebase_options(p)
     p.add_argument("--secret-key", env_var="NUX_SECRET_KEY", required=True)
     p.add_argument("--port", default=8000, env_var="NUX_PORT", type=int)
-    p.add_argument("--google-creds-file",
-                   env_var="GOOGLE_CREDS_FILE",
-                   default="google_creds.json")
-    p.add_argument("--google-creds",
-                   env_var="GOOGLE_CREDS",)
-    p.add_argument("--firebase-dry-run", action="store_true")
 
     options = parse_args_from_parser(p, args)
     options.postgres_url = get_pg_url(options)
