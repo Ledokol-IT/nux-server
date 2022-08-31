@@ -3,14 +3,16 @@ import logging
 import ischedule
 
 import nux.database
+import nux.firebase
 from nux.periodic_tasks._clear_statuses import clear_statuses, ping_users
 
 logger = logging.getLogger(__name__)
 
 
-def run_tasks(postgres_url):
+def run_tasks(postgres_url, options):
     logger.info("Connecting to db...")
     nux.database.connect_to_db(postgres_url)
+    nux.firebase.setup_firebase(options)
 
     logger.info("Start tasks.\n"
                 "Ctrl+C to stop.")

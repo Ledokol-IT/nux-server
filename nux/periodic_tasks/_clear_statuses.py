@@ -100,4 +100,5 @@ def ping_users():
 
         session.commit()
 
-        nux.notifications.send_ping(session, users)
+        if users:
+            nux.notifications.send_ping(session, users)

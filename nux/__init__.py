@@ -35,7 +35,7 @@ def run_db_tasks():
     logging.basicConfig(level=logging.INFO)
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
     options = nux.config.parse_args_from_parser(p)
-    nux.periodic_tasks.run_tasks(options.postgres_url)
+    nux.periodic_tasks.run_tasks(options.postgres_url, options)
 
 
 def run_migrations():
@@ -86,7 +86,7 @@ def delete_user():
 
 def alembic():
     import alembic.config
-    
+
     import nux.config
     import nux.database
 
