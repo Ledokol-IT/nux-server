@@ -63,6 +63,7 @@ def remove_friend(
             detail="bad friend_id",
         )
     mfriends.remove_friendship(session, current_user, friend)
+    session.commit()
 
 
 @router.delete("/reject_invite")
@@ -78,6 +79,7 @@ def reject_invite(
             detail="bad from_user_id",
         )
     mfriends.remove_invite(session, from_user, current_user)
+    session.commit()
 
 
 @router.delete("/remove_invite")
@@ -93,6 +95,7 @@ def remove_invite(
             detail="bad to_user_id",
         )
     mfriends.remove_invite(session, current_user, to_user)
+    session.commit()
 
 
 @router.get("/pending_invites",

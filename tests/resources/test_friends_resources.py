@@ -2,6 +2,8 @@ import unittest.mock
 
 from tests.utils import create_user, get_user, set_token
 
+from tests.utils import make_friends
+
 
 @unittest.mock.patch("nux.firebase.send_message")
 def test_make_friends(
@@ -71,3 +73,95 @@ def test_make_friends(
     res = client.get("/friends", headers=user2)
     assert len(res.json()) == 1
     assert res.json()[0]["id"] == user1_id
+
+
+def test_remove_friends(client):
+    user1 = create_user(client)
+    user2 = create_user(client)
+    make_friends(client, user1, user2)
+    user2_id = get_user(client, user2)["id"]
+
+    response = client.delete(
+        "/friends/remove_friend",
+        json={
+            "friend_id": user2_id
+        },
+        headers=user1,
+    )
+    assert response.status_code == 200
+
+    res = client.get("/friends/pending_invites", headers=user2)
+    assert res.status_code == 200
+    assert len(res.json()) == 0
+
+    res = client.get("/friends/outgoing_invites", headers=user1)
+    assert res.status_code == 200
+    assert len(res.json()) == 0
+
+    res = client.get("/friends", headers=user2)
+    assert len(res.json()) == 0
+
+
+def test_reject_invite(client):
+    user1 = create_user(client)
+    user2 = create_user(client)
+    user1_id = get_user(client, user1)["id"]
+    user2_id = get_user(client, user2)["id"]
+
+    res = client.put(
+        "/friends/add",
+        json={"user_id": user2_id},
+        headers=user1,
+    )
+
+    res = client.delete(
+        "/friends/reject_invite",
+        json={
+            "from_user_id": user1_id
+        },
+        headers=user2,
+    )
+    assert res.status_code == 200
+
+    res = client.get("/friends/pending_invites", headers=user2)
+    assert res.status_code == 200
+    assert len(res.json()) == 0
+
+    res = client.get("/friends/outgoing_invites", headers=user1)
+    assert res.status_code == 200
+    assert len(res.json()) == 0
+
+    res = client.get("/friends", headers=user2)
+    assert len(res.json()) == 0
+
+
+def test_remove_invite(client):
+    user1 = create_user(client)
+    user2 = create_user(client)
+    user2_id = get_user(client, user2)["id"]
+
+    res = client.put(
+        "/friends/add",
+        json={"user_id": user2_id},
+        headers=user1,
+    )
+
+    res = client.delete(
+        "/friends/remove_invite",
+        json={
+            "to_user_id": user2_id
+        },
+        headers=user1,
+    )
+    assert res.status_code == 200
+
+    res = client.get("/friends/pending_invites", headers=user2)
+    assert res.status_code == 200
+    assert len(res.json()) == 0
+
+    res = client.get("/friends/outgoing_invites", headers=user1)
+    assert res.status_code == 200
+    assert len(res.json()) == 0
+
+    res = client.get("/friends", headers=user2)
+    assert len(res.json()) == 0
