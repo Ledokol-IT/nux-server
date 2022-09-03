@@ -46,9 +46,53 @@ def add_friend(
             detail="can't send request to yourself",
         )
 
-
     mfriends.add_user_as_friend(session, events, current_user, to_user)
     session.commit()
+
+
+@router.delete("/remove_friend")
+def remove_friend(
+        friend_id: str = fastapi.Body(embed=True),
+        current_user=CurrentUserDependecy(),
+        session=SessionDependecy(),
+):
+    friend = muser.get_user(session, id=friend_id)
+    if friend is None:
+        raise fastapi.HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="bad friend_id",
+        )
+    mfriends.remove_friendship(session, current_user, friend)
+
+
+@router.delete("/reject_invite")
+def reject_invite(
+        from_user_id: str = fastapi.Body(embed=True),
+        current_user=CurrentUserDependecy(),
+        session=SessionDependecy(),
+):
+    from_user = muser.get_user(session, id=from_user_id)
+    if from_user is None:
+        raise fastapi.HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="bad from_user_id",
+        )
+    mfriends.remove_invite(session, from_user, current_user)
+
+
+@router.delete("/remove_invite")
+def remove_invite(
+        to_user_id: str = fastapi.Body(embed=True),
+        current_user=CurrentUserDependecy(),
+        session=SessionDependecy(),
+):
+    to_user = muser.get_user(session, id=to_user_id)
+    if to_user is None:
+        raise fastapi.HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="bad to_user_id",
+        )
+    mfriends.remove_invite(session, current_user, to_user)
 
 
 @router.get("/pending_invites",

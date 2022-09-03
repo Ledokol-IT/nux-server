@@ -154,6 +154,34 @@ def add_user_as_friend(
             events.friends_invite(session, from_user, to_user)
 
 
+def remove_invite(
+        session: orm.Session,
+        from_user: muser.User,
+        to_user: muser.User,
+) -> bool:
+    """Return True if invite found and deleted. False otherwise"""
+    invite = find_invite(session, from_user, to_user)
+    if invite:
+        session.delete(invite)
+        return True
+    else:
+        return False
+
+
+def remove_friendship(
+        session: orm.Session,
+        current_user: muser.User,
+        friend: muser.User,
+) -> bool:
+    """Return True if friendship found and deleted. False otherwise"""
+    friendship = find_friendship(session, current_user, friend)
+    if friendship:
+        session.delete(friendship)
+        return True
+    else:
+        return False
+
+
 def get_pending_friends_invites(
         session: orm.Session,
         to_user: muser.User,
