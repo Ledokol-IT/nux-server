@@ -22,7 +22,7 @@ def test_clear_status_ok(
         )
         assert response.status_code == 200
 
-    with freezegun.freeze_time("2012-01-14 12:01"):
+    with freezegun.freeze_time("2012-01-14 12:03"):
         clear_statuses()
 
     response = client.get(
@@ -32,7 +32,7 @@ def test_clear_status_ok(
     assert response.json()["status"]["online"] is False
 
     patched_firebase_send_messages.reset_mock()
-    with freezegun.freeze_time("2012-01-14 12:02"):
+    with freezegun.freeze_time("2012-01-14 12:05"):
         ping_users()
     patched_firebase_send_messages.assert_called_once()
     assert len(patched_firebase_send_messages.call_args[0]) == 1

@@ -1,4 +1,5 @@
 import unittest.mock
+import time
 
 from tests.utils import create_user, get_user, set_token
 
@@ -10,6 +11,7 @@ def test_make_friends(
         patched_firebase_send_messages,
         client
 ):
+    start_time = time.time()
     pref = "make_friends__"
     user1_nickname = pref + "user1"
     user1 = create_user(client, nickname=user1_nickname)
@@ -73,6 +75,8 @@ def test_make_friends(
     res = client.get("/friends", headers=user2)
     assert len(res.json()) == 1
     assert res.json()[0]["id"] == user1_id
+    end_time = time.time()
+    print(end_time - start_time)
 
 
 def test_remove_friends(client):
