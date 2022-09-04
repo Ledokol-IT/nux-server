@@ -66,7 +66,7 @@ class UserStatus(nux.database.Base):
         default=False,
     )  # type: ignore
 
-    ONLINE_TTL = datetime.timedelta(seconds=30)
+    ONLINE_TTL = datetime.timedelta(minutes=5)
     SECOND_TIME_TTL = datetime.timedelta(minutes=5)
 
 

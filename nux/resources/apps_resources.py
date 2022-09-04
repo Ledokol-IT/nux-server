@@ -26,16 +26,20 @@ def sync_installed_apps(
     apps: list[nux.models.app.AppSchemeCreateAndroid] = fastapi.Body(
         embed=True),
 ):
-    determined_apps: list[nux.models.app.App] = [
-        nux.models.app.determine_app_android(session, app_data)[1]
-        for app_data in apps
-    ]
+    send_icons = []
+    determined_apps: list[nux.models.app.App] = []
+    for app_data in apps:
+        is_new, app = nux.models.app.determine_app_android(session, app_data)
+        determined_apps.append(app)
+        if is_new:
+            send_icons.append(app.id)
     nux.models.app.set_apps_to_user(session, current_user, determined_apps)
 
     session.commit()
 
     return {
-        "apps": nux.models.app.get_user_apps(session, current_user)
+        "apps": nux.models.app.get_user_apps(session, current_user),
+        "send_icons_apps_ids": send_icons,
     }
 
 
