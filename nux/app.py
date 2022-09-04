@@ -20,13 +20,19 @@ import nux.s3
 import nux.sms
 
 
+def format_client(p):
+    return f"{p[0]}:{p[1]}"
+
+
 async def log_requests(request: fastapi.Request, call_next):
     start_time = time.time()
     try:
         response = await call_next(request)
     except Exception as e:
         logger.exception(e)
-        logger.error(f"{request.url} {500}")
+        process_time = (time.time() - start_time)
+        logger.error(
+            f"{request.url} {500} {format_client(request.client)} {process_time:.5f}sec")
         raise e
 
     level = "INFO"
@@ -38,7 +44,7 @@ async def log_requests(request: fastapi.Request, call_next):
     process_time = (time.time() - start_time)
 
     logger.log(
-        level, f"{process_time:.5f}sec {request.url} {response.status_code}")
+        level, f"{request.url} {response.status_code} {format_client(request.client)} {process_time:.5f}sec")
 
     return response
 

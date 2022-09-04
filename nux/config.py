@@ -5,6 +5,8 @@ import argparse
 from loguru import logger
 import sys
 
+import loguru
+
 SECRET_KEY: str
 
 
@@ -65,7 +67,11 @@ def parse_args_from_parser(
     args=None
 ) -> argparse.Namespace:
     options = p.parse_known_args(args)[0]
-
+    logger.remove()
+    logger.add(sys.stdout, format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+               "<level>{level: <8}</level> | "
+               "{message}",
+               )
     loggers = [logging.getLogger(
         name) for name in logging.root.manager.loggerDict if 'nux' in name]
     for _logger in loggers:

@@ -15,6 +15,7 @@ def run_app():
         create_app(options=options),  # type: ignore
         port=options.port,
         host="0.0.0.0",
+        access_log=False,
     )
 
 
