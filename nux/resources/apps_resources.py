@@ -16,6 +16,7 @@ apps_router = fastapi.APIRouter()
 
 class SyncInstalledAppsResponse(pydantic.BaseModel):
     apps: list[nux.models.app.AppScheme]
+    send_icons_apps_ids: list[int]
 
 
 @apps_router.put("/sync_installed_apps/android",
