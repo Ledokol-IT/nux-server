@@ -18,12 +18,37 @@ import nux.s3
 import nux.sms
 
 
+logger = logging.getLogger(__name__)
+
+
+async def log_requests(request: fastapi.Request, call_next):
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        logger.exception(e)
+        logger.error(f"{request.url} {500}")
+        raise e
+
+    logger.info(
+        '%(levelprefix)s %(client_addr)s - "%(request_line)s" %(status_code)s'
+    )
+    level = logging.INFO
+    if 400 <= response.status_code:
+        level = logging.WARNING
+    if 500 <= response.status_code:
+        level = logging.ERROR
+    logger.log(level, f"{request.url} {response.status_code}")
+
+    return response
+
+
 def create_app(options):
     """Create and setup fastapi app ready to run."""
     app = fastapi.FastAPI(
-        title="NUX (Ledokol)"
+        title="NUX (Ledokol)",
     )
-    logging.basicConfig(level=options.logging_level)
+    app.middleware("http")(log_requests)
+
     nux.database.connect_to_db(options.postgres_url)
     nux.firebase.setup_firebase(options)
     if not options.aws_disable:

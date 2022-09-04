@@ -6,7 +6,6 @@ Module should not use other models (if possible)
 """
 
 import datetime
-import enum
 import logging
 import random
 from typing import Literal
@@ -62,13 +61,13 @@ class PhoneConfirmation(nux.database.Base):
     @property
     def dt_can_retry_after(self):
         if self.retries == 1:
-            return self.dt_sent + datetime.timedelta(seconds=30)
+            return self.dt_sent + datetime.timedelta(seconds=5)
         elif self.retries == 2:
-            return self.dt_sent + datetime.timedelta(minutes=1)
+            return self.dt_sent + datetime.timedelta(seconds=30)
         elif self.retries == 3:
-            return self.dt_sent + datetime.timedelta(minutes=10)
+            return self.dt_sent + datetime.timedelta(seconds=30)
         else:
-            return self.dt_sent + datetime.timedelta(minutes=30)
+            return self.dt_sent + datetime.timedelta(minutes=5)
 
     def is_reseted(self):
         return now() - self.dt_sent > datetime.timedelta(minutes=30)

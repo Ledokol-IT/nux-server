@@ -10,10 +10,11 @@ def run_app():
 
     options = nux.config.parse_args()
     nux.database.create_all(options.postgres_url)
+
     uvicorn.run(
         create_app(options=options),  # type: ignore
         port=options.port,
-        host="0.0.0.0"
+        host="0.0.0.0",
     )
 
 
