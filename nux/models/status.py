@@ -99,7 +99,7 @@ def update_status_in_app(
                 user.status is not None
                 and user.status.app == app
                 and user.status.dt_leaved_app
-                and now() - user.status.dt_leaved_app < user.SECOND_TIME_TTL
+                and now() - user.status.dt_leaved_app < UserStatus.SECOND_TIME_TTL
         ):
             events.user_entered_app(session, user, app)
 
