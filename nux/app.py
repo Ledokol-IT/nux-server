@@ -17,8 +17,7 @@ import nux.resources.friends_resources
 import nux.s3
 import nux.sms
 
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 async def log_requests(request: fastapi.Request, call_next):
@@ -29,10 +28,7 @@ async def log_requests(request: fastapi.Request, call_next):
         logger.error(f"{request.url} {500}")
         raise e
 
-    logger.info(
-        '%(levelprefix)s %(client_addr)s - "%(request_line)s" %(status_code)s'
-    )
-    level = logging.INFO
+    level = "INFO"
     if 400 <= response.status_code:
         level = logging.WARNING
     if 500 <= response.status_code:
@@ -63,6 +59,10 @@ def create_app(options):
     @app.get("/")
     def index():
         return {"hello": "world"}
+
+    @app.get("/error")
+    def error():
+        raise ValueError
 
     app.include_router(auth_router)
     app.include_router(user_router)

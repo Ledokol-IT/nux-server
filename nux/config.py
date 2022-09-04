@@ -2,6 +2,8 @@ import logging
 import os
 import configargparse
 import argparse
+from loguru import logger
+import sys
 
 SECRET_KEY: str
 
@@ -63,11 +65,11 @@ def parse_args_from_parser(
     args=None
 ) -> argparse.Namespace:
     options = p.parse_known_args(args)[0]
-    logging.basicConfig(level=options.logging_level)
+
     loggers = [logging.getLogger(
         name) for name in logging.root.manager.loggerDict if 'nux' in name]
-    for logger in loggers:
-        logger.setLevel(options.logging_level)
+    for _logger in loggers:
+        _logger.setLevel(options.logging_level)
 
     try:
         options.postgres_url = get_pg_url(options)
