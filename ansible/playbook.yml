@@ -46,7 +46,7 @@
                 GOOGLE_CREDS: "{{GOOGLE_CREDS}}"
               logging:
                 options:
-                  max-size: "10m"
+                  max-size: "1m"
                   max-file: "3"
         pull: yes
       register: output
