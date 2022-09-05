@@ -83,7 +83,7 @@ def test_encode_message():
         id="user_id",
         nickname="user_nickname",
         name="user_name",
-        profile_pic=None,
+        profile_pic="123",
     )
     message = nux.notifications.encode_message(
         type="test",
@@ -98,6 +98,7 @@ def test_encode_message():
         "user.id": "user_id",
         "user.nickname": "user_nickname",
         "user.name": "user_name",
+        "user.profile_pic": "123",
         "type": "test",
     }
     assert "id" in message

@@ -9,28 +9,9 @@ import sqlalchemy.orm
 import nux.database
 import nux.events
 import nux.firebase
+from nux.schemes import AppN, UserN
 
 logger = logging.getLogger(__name__)
-
-
-class AppN(pydantic.BaseModel):
-    id: str
-    name: str
-    android_package_name: str
-    icon_preview: str
-
-    class Config:
-        orm_mode = True
-
-
-class UserN(pydantic.BaseModel):
-    id: str
-    nickname: str
-    name: str
-    profile_pic: str | None
-
-    class Config:
-        orm_mode = True
 
 
 _Value = str | pydantic.BaseModel | dict[str, '_Value'] | None

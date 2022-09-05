@@ -29,18 +29,25 @@ class UserSchemeCreate(UserSchemeEdit):
     phone: nux.pydantic_types.Phone | None = None
 
 
-class UserSchemeSecure(pydantic.BaseModel):
+class UserN(pydantic.BaseModel):
     _DEFAULT_PROFILE_PIC = "https://storage.yandexcloud.net/nux/icons/common/profile_pic_base.png"  # noqa
     id: str
     nickname: str
     name: str
-    status: t.Optional[UserStatusSchemeSecure]
     profile_pic: str
-    do_not_disturb: bool
 
     @pydantic.validator('profile_pic', pre=True)
     def set_default_profile_pic(cls, v):
         return v or cls._DEFAULT_PROFILE_PIC
+
+    class Config:
+        orm_mode = True
+
+
+class UserSchemeSecure(UserN):
+    status: t.Optional[UserStatusSchemeSecure]
+    profile_pic: str
+    do_not_disturb: bool
 
     class Config:
         orm_mode = True
@@ -81,28 +88,23 @@ class AppSchemeCreateAndroid(AppSchemeBase):
     android_category: int | None
 
 
-class AppScheme(AppSchemeBase):
+class AppN(pydantic.BaseModel):
     _DEFAULT_ICON_PREVIEW = "https://storage.yandexcloud.net/nux/icons/common/preview_icon.png"  # noqa
-    _DEFAULT_ICON_LARGE = "https://storage.yandexcloud.net/nux/icons/common/large_icon.png"  # noqa
-    _DEFAULT_ICON_WIDE = "https://storage.yandexcloud.net/nux/icons/common/wide_icon.png"  # noqa
-
-    category: CATEGORY
     id: str
-    icon_preview: str | None
-    image_wide: str | None
-    icon_large: str | None
+    name: str
+    android_package_name: str
+    icon_preview: str
 
     @pydantic.validator("icon_preview", pre=True, check_fields=False)
     def set_default_app_icon_preview(cls, value):
         return value or cls._DEFAULT_ICON_PREVIEW
 
-    @pydantic.validator("icon_large", pre=True, check_fields=False)
-    def set_default_app_icon_large(cls, value):
-        return value or cls._DEFAULT_ICON_LARGE
+    class Config:
+        orm_mode = True
 
-    @pydantic.validator("icon_wide", pre=True, check_fields=False)
-    def set_default_app_icon_wide(cls, value):
-        return value or cls._DEFAULT_ICON_WIDE
+
+class AppScheme(AppN):
+    category: CATEGORY
 
     class Config:
         orm_mode = True
