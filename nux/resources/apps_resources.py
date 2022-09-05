@@ -16,7 +16,7 @@ apps_router = fastapi.APIRouter()
 
 class SyncInstalledAppsResponse(pydantic.BaseModel):
     apps: list[nux.models.app.AppScheme]
-    send_icons_apps_ids: list[int]
+    send_icons_apps_ids: list[str]
 
 
 @apps_router.put("/sync_installed_apps/android",
@@ -56,19 +56,16 @@ def get_app_by_id(
 
 
 class SetIconsRequestBody(pydantic.BaseModel):
-    icon_large: pydantic.FileUrl | None = None
     icon_preview: pydantic.FileUrl | None = None
-    image_wide: pydantic.FileUrl | None = None
 
 
 @apps_router.put("/app/package/{package_name}/set_images",
                  response_model=nux.models.app.AppScheme)
-def set_images(
+@apps_router.put("/app/package/{package_name}/set_icon",
+                 response_model=nux.models.app.AppScheme)
+async def set_images(
     package_name,
-    icon_large: fastapi.UploadFile | None = fastapi.File(default=None),
-    icon_preview: fastapi.UploadFile | None = fastapi.File(default=None),
-    image_wide: fastapi.UploadFile | None = fastapi.File(default=None),
-    current_user: nux.models.user.User = CurrentUserDependecy(),
+    icon: fastapi.UploadFile = fastapi.File(),
     session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
     app = nux.models.app.get_app(session, android_package_name=package_name)
@@ -77,21 +74,15 @@ def set_images(
             400,
             detail="bad app"
         )
-    if icon_large is not None:
-        app.icon_large = nux.s3.upload_fastapi_file(
-            icon_large,
-            "icons", "icon_large", package_name
+    if app.icon_preview:
+        raise fastapi.HTTPException(
+            400,
+            detail="already set"
         )
-    if icon_preview is not None:
-        app.icon_preview = nux.s3.upload_fastapi_file(
-            icon_preview,
-            "icons", "icon_preview", package_name
-        )
-    if image_wide is not None:
-        app.image_wide = nux.s3.upload_fastapi_file(
-            image_wide,
-            "icons", "image_wide", package_name
-        )
+    app.icon_preview = nux.s3.upload_fastapi_file(
+        icon,
+        "icons", "icon_preview", package_name
+    )
     session.commit()
     session.merge(app)
     return app

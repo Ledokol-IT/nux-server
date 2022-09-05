@@ -39,6 +39,10 @@ class App(nux.database.Base):
         default=lambda: str(uuid.uuid4())
     )  # type: ignore
 
+    @staticmethod
+    def _generate_id():
+        return str(uuid.uuid4())
+
     android_package_name: str | None = sa.Column(
         sa.String,
         unique=True,
@@ -74,6 +78,7 @@ class App(nux.database.Base):
 
 def create_app_android(app_data: AppSchemeCreateAndroid):
     app = App()
+    app.id = App._generate_id()
     app.android_package_name = app_data.android_package_name
     app.name = app_data.name
     app.approved = False

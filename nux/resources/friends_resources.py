@@ -16,7 +16,7 @@ import nux.s3
 router = fastapi.APIRouter(prefix="/friends")
 
 
-@router.get("/",
+@router.get("",
             response_model=list[muser.UserSchemeSecure])
 def get_friends(
         current_user=CurrentUserDependecy(),
