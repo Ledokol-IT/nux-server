@@ -9,7 +9,6 @@ def run_app():
     from nux.app import create_app
 
     options = nux.config.parse_args()
-    nux.database.create_all(options.postgres_url)
 
     uvicorn.run(
         create_app(options=options),  # type: ignore
@@ -40,6 +39,16 @@ def run_db_tasks():
     add_firebase_options(p)
     options = nux.config.parse_args_from_parser(p)
     nux.periodic_tasks.run_tasks(options.postgres_url, options)
+
+
+def create_debug_session():
+    import nux.config
+    import nux.database
+
+    p = nux.config.add_data_base_args(nux.config.init_arg_parser())
+    options = nux.config.parse_args_from_parser(p)
+    nux.database.connect_to_db(postgres_url=options.postgres_url)
+    return nux.database.Session()
 
 
 def run_migrations():
