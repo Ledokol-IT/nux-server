@@ -81,7 +81,7 @@ def send_notification_user_entered_app(
 ):
     logger.debug(f"{user.nickname} entered the {app.android_package_name}")
     if 'online' not in app.category:
-        pass
+        return
     if nux.firebase.firebase_app is None:
         return
 
