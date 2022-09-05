@@ -32,7 +32,8 @@ async def log_requests(request: fastapi.Request, call_next):
         logger.exception(e)
         process_time = (time.time() - start_time)
         logger.error(
-            f"{request.url} {500} {format_client(request.client)} {process_time:.5f}sec")
+            f"{request.url} {500} "
+            f"{format_client(request.client)} {process_time:.5f}sec")
         raise e
 
     level = "INFO"
@@ -44,7 +45,10 @@ async def log_requests(request: fastapi.Request, call_next):
     process_time = (time.time() - start_time)
 
     logger.log(
-        level, f"{request.url} {response.status_code} {format_client(request.client)} {process_time:.5f}sec")
+        level,
+        f"{request.url} {response.status_code} "
+        f"{format_client(request.client)} {process_time:.5f}sec",
+    )
 
     return response
 

@@ -40,8 +40,10 @@ class OfflineUser(nux.database.Base):
         if self.pinged_cnt > 10:
             interval = max_interval
         else:
-            interval = min(max_interval, initial_interval *
-                           2 ** self.pinged_cnt)
+            interval = min(
+                max_interval,
+                initial_interval * 2 ** self.pinged_cnt
+            )
         return self.dt_next_ping + interval
 
 

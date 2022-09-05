@@ -152,10 +152,13 @@ def upgrade() -> None:
     initial_id = 13
     for id, app_data in enumerate(new_approved_apps, initial_id):
         app = generate_approved_game(id, **app_data)
-        if old_app := session.query(App).where(App.android_package_name == app.android_package_name).first():
+        old_app = session.query(
+            App
+        ).where(App.android_package_name == app.android_package_name).first()
+        if old_app:
             session.delete(old_app)
         session.add(app)
-    
+
     session.commit()
 
 
@@ -165,7 +168,8 @@ def downgrade() -> None:
     # create the teams table and the players.team_id column
     App.__table__.create(bind)
 
-    approved_apps = session.query(App).where(App.category == "GAME,online").all()
+    approved_apps = session.query(App).where(
+        App.category == "GAME,online").all()
     for app in approved_apps:
         app.category = "GAME"
 
