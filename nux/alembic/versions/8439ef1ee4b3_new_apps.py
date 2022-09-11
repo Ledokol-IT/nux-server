@@ -69,17 +69,55 @@ class App(Base):
     )  # type: ignore
 
 
+class UserStatus(Base):
+    __tablename__ = "user_statuses_v2"
+
+    id: str = sa.Column(
+        sa.String,
+        primary_key=True,
+        index=True,
+        default=lambda: str(uuid.uuid4())
+    )  # type: ignore
+    app_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("apps.id"),
+        nullable=True,
+    )  # type: ignore
+    app: App | None = orm.relationship(
+        lambda: App)
+
+
+class UserInAppStatistic(Base):
+    __tablename__ = "user_in_app_statistics"
+
+    app_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("apps.id"),
+        primary_key=True,
+    )  # type: ignore
+    app: 'App' = orm.relationship(lambda: App)
+
+
 def generate_approved_game(session, id, android_package_name, name):
-    app = session.query(
+    old_app = session.query(
         App
     ).where(App.android_package_name == android_package_name).first()
-    if not app:
-        app = App()
+    app = App()
     app.id = str(id)
     app.android_package_name = android_package_name
     app.name = name
     app.category = "GAME,online"
     app.approved = True
+    if old_app:
+        stats = session.query(UserInAppStatistic).where(
+            UserInAppStatistic.app_id == old_app.id).all()
+        for stat in stats:
+            stat.app = app
+        statuses = session.query(UserStatus).where(
+            UserStatus.app_id == old_app.id).all()
+        for status in statuses:
+            status.app = app
+        session.delete(old_app)
     session.add(app)
     return app
 
