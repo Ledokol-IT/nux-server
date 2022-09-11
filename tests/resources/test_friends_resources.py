@@ -169,3 +169,14 @@ def test_remove_invite(client):
 
     res = client.get("/friends", headers=user2)
     assert len(res.json()) == 0
+
+
+def test_recommended_friends(client):
+    user1 = create_user(client)
+    user2 = create_user(client)
+    user2_id = get_user(client, user2)["id"]
+
+    res = client.get("/friends/recommended", headers=user1)
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    assert res.json()[0]["id"] == user2_id

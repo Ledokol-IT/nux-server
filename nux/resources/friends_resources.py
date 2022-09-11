@@ -11,6 +11,7 @@ import nux.models.friends as mfriends
 import nux.models.user as muser
 import nux.notifications
 import nux.s3
+from nux.schemes import UserSchemeSecure
 
 
 router = fastapi.APIRouter(prefix="/friends")
@@ -163,3 +164,11 @@ def invite_friends_to_game(
         friends,
         app,
     )
+
+
+@router.get("/recommended", response_model=list[UserSchemeSecure])
+def get_recommended_friends(
+        session=SessionDependecy(),
+        current_user: 'muser.User' = CurrentUserDependecy(),
+):
+    return mfriends.get_recommended_friends(session, current_user)

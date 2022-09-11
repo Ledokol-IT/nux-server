@@ -232,3 +232,12 @@ def get_friends(
     friends = query.all()
 
     return friends
+
+
+def get_recommended_friends(
+    session: orm.Session,
+    user: muser.User,
+) -> list[muser.User]:
+    q = session.query(muser.User)
+    q = q.where(muser.User.id != user.id)
+    return q.all()
