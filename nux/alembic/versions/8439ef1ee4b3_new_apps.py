@@ -123,7 +123,6 @@ def generate_approved_game(session, id, android_package_name, name):
         for status in statuses:
             status.app_id = app.id
     session.add(app)
-    return app
 
 
 new_approved_apps = [
@@ -185,7 +184,7 @@ new_approved_apps = [
 def upgrade() -> None:
     op.execute('ALTER TABLE apps ALTER COLUMN category TYPE text')
     bind = op.get_bind()
-    session = orm.Session(bind=bind)
+    session = orm.Session(bind=bind, autoflush=False)
     print("123")
 
     approved_apps = session.query(App).where(App.approved).all()
