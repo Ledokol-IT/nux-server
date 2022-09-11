@@ -98,30 +98,35 @@ class UserInAppStatistic(Base):
     app: 'App' = orm.relationship(lambda: App)
 
 
+def prepare(session, id, android_package_name, name):
+    old_app = session.query(
+        App
+    ).where(App.android_package_name == android_package_name).first()
+    id = str(id)
+    if old_app:
+        stats = session.query(UserInAppStatistic).where(
+            UserInAppStatistic.app_id == old_app.id).all()
+        for stat in stats:
+            stat.app_id = id
+        statuses = session.query(UserStatus).where(
+            UserStatus.app_id == old_app.id).all()
+        for status in statuses:
+            status.app_id = id
+
+
 def generate_approved_game(session, id, android_package_name, name):
     old_app = session.query(
         App
     ).where(App.android_package_name == android_package_name).first()
     if old_app:
-        old_app_id = old_app.id
         app = old_app
     else:
-        old_app_id = None
         app = App()
     app.id = str(id)
     app.android_package_name = android_package_name
     app.name = name
     app.category = "GAME,online"
     app.approved = True
-    if old_app_id:
-        stats = session.query(UserInAppStatistic).where(
-            UserInAppStatistic.app_id == old_app_id).all()
-        for stat in stats:
-            stat.app_id = app.id
-        statuses = session.query(UserStatus).where(
-            UserStatus.app_id == old_app_id).all()
-        for status in statuses:
-            status.app_id = app.id
     session.add(app)
 
 
@@ -191,6 +196,10 @@ def upgrade() -> None:
     for app in approved_apps:
         app.category = "GAME,online"
     initial_id = 13
+    for id, app_data in enumerate(new_approved_apps, initial_id):
+        prepare(session, id, **app_data)
+    session.flush()
+
     for id, app_data in enumerate(new_approved_apps, initial_id):
         generate_approved_game(session, id, **app_data)
 
