@@ -143,8 +143,10 @@ def upgrade() -> None:
         type_=sa.String(),
         existing_nullable=False,
     )
+    op.execute('ALTER TABLE apps ALTER COLUMN category TYPE text')
     bind = op.get_bind()
     session = orm.Session(bind=bind)
+    print("123")
 
     approved_apps = session.query(App).where(App.approved).all()
     for app in approved_apps:
@@ -166,7 +168,7 @@ def downgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
     # create the teams table and the players.team_id column
-    App.__table__.create(bind)
+    # App.__table__.create(bind)
 
     approved_apps = session.query(App).where(
         App.category == "GAME,online").all()
@@ -174,9 +176,5 @@ def downgrade() -> None:
         app.category = "GAME"
 
     session.commit()
-    op.alter_column(
-        'apps', 'category',
-        existing_type=sa.String(),
-        type_=postgresql.ENUM('GAME', 'OTHER', name='category'),
-        existing_nullable=False,
-    )
+    op.execute('ALTER TABLE apps ALTER COLUMN category TYPE category'
+               ' USING category::category')

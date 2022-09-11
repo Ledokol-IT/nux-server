@@ -22,13 +22,16 @@ def print_shit():
     import nux.database
     from nux.config import add_data_base_args,\
         parse_args_from_parser, init_arg_parser
-    from nux.periodic_tasks._clear_statuses import ping_users
+    from nux.models.app import App
 
     p = add_data_base_args(init_arg_parser())
     o = parse_args_from_parser(p)
     nux.database.create_all(o.postgres_url)
     nux.database.connect_to_db(o.postgres_url)
-    ping_users()
+    s = nux.database.Session()
+    apps = s.query(App).where(App.approved).all()
+    for app in apps:
+        print(app.name, app.category)
 
 
 def run_db_tasks():
