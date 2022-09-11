@@ -98,6 +98,16 @@ class UserInAppStatistic(Base):
     app: 'App' = orm.relationship(lambda: App)
 
 
+def pre_generate_approved_game(session, id, android_package_name, name):
+    app = App()
+    app.id = str(id)
+    app.android_package_name = str(id)
+    app.name = name
+    app.category = "GAME,online"
+    app.approved = True
+    session.add(app)
+
+
 def prepare(session, id, android_package_name, name):
     old_app = session.query(
         App
@@ -119,15 +129,11 @@ def generate_approved_game(session, id, android_package_name, name):
         App
     ).where(App.android_package_name == android_package_name).first()
     if old_app:
-        app = old_app
-    else:
-        app = App()
-    app.id = str(id)
+        session.delete(old_app)
+    app = session.query(
+        App
+    ).get(str(id))
     app.android_package_name = android_package_name
-    app.name = name
-    app.category = "GAME,online"
-    app.approved = True
-    session.add(app)
 
 
 new_approved_apps = [
@@ -197,11 +203,14 @@ def upgrade() -> None:
         app.category = "GAME,online"
     initial_id = 13
     for id, app_data in enumerate(new_approved_apps, initial_id):
+        pre_generate_approved_game(session, id, **app_data)
+    session.flush()
+    for id, app_data in enumerate(new_approved_apps, initial_id):
         prepare(session, id, **app_data)
     session.flush()
-
     for id, app_data in enumerate(new_approved_apps, initial_id):
         generate_approved_game(session, id, **app_data)
+    session.flush()
 
     session.commit()
 
