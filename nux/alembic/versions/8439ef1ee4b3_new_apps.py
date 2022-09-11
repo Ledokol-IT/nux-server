@@ -87,6 +87,15 @@ class UserStatus(Base):
         lambda: App)
 
 
+class User(Base):
+    __tablename__ = "users"
+
+    id: str = sa.Column(
+        sa.String,
+        primary_key=True,
+    )  # type: ignore
+
+
 class UserInAppStatistic(Base):
     __tablename__ = "user_in_app_statistics"
     user_id: str = sa.Column(
