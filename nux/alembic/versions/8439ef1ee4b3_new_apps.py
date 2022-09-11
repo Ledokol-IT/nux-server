@@ -136,14 +136,10 @@ def prepare(session, id, android_package_name, name):
             UserStatus.app_id == old_app.id).all()
         for status in statuses:
             status.app_id = id
+        session.delete(old_app)
 
 
 def generate_approved_game(session, id, android_package_name, name):
-    old_app = session.query(
-        App
-    ).where(App.android_package_name == android_package_name).first()
-    if old_app:
-        session.delete(old_app)
     app = session.query(
         App
     ).get(str(id))
