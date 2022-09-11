@@ -172,3 +172,21 @@ def get_recommended_friends(
         current_user: 'muser.User' = CurrentUserDependecy(),
 ):
     return mfriends.get_recommended_friends(session, current_user)
+
+
+@router.get("/user/{user_id}/is_friend", response_model=bool)
+def is_friend(
+        user_id: str,
+        session=SessionDependecy(),
+        current_user: 'muser.User' = CurrentUserDependecy(),
+):
+    user = muser.get_user(session, id=user_id)
+    if user is None:
+        raise fastapi.HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="bad user_id",
+        )
+    if mfriends.find_friendship(session, current_user, user):
+        return True
+    else:
+        return False

@@ -180,3 +180,29 @@ def test_recommended_friends(client):
     assert res.status_code == 200
     assert len(res.json()) == 1
     assert res.json()[0]["id"] == user2_id
+
+
+def test_is_friend(client):
+    user1 = create_user(client)
+    user2 = create_user(client)
+    user2_id = get_user(client, user2)["id"]
+    make_friends(client, user1, user2)
+
+    res = client.get(
+        f"/friends/user/{user2_id}/is_friend",
+        headers=user1,
+    )
+    assert res.status_code == 200
+    assert res.json() is True
+
+def test_is_friend_false(client):
+    user1 = create_user(client)
+    user2 = create_user(client)
+    user2_id = get_user(client, user2)["id"]
+
+    res = client.get(
+        f"/friends/user/{user2_id}/is_friend",
+        headers=user1,
+    )
+    assert res.status_code == 200
+    assert res.json() is False
