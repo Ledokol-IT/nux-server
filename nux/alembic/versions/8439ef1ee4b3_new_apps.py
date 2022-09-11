@@ -89,6 +89,11 @@ class UserStatus(Base):
 
 class UserInAppStatistic(Base):
     __tablename__ = "user_in_app_statistics"
+    user_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("users.id"),
+        primary_key=True,
+    )  # type: ignore
 
     app_id: str = sa.Column(
         sa.String,
