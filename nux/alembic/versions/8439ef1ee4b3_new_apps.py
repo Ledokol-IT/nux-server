@@ -136,13 +136,6 @@ new_approved_apps = [
 
 
 def upgrade() -> None:
-    op.alter_column(
-        'apps', 'category',
-        existing_type=postgresql.ENUM(
-            'GAME', 'OTHER', name='category'),
-        type_=sa.String(),
-        existing_nullable=False,
-    )
     op.execute('ALTER TABLE apps ALTER COLUMN category TYPE text')
     bind = op.get_bind()
     session = orm.Session(bind=bind)
@@ -152,6 +145,7 @@ def upgrade() -> None:
     for app in approved_apps:
         app.category = "GAME,online"
     initial_id = 13
+    new_apps = []
     for id, app_data in enumerate(new_approved_apps, initial_id):
         app = generate_approved_game(id, **app_data)
         old_app = session.query(
@@ -159,8 +153,11 @@ def upgrade() -> None:
         ).where(App.android_package_name == app.android_package_name).first()
         if old_app:
             session.delete(old_app)
-        session.add(app)
+        new_apps.append(app)
 
+    session.commit()
+    for app in new_apps:
+        session.add(app)
     session.commit()
 
 
