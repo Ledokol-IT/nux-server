@@ -69,13 +69,18 @@ class App(Base):
     )  # type: ignore
 
 
-def generate_approved_game(id, android_package_name, name):
-    app = App()
+def generate_approved_game(session, id, android_package_name, name):
+    app = session.query(
+        App
+    ).where(App.android_package_name == android_package_name).first()
+    if not app:
+        app = App()
     app.id = str(id)
     app.android_package_name = android_package_name
     app.name = name
     app.category = "GAME,online"
     app.approved = True
+    session.add(app)
     return app
 
 
@@ -145,19 +150,9 @@ def upgrade() -> None:
     for app in approved_apps:
         app.category = "GAME,online"
     initial_id = 13
-    new_apps = []
     for id, app_data in enumerate(new_approved_apps, initial_id):
-        app = generate_approved_game(id, **app_data)
-        old_app = session.query(
-            App
-        ).where(App.android_package_name == app.android_package_name).first()
-        if old_app:
-            session.delete(old_app)
-        new_apps.append(app)
+        generate_approved_game(session, id, **app_data)
 
-    session.commit()
-    for app in new_apps:
-        session.add(app)
     session.commit()
 
 

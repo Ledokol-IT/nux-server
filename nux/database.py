@@ -58,16 +58,6 @@ def create_all(postgres_url: str):
     alembic.command.stamp(alembic_cfg, "head")
 
 
-def run_migrations(postgres_url: str):
-    import alembic.command
-    import alembic.config
-
-    # then, load the Alembic configuration and generate the
-    # version table, "stamping" it with the most recent rev:
-    alembic_cfg = make_alembic_config(postgres_url)
-    alembic.command.upgrade(alembic_cfg, "head")
-
-
 def make_migration(postgres_url: str):
     import alembic.command
     import alembic.config

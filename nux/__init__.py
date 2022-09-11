@@ -54,14 +54,6 @@ def create_debug_session():
     return nux.database.Session()
 
 
-def run_migrations():
-    import nux.database
-    import nux.config
-
-    options = nux.config.parse_args()
-    nux.database.run_migrations(options.postgres_url)
-
-
 def create_all():
     import nux.database
     import nux.config
