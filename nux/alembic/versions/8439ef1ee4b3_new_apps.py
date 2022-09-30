@@ -11,10 +11,7 @@ import typing as t
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import orm
-from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
-import sqlalchemy.sql
-from sqlalchemy.sql import column
 
 Base = declarative_base()
 
