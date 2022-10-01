@@ -34,8 +34,8 @@ def sync_installed_apps(
         determined_apps.append(app)
         if is_new:
             send_icons.append(app.id)
-        elif app.approved and app.icon_preview is None:
-            send_icons.append(app.id)
+        # elif app.approved and app.icon_preview is None:
+            # send_icons.append(app.id)
     nux.models.app.set_apps_to_user(session, current_user, determined_apps)
 
     session.commit()
