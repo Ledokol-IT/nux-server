@@ -53,7 +53,7 @@ def add_friend(
 
 @router.delete("/remove_friend")
 def remove_friend(
-        friend_id: str = fastapi.Body(embed=True),
+        friend_id: str,
         current_user=CurrentUserDependecy(),
         session=SessionDependecy(),
 ):
@@ -69,7 +69,7 @@ def remove_friend(
 
 @router.delete("/reject_invite")
 def reject_invite(
-        from_user_id: str = fastapi.Body(embed=True),
+        from_user_id: str,
         current_user=CurrentUserDependecy(),
         session=SessionDependecy(),
 ):
@@ -85,7 +85,7 @@ def reject_invite(
 
 @router.delete("/remove_invite")
 def remove_invite(
-        to_user_id: str = fastapi.Body(embed=True),
+        to_user_id: str,
         current_user=CurrentUserDependecy(),
         session=SessionDependecy(),
 ):

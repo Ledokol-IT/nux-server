@@ -87,7 +87,7 @@ def test_remove_friends(client):
 
     response = client.delete(
         "/friends/remove_friend",
-        json={
+        params={
             "friend_id": user2_id
         },
         headers=user1,
@@ -120,7 +120,7 @@ def test_reject_invite(client):
 
     res = client.delete(
         "/friends/reject_invite",
-        json={
+        params={
             "from_user_id": user1_id
         },
         headers=user2,
@@ -152,7 +152,7 @@ def test_remove_invite(client):
 
     res = client.delete(
         "/friends/remove_invite",
-        json={
+        params={
             "to_user_id": user2_id
         },
         headers=user1,
@@ -194,6 +194,7 @@ def test_is_friend(client):
     )
     assert res.status_code == 200
     assert res.json() is True
+
 
 def test_is_friend_false(client):
     user1 = create_user(client)
