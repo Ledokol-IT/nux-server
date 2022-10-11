@@ -41,7 +41,7 @@ def sync_installed_apps(
     session.commit()
 
     return {
-        "apps": nux.models.app.get_user_apps(session, current_user),
+        "apps": nux.models.app.get_user_apps(session, current_user, only_visible=True),
         "send_icons_apps_ids": send_icons,
     }
 
@@ -106,5 +106,5 @@ def get_user_apps(
             detail="bad user"
         )
     return {
-        "apps": nux.models.app.get_user_apps(session, user)
+        "apps": nux.models.app.get_user_apps(session, user, only_visible=True)
     }

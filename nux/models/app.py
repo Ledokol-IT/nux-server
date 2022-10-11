@@ -75,6 +75,9 @@ class App(nux.database.Base):
         server_default="FALSE",
     )  # type: ignore
 
+    def is_visible(self):
+        return "GAME" in self.category
+
 
 def create_app_android(app_data: AppSchemeCreateAndroid):
     app = App()
@@ -143,6 +146,7 @@ def get_user_apps(
         session: orm.Session,
         user: 'muser.User',
         *,
+        only_visible: bool = False,
         only_approved: bool = False,
         only_games: bool = False,
         only_online: bool = False,
@@ -152,6 +156,8 @@ def get_user_apps(
         .join(UserInAppStatistic)
         .where(UserInAppStatistic.user_id == user.id)
     )
+    if only_visible:
+        only_games = True
     if only_approved:
         q = q.where(App.approved)
     if only_games:
