@@ -6,8 +6,8 @@ import sqlalchemy.orm
 
 from nux.auth import CurrentUserDependecy
 from nux.database import SessionDependecy
-import nux.models.app
-import nux.models.user
+import nux.models.app as mapp
+import nux.models.user as muser
 import nux.s3
 
 
@@ -15,7 +15,7 @@ apps_router = fastapi.APIRouter()
 
 
 class SyncInstalledAppsResponse(pydantic.BaseModel):
-    apps: list[nux.models.app.AppScheme]
+    apps: list[mapp.AppScheme]
     send_icons_apps_ids: list[str]
 
 
@@ -24,34 +24,39 @@ class SyncInstalledAppsResponse(pydantic.BaseModel):
 def sync_installed_apps(
     current_user=CurrentUserDependecy(),
     session=SessionDependecy(),
-    apps: list[nux.models.app.AppSchemeCreateAndroid] = fastapi.Body(
+    apps: list[mapp.AppSchemeCreateAndroid] = fastapi.Body(
         embed=True),
 ):
-    send_icons = []
-    determined_apps: list[nux.models.app.App] = []
+    send_icons: list[mapp.App] = []
+    determined_apps: list[mapp.App] = []
     for app_data in apps:
-        is_new, app = nux.models.app.determine_app_android(session, app_data)
+        is_new, app = mapp.determine_app_android(session, app_data)
         determined_apps.append(app)
-        if is_new:
-            send_icons.append(app.id)
-        elif app.approved and app.icon_preview is None:
-            send_icons.append(app.id)
-    nux.models.app.set_apps_to_user(session, current_user, determined_apps)
+        if app.is_visible():
+            if is_new:
+                send_icons.append(app)
+            elif app.approved and app.icon_preview is None:
+                send_icons.append(app)
+    mapp.set_apps_to_user(session, current_user, determined_apps)
 
     session.commit()
 
     return {
-        "apps": nux.models.app.get_user_apps(session, current_user, only_visible=True),
-        "send_icons_apps_ids": send_icons,
+        "apps": mapp.get_user_apps(session,
+                                   current_user, only_visible=True),
+        # deprecated
+        "send_icons_apps_ids": list(map(lambda app: app.id, send_icons)),
+        "send_icons_apps_android_packages": list(map(
+            lambda app: app.android_package_name, send_icons)),
     }
 
 
-@apps_router.get("/app/{app_id}", response_model=nux.models.app.AppScheme)
+@apps_router.get("/app/{app_id}", response_model=mapp.AppScheme)
 def get_app_by_id(
     app_id,
     session: sqlalchemy.orm.Session = SessionDependecy()
 ):
-    app = nux.models.app.get_app(session, id=app_id)
+    app = mapp.get_app(session, id=app_id)
     if not app:
         raise fastapi.HTTPException(404)
     return app
@@ -62,15 +67,15 @@ class SetIconsRequestBody(pydantic.BaseModel):
 
 
 @apps_router.put("/app/package/{package_name}/set_images",
-                 response_model=nux.models.app.AppScheme)
+                 response_model=mapp.AppScheme)
 @apps_router.put("/app/package/{package_name}/set_icon",
-                 response_model=nux.models.app.AppScheme)
+                 response_model=mapp.AppScheme)
 async def set_images(
     package_name,
     icon: fastapi.UploadFile = fastapi.File(),
     session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
-    app = nux.models.app.get_app(session, android_package_name=package_name)
+    app = mapp.get_app(session, android_package_name=package_name)
     if app is None:
         raise fastapi.HTTPException(
             400,
@@ -91,7 +96,7 @@ async def set_images(
 
 
 class GetUserAppsResponse(pydantic.BaseModel):
-    apps: list[nux.models.app.AppScheme]
+    apps: list[mapp.AppScheme]
 
 
 @apps_router.get("/user/{user_id}/apps", response_model=GetUserAppsResponse)
@@ -99,12 +104,27 @@ def get_user_apps(
     user_id: str,
     session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
-    user = nux.models.user.get_user(session, user_id)
+    user = muser.get_user(session, user_id)
     if user is None:
         raise fastapi.HTTPException(
             404,
             detail="bad user"
         )
     return {
-        "apps": nux.models.app.get_user_apps(session, user, only_visible=True)
+        "apps": mapp.get_user_apps(session, user, only_visible=True)
     }
+
+
+class RecomendationsAppsResponse(pydantic.BaseModel):
+    apps: list[mapp.AppScheme]
+
+
+@apps_router.get("/apps/recommendations", response_model=RecomendationsAppsResponse)
+def get_recommended_apps(
+    current_user=CurrentUserDependecy(),
+    session: sqlalchemy.orm.Session = SessionDependecy(),
+):
+    apps = session.query(mapp.App).limit(10).all()
+    return {
+        "apps": apps,
+        }
