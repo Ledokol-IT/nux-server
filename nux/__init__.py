@@ -44,11 +44,22 @@ def run_db_tasks():
     nux.periodic_tasks.run_tasks(options.postgres_url, options)
 
 
+def run_migrations():
+    import nux.database
+    import nux.config
+
+    p = nux.config.add_data_base_args(nux.config.init_arg_parser())
+    add_firebase_options(p)
+    options = nux.config.parse_args_from_parser(p)
+    nux.database.run_migrations(options.postgres_url)
+
+
 def run_icons_updater():
     import nux.config
     import nux.icons_updater
 
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
+    add_firebase_options(p)
     options = nux.config.parse_args_from_parser(p)
     nux.icons_updater.run_updater(options.postgres_url)
 

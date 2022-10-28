@@ -1,10 +1,11 @@
 from __future__ import annotations
-import logging
 import random
 import string
 import typing as t
 import uuid
 import re
+
+from loguru import logger
 
 import boto3
 import boto3.session
@@ -13,8 +14,6 @@ import fastapi
 s3: None | t.Any = None
 bucket: None | t.Any = None
 resource: None | t.Any = None
-
-logger = logging.getLogger(__name__)
 
 BUCKET_NAME = 'nux'
 ENDPOINT_URL = 'https://storage.yandexcloud.net'

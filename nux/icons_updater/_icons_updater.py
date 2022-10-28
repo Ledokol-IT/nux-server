@@ -1,13 +1,12 @@
+from loguru import logger
+
 import requests
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Query
 import ischedule
-import logging
 
 import nux.models.app as mapp
 import nux.database
-
-logger = logging.getLogger(__name__)
 
 
 def get_link_icon(package: str):
@@ -26,7 +25,7 @@ def update_icon(app: mapp.App):
     if app.android_package_name is None:
         return
     app.icon_preview = get_link_icon(app.android_package_name)
-    logger.info(f"Update for App<android_package_name=%s>.icon_preview=%s",
+    logger.info("Update for App<android_package_name={}>.icon_preview={}",
                 app.android_package_name, app.icon_preview)
 
 
@@ -36,6 +35,8 @@ def update_icons_batch(batch_size=10):
         query: Query[mapp.App] = query.where(
             mapp.App.icon_preview.is_(None))  # type: ignore
         apps = query.limit(batch_size).all()
+        if not apps:
+            logger.info("No apps without icon found")
         for app in apps:
             update_icon(app)
         session.commit()
@@ -47,7 +48,7 @@ def run_updater(postgres_url):
 
     logger.info("Start tasks.\n"
                 "Ctrl+C to stop.")
-    ischedule.schedule(update_icons_batch, interval=10)
+    ischedule.schedule(update_icons_batch, interval=5)
 
     try:
         ischedule.run_loop()

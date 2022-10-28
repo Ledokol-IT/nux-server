@@ -1,7 +1,7 @@
 from __future__ import annotations
 import datetime
-import logging
 
+from loguru import logger
 import sqlalchemy as sa
 from sqlalchemy import orm
 
@@ -12,8 +12,6 @@ import nux.models.status as mstatus
 import nux.models.user as muser
 import nux.notifications
 from nux.utils import now
-
-logger = logging.getLogger(__name__)
 
 
 class OfflineUser(nux.database.Base):

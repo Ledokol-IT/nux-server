@@ -1,12 +1,9 @@
-import logging
-
 import ischedule
+from loguru import logger
 
 import nux.database
 import nux.firebase
 from nux.periodic_tasks._clear_statuses import clear_statuses, ping_users
-
-logger = logging.getLogger(__name__)
 
 
 def run_tasks(postgres_url, options):

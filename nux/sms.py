@@ -3,10 +3,9 @@ import logging
 from typing import Literal
 
 import pydantic
+from loguru import logger
 
 import smsaero
-
-logger = logging.getLogger(__name__)
 
 _sms_aero: None | smsaero.SmsAero = None
 

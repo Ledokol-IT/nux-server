@@ -5,8 +5,6 @@ import argparse
 from loguru import logger
 import sys
 
-import loguru
-
 SECRET_KEY: str
 
 
@@ -58,7 +56,7 @@ def init_arg_parser():
         ignore_unknown_config_file_keys=True,
     )
     p.add_argument("--logging-level",
-                   env_var="NUX_LOGGING_LEVEL", default="WARNING")
+                   env_var="NUX_LOGGING_LEVEL", default="DEBUG")
     return p
 
 

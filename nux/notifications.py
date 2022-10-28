@@ -1,7 +1,7 @@
 from __future__ import annotations
-import logging
 import uuid
 
+from loguru import logger
 import firebase_admin.messaging
 import pydantic
 import sqlalchemy.orm
@@ -10,8 +10,6 @@ import nux.database
 import nux.events
 import nux.firebase
 from nux.schemes import AppN, UserN
-
-logger = logging.getLogger(__name__)
 
 
 _Value = str | pydantic.BaseModel | dict[str, '_Value'] | None

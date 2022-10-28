@@ -6,11 +6,11 @@ Module should not use other models (if possible)
 """
 
 import datetime
-import logging
 import random
 from typing import Literal
 import uuid
 
+from loguru import logger
 import fastapi
 import pydantic
 import sqlalchemy as sa
@@ -21,8 +21,6 @@ import nux.database
 import nux.pydantic_types
 import nux.sms
 from nux.utils import now
-
-logger = logging.getLogger(__name__)
 
 
 class PhoneConfirmation(nux.database.Base):

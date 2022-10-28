@@ -1,13 +1,11 @@
-import logging
 import random
 import re
 
 import fastapi
 import pydantic
+from loguru import logger
 
 import nux.s3
-
-logger = logging.getLogger(__name__)
 
 
 class DefaultProfilePic(pydantic.BaseModel):
