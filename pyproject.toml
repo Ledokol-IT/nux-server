@@ -37,6 +37,7 @@ freezegun = "^1.2.1"
 [tool.poetry.scripts]
 run = "nux:run_app"
 run_db_tasks = "nux:run_db_tasks"
+run_icons_updater = "nux:run_icons_updater"
 create_all = "nux:create_all"
 make_migration = "nux:make_migration"
 run_migrations = "nux:run_migrations"

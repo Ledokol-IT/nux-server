@@ -48,5 +48,17 @@
                 options:
                   max-size: "1m"
                   max-file: "3"
-        pull: yes
+            icons_updater:
+              image: "i3cheese/nux:latest"
+              entrypoint: "/code/scripts/run_icons_updater.sh"
+              restart: always
+              environment:
+                POSTGRES_HOST: "{{POSTGRES_HOST}}"
+                POSTGRES_USER: "{{POSTGRES_USER}}"
+                POSTGRES_PASSWORD: "{{POSTGRES_PASSWORD}}"
+                POSTGRES_DB: "{{POSTGRES_DB}}"
+              logging:
+                options:
+                  max-size: "1m"
+                  max-file: "3"
       register: output

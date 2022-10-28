@@ -40,3 +40,13 @@ services:
     entrypoint: "scripts/run_db_tasks.sh"
     depends_on:
       - postgres
+  icons_updater:
+    build:
+      dockerfile: Dockerfile
+      context: "."
+      target: image-dev
+    env_file:
+      .env
+    entrypoint: "./scripts/run_icons_updater.sh"
+    depends_on:
+      - postgres
