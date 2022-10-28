@@ -119,7 +119,8 @@ class RecomendationsAppsResponse(pydantic.BaseModel):
     apps: list[mapp.AppScheme]
 
 
-@apps_router.get("/apps/recommendations", response_model=RecomendationsAppsResponse)
+@apps_router.get("/apps/recommendations",
+                 response_model=RecomendationsAppsResponse)
 def get_recommended_apps(
     current_user=CurrentUserDependecy(),
     session: sqlalchemy.orm.Session = SessionDependecy(),
