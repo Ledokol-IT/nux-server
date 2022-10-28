@@ -13,7 +13,7 @@ import nux.database
 def get_link_icon(package: str) -> None | str:
     url = f'https://play.google.com/store/apps/details?id={package}'
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36'}
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36'}  # noqa
     response = requests.get(url, headers=headers)
     with open("page.html", 'w') as f:
         f.write(response.text)

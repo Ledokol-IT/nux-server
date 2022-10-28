@@ -61,7 +61,8 @@ def run_icons_updater():
     p = nux.config.add_data_base_args(nux.config.init_arg_parser())
     add_firebase_options(p)
     options = nux.config.parse_args_from_parser(p)
-    nux.icons_updater.update_all(options.postgres_url)
+    nux.icons_updater.run_updater(options.postgres_url)
+
 
 def update_all_icons():
     import nux.config

@@ -111,7 +111,7 @@ def update_status_in_app(
         status.in_app = True
         user.status = status
     else:
-        user.status = create_empty_status()
+        return update_status_not_in_app(session, user)
 
     return user.status
 
