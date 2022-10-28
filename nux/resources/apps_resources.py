@@ -127,4 +127,4 @@ def get_recommended_apps(
     apps = session.query(mapp.App).limit(10).all()
     return {
         "apps": apps,
-        }
+    }

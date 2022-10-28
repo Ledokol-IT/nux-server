@@ -94,7 +94,7 @@ def update_status_in_app(
             and user.status.app == app
     ):
         user.status.dt_last_update = now()
-    else:
+    elif app.is_visible():
         if not (
                 user.status is not None
                 and user.status.app == app
@@ -110,6 +110,8 @@ def update_status_in_app(
         status.dt_leaved_app = None
         status.in_app = True
         user.status = status
+    else:
+        user.status = create_empty_status()
 
     return user.status
 
