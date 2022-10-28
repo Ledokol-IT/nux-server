@@ -78,6 +78,10 @@ class App(nux.database.Base):
     def is_visible(self):
         return "GAME" in self.category
 
+    def __repr__(self):
+        return (f"App<android_package_name={self.android_package_name}"
+                f", id={self.id}>")
+
 
 def create_app_android(app_data: AppSchemeCreateAndroid):
     app = App()

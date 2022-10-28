@@ -9,8 +9,8 @@ import sqlalchemy.orm
 Base = sqlalchemy.orm.declarative_base()
 
 
-def Session() -> sqlalchemy.orm.Session:
-    return _Session()
+def Session(*args, **kwargs) -> sqlalchemy.orm.Session:
+    return _Session(*args, **kwargs)
 
 
 def session_generator() -> t.Generator[sqlalchemy.orm.Session, None, None]:

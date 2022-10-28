@@ -44,6 +44,15 @@ def run_db_tasks():
     nux.periodic_tasks.run_tasks(options.postgres_url, options)
 
 
+def run_icons_updater():
+    import nux.config
+    import nux.icons_updater
+
+    p = nux.config.add_data_base_args(nux.config.init_arg_parser())
+    options = nux.config.parse_args_from_parser(p)
+    nux.icons_updater.run_updater(options.postgres_url)
+
+
 def create_debug_session():
     import nux.config
     import nux.database

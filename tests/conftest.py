@@ -18,7 +18,12 @@ def session(app):
 
 
 @pytest.fixture
-def app():
+def session_factory(app):
+    return nux.database.Session
+
+
+@pytest.fixture
+def options():
     tmp_db = '.'.join([uuid.uuid4().hex, 'pytest'])
     args = [
         "--pg-user", "web",
@@ -33,6 +38,11 @@ def app():
         "--aws-secret-access-key", "YCPM8_Qc-Bf_gDKfFq3ct2b2GxQPZcJnhq7U0GR8",
     ]
     options = nux.config.parse_args(args)
+    return options
+
+
+@pytest.fixture
+def app(options):
     sqlalchemy_utils.create_database(options.postgres_url)
 
     # nux.database.create_all(options.postgres_url)
