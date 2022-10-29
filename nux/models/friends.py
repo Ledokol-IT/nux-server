@@ -1,9 +1,9 @@
 from __future__ import annotations
 import datetime
-import time
 import typing as t
-from loguru import logger
+from collections import defaultdict
 
+from loguru import logger
 import sqlalchemy as sa
 from sqlalchemy import orm
 
@@ -204,6 +204,7 @@ def get_friends(
     session: orm.Session,
     user: muser.User,
     order: t.Literal["online"] | None = None,
+    limit: int | None = None,
 ) -> list[muser.User]:
     query = (
         session.query(muser.User)
@@ -228,6 +229,8 @@ def get_friends(
             .order_by(mstatus.UserStatus.online)
             .order_by(mstatus.UserStatus.in_app)
         )
+    if limit is not None:
+        query = query.limit(limit)
 
     friends = query.all()
 
@@ -238,6 +241,13 @@ def get_recommended_friends(
     session: orm.Session,
     user: muser.User,
 ) -> list[muser.User]:
-    q = session.query(muser.User)
-    q = q.where(muser.User.id != user.id)
-    return q.all()
+    friends = get_friends(session, user, limit=100)
+    recommended: defaultdict[muser.User, int] = defaultdict(lambda: 0)
+    for friend in friends:
+        for two_edge_friend in get_friends(session, friend, limit=100):
+            recommended[two_edge_friend] += 1
+    for friend in friends:
+        recommended.pop(friend, None)
+    recommended.pop(user, None)
+    recommended_list = sorted(recommended.items(), key=lambda t: t[1])
+    return [user for user, _ in recommended_list]
