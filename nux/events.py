@@ -21,6 +21,16 @@ class NuxEvents:
             nux.notifications.send_notification_user_entered_app,
             session, user, app)
 
+    def user_leaved_app(
+        self,
+        session: sqlalchemy.orm.Session,
+        user: 'muser.User',
+        app: 'mapp.App',
+    ):
+        self.background_tasks.add_task(
+            nux.notifications.send_notification_user_leaved_app,
+            session, user, app)
+
     def friends_invite(
         self,
         session: sqlalchemy.orm.Session,

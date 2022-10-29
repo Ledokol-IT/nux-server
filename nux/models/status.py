@@ -111,7 +111,7 @@ def update_status_in_app(
         status.in_app = True
         user.status = status
     else:
-        return update_status_not_in_app(session, user)
+        return update_status_not_in_app(session, user, events)
 
     return user.status
 
@@ -124,7 +124,8 @@ def status_leave_app(status: UserStatus):
 
 def update_status_not_in_app(
     session: orm.Session,
-    user: 'muser.User'
+    user: 'muser.User',
+    events: 'nux.events.NuxEvents',
 ):
     if user.status is None:
         user.status = create_empty_status()
@@ -132,5 +133,7 @@ def update_status_not_in_app(
 
     user.status.dt_last_update = now()
     user.status.online = True
-    status_leave_app(user.status)
+    if user.status.in_app:
+        events.user_leaved_app(session, user, user.status.app)
+        status_leave_app(user.status)
     return user.status

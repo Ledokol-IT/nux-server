@@ -26,7 +26,7 @@ def friend_id(client, friend_with_token_auth):
 
 
 @unittest.mock.patch("nux.firebase.send_messages")
-def test_notifications_sent_then_user_entered_app(
+def test_notifications_sent_then_user_entered_app_and_leaved(
         patched_firebase_send_messages,
         client,
 ):
@@ -41,6 +41,15 @@ def test_notifications_sent_then_user_entered_app(
         json={
             "app": app1_android_payload,
         },
+        headers=user,
+    )
+    assert response.status_code == 200
+    patched_firebase_send_messages.assert_called_once()
+
+    patched_firebase_send_messages.reset_mock()
+
+    response = client.put(
+        "/status/not_in_app",
         headers=user,
     )
     assert response.status_code == 200

@@ -72,6 +72,28 @@ def _make_message_user_entered_app(
     )
 
 
+def _make_message_user_leaved_app(
+    from_user: 'nux.models.user.User',
+    app: 'nux.models.app.App',
+    to_user: 'nux.models.user.User',
+):
+    """
+    user -- user joined the app
+    friend -- user to notify
+    """
+    _ = app
+    if not is_user_ready_to_notification(to_user):
+        return None
+    data = encode_message(
+        type="friend_leaved_app",
+        user=UserN.from_orm(from_user),
+    )
+    return firebase_admin.messaging.Message(
+        data=data,
+        token=to_user.firebase_messaging_token,
+    )
+
+
 def send_notification_user_entered_app(
     session: sqlalchemy.orm.Session,
     user: 'nux.models.user.User',
@@ -86,6 +108,25 @@ def send_notification_user_entered_app(
     friends = mfriends.get_friends(session, user)
     none_or_messages = (
         _make_message_user_entered_app(user, app, friend) for friend in friends
+    )
+    messages = [m for m in none_or_messages if m is not None]
+    nux.firebase.send_messages(messages)
+
+
+def send_notification_user_leaved_app(
+    session: sqlalchemy.orm.Session,
+    user: 'nux.models.user.User',
+    app: 'nux.models.app.App'
+):
+    logger.debug(f"{user.nickname} leaved the {app.android_package_name}")
+    if not app.is_visible():
+        return
+    if nux.firebase.firebase_app is None:
+        return
+
+    friends = mfriends.get_friends(session, user)
+    none_or_messages = (
+        _make_message_user_leaved_app(user, app, friend) for friend in friends
     )
     messages = [m for m in none_or_messages if m is not None]
     nux.firebase.send_messages(messages)

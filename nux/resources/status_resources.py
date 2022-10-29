@@ -32,8 +32,9 @@ def set_status(
 def unset_status(
     current_user=CurrentUserDependecy(),
     session=SessionDependecy(),
+    events=EventsDependecy(),
 ):
-    status = nux.models.status.update_status_not_in_app(session, current_user)
+    status = nux.models.status.update_status_not_in_app(session, current_user, events)
     session.commit()
     session.refresh(status)
     return status
