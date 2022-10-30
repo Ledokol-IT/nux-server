@@ -3,6 +3,7 @@ import time
 
 import requests
 from bs4 import BeautifulSoup
+from sqlalchemy import log
 from sqlalchemy.orm import Query
 import ischedule
 
@@ -14,7 +15,11 @@ def get_link_icon(package: str) -> None | str:
     url = f'https://play.google.com/store/apps/details?id={package}'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36'}  # noqa
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+    except Exception as e:
+        logger.exception(e)
+        return None
     with open("page.html", 'w') as f:
         f.write(response.text)
     soup = BeautifulSoup(response.text, "lxml")

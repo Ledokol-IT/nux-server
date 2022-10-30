@@ -1,7 +1,10 @@
+import pytest
+
 import nux.models.app as mapp
 from nux.icons_updater._icons_updater import update_icons_batch
 
 
+@pytest.mark.skip("doesn't implement registration with password only")
 def test_icons_updater(session, options):
     android_package_name = "com.robtopx.geometryjumplite"
     app_data = mapp.AppSchemeCreateAndroid(
@@ -11,7 +14,7 @@ def test_icons_updater(session, options):
     )
     with session.begin():
         query = session.query(mapp.App)
-        query: Query[mapp.App] = query.where(
+        query = query.where(
             mapp.App.icon_preview.is_(None))  # type: ignore
         query.delete()
 
