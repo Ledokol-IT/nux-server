@@ -20,8 +20,6 @@ def get_link_icon(package: str) -> None | str:
     except Exception as e:
         logger.exception(e)
         return None
-    with open("page.html", 'w') as f:
-        f.write(response.text)
     soup = BeautifulSoup(response.text, "lxml")
 
     img_list = soup.find_all("img", alt="Icon image")
