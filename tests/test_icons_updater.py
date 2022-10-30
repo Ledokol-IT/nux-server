@@ -4,7 +4,7 @@ import nux.models.app as mapp
 from nux.icons_updater._icons_updater import update_icons_batch
 
 
-@pytest.mark.skip("doesn't implement registration with password only")
+@pytest.mark.skip("Google is down")
 def test_icons_updater(session, options):
     android_package_name = "com.robtopx.geometryjumplite"
     app_data = mapp.AppSchemeCreateAndroid(
