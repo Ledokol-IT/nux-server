@@ -26,10 +26,7 @@ def session_factory(app):
 def options():
     tmp_db = '.'.join([uuid.uuid4().hex, 'pytest'])
     args = [
-        "--pg-user", "web",
-        "--pg-password", "pass",
         "--pg-db", tmp_db,
-        "--pg-host", "localhost:5432",
         "--secret-key", "123",
         "--firebase-dry-run",
         "--sms-disable",
