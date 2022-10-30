@@ -249,5 +249,5 @@ def get_recommended_friends(
     for friend in friends:
         recommended.pop(friend, None)
     recommended.pop(user, None)
-    recommended_list = sorted(recommended.items(), key=lambda t: t[1])
+    recommended_list = sorted(recommended.items(), key=lambda t: t[1], reverse=True)
     return [user for user, _ in recommended_list]
