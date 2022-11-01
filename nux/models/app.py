@@ -8,7 +8,7 @@ import sqlalchemy.orm as orm
 
 import nux.database
 import nux.models.user as muser
-from nux.models.friends import get_friends
+import nux.models.friends as mfriends
 from nux.schemes import AppSchemeCreateAndroid, AppScheme
 
 
@@ -211,10 +211,10 @@ def get_recommended_apps(
     session: orm.Session,
     user: 'muser.User',
 ) -> list[App]:
-    friends = get_friends(session, user, limit=100)
+    friends = mfriends.get_friends(session, user, limit=100)
     recommended: defaultdict[App, int] = defaultdict(lambda: 0)
     for friend in friends:
-        for app in get_user_apps(session, friend, only_games=True):
+        for app in get_user_apps(session, friend, only_visible=True):
             recommended[app] += 1
     for app in get_user_apps(session, user, only_games=True):
         recommended.pop(app, None)
