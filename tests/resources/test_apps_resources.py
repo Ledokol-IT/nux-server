@@ -1,7 +1,8 @@
 import faker
 
 from nux.schemes import AppSchemeCreateAndroid
-from tests.utils import get_user, make_friends, create_user, sync_apps_with_user
+from tests.utils import get_user, make_friends, create_user,\
+    sync_apps_with_user
 from pprint import pprint
 
 fake = faker.Faker()
@@ -81,4 +82,5 @@ def test_recommended_apps(client):
     pprint(res.json())
     pprint({"apps": [app3, app2]})
     assert len(res.json()["apps"]) == 2
-    assert all(x["android_package_name"] == y["android_package_name"] for x, y in zip(res.json()["apps"], (app3, app2)))
+    assert all(x["android_package_name"] == y["android_package_name"]
+               for x, y in zip(res.json()["apps"], (app3, app2)))
