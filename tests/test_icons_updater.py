@@ -1,11 +1,17 @@
 import pytest
+import requests
 
 import nux.models.app as mapp
 from nux.icons_updater._icons_updater import update_icons_batch
 
 
-@pytest.mark.skip("Google is down")
 def test_icons_updater(session, options):
+    try:
+        url = f'https://play.google.com/'
+        requests.get(url)
+    except requests.exceptions.ConnectionError:
+        pytest.xfail(reason="No connection")
+
     android_package_name = "com.robtopx.geometryjumplite"
     app_data = mapp.AppSchemeCreateAndroid(
         android_package_name=android_package_name,

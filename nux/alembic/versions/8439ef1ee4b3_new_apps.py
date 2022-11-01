@@ -203,7 +203,6 @@ def upgrade() -> None:
     op.execute('ALTER TABLE apps ALTER COLUMN category TYPE text')
     bind = op.get_bind()
     session = orm.Session(bind=bind, autoflush=False)
-    print("123")
 
     approved_apps = session.query(App).where(App.approved).all()
     for app in approved_apps:

@@ -3,8 +3,7 @@ import time
 
 import requests
 from bs4 import BeautifulSoup
-from sqlalchemy import log
-from sqlalchemy.orm import Query
+from sqlalchemy import orm
 import ischedule
 
 import nux.models.app as mapp
@@ -52,7 +51,7 @@ def update_icons_batch(batch_size=10):
     session = nux.database.Session()
     with session.begin():
         query = session.query(mapp.App)
-        query: Query[mapp.App] = query.where(
+        query: orm.Query[mapp.App] = query.where(
             mapp.App.icon_preview.is_(None))  # type: ignore
         apps = query.limit(batch_size).all()
         if not apps:
