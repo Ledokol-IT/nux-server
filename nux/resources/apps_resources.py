@@ -125,7 +125,6 @@ def get_recommended_apps(
     current_user=CurrentUserDependecy(),
     session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
-    apps = session.query(mapp.App).limit(10).all()
     return {
-        "apps": apps,
+        "apps": mapp.get_recommended_apps(session, current_user),
     }

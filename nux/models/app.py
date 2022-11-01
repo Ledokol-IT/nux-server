@@ -1,12 +1,14 @@
 from __future__ import annotations
 import typing as t
 import uuid
+from collections import defaultdict
 
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 
 import nux.database
 import nux.models.user as muser
+from nux.models.friends import get_friends
 from nux.schemes import AppSchemeCreateAndroid, AppScheme
 
 
@@ -83,7 +85,7 @@ class App(nux.database.Base):
                 f", id={self.id}>")
 
 
-def create_app_android(app_data: AppSchemeCreateAndroid):
+def create_app_android(app_data: AppSchemeCreateAndroid) -> App:
     app = App()
     app.id = App._generate_id()
     app.android_package_name = app_data.android_package_name
@@ -203,3 +205,19 @@ def get_app(
         app = query.filter(App.android_package_name
                            == android_package_name).first()
     return app
+
+
+def get_recommended_apps(
+    session: orm.Session,
+    user: 'muser.User',
+) -> list[App]:
+    friends = get_friends(session, user, limit=100)
+    recommended: defaultdict[App, int] = defaultdict(lambda: 0)
+    for friend in friends:
+        for app in get_user_apps(session, friend, only_games=True):
+            recommended[app] += 1
+    for app in get_user_apps(session, user, only_games=True):
+        recommended.pop(app, None)
+    recommended_list = sorted(recommended.items(), key=lambda t: t[1],
+                              reverse=True)
+    return [app for app, _ in recommended_list]
