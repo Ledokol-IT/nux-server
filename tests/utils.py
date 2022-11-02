@@ -100,3 +100,13 @@ def get_phone_confirmation(
         "code": code,
         "id": id,
     }
+
+
+def sync_apps_with_user(client, user_auth_header, apps):
+    client.put(
+        "/sync_installed_apps/android",
+        json={
+            "apps": apps,
+        },
+        headers=user_auth_header,
+    )
