@@ -27,10 +27,10 @@ def get_link_icon(package: str) -> None | str:
 
     url: str = img_list[0]["src"]
     if not url.startswith("https://"):
-        logger.warning("Bad image. Dont starts with https")
+        logger.warning("Bad image. Dont starts with 'https://'")
         return None
     if "fonts" in url:
-        logger.warning("Bad image. Contains fonts")
+        logger.warning("Bad image url. Contains 'fonts'")
         return None
     return url
 
