@@ -98,9 +98,6 @@ def update_status_in_app(
         if not (
                 user.status is not None
                 and user.status.app == app
-                # and (user.status.dt_leaved_app is None
-                #      or now() - user.status.dt_leaved_app
-                #      < UserStatus.SECOND_TIME_TTL)
         ):
             events.user_entered_app(session, user, app)
 

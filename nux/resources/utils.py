@@ -1,20 +1,33 @@
 import fastapi
+from sqlalchemy import orm
 
 import nux.models.user as muser
 from nux.database import SessionDependecy
 
 
 def get_user_or_raise(
-        user_id_field: str,
-        code=404,
-        detail=None,
+        session: orm.Session,
+        user_id: str,
+        code: int,
+        detail: str | None = None,
+):
+    user = muser.get_user(session, id=user_id)
+    if not user:
+        raise fastapi.HTTPException(code, detail)
+    return user
+
+
+def UserQueryParam(
+        alias: str,
+        code: int = 404,
+        detail: str | None = None,
 ) -> muser.User:
     if detail is None:
-        detail = f"Error in {user_id_field}: not found."
+        detail = f"Error in {alias}: user not found."
 
     def _validate(
             session=SessionDependecy(),
-            user_id=fastapi.Query(alias=user_id_field),
+            user_id=fastapi.Query(alias=alias),
     ):
         user = muser.get_user(session, id=user_id)
         if not user:

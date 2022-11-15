@@ -1,30 +1,9 @@
 import faker
 
 from tests.utils import get_user, make_friends, create_user,\
-    sync_apps_with_user
+    sync_apps_with_user, create_android_app_payload
 
 fake = faker.Faker()
-
-
-def create_android_app_payload(
-    package_name: str | None = None,
-    category: int | None = None,
-    name: str | None = None,
-):
-    if package_name is None:
-        package_name = fake.domain_name(levels=4)
-    if category is None:
-        category = fake.random_element(elements=[
-            0,
-            None,
-        ])
-    if name is None:
-        name = fake.company()
-    return {
-        "android_package_name": package_name,
-        "android_category": category,
-        "name": name,
-    }
 
 
 def test_sync_apps_ok(client, user_auth_header):

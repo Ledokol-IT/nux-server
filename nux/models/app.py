@@ -1,15 +1,54 @@
 from __future__ import annotations
+import datetime
 import typing as t
 import uuid
 from collections import defaultdict
 
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
+from nux.utils import now
 
 import nux.database
 import nux.models.user as muser
 import nux.models.friends as mfriends
 from nux.schemes import AppSchemeCreateAndroid, AppScheme
+
+
+class UserInAppRecord(nux.database.Base):
+    __tablename__ = "user_in_app_records"
+    id: str = sa.Column(
+        sa.String,
+        primary_key=True,
+    )  # type: ignore
+
+    @staticmethod
+    def _generate_id():
+        return str(uuid.uuid4())
+
+    user_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("users.id"),
+    )  # type: ignore
+    user: 'muser.User' = orm.relationship(
+        lambda: muser.User,
+        back_populates="in_app_records"
+    )
+
+    app_id: str = sa.Column(
+        sa.String,
+        sa.ForeignKey("apps.id"),
+    )  # type: ignore
+    app: 'App' = orm.relationship(lambda: App)
+
+    dt_begin: datetime.datetime = sa.Column(
+        sa.DateTime,
+        nullable=False,
+    )  # type: ignore
+    dt_end: datetime.datetime = sa.Column(
+        sa.DateTime,
+        nullable=False,
+        index=True,
+    )  # type: ignore
 
 
 class UserInAppStatistic(nux.database.Base):
@@ -19,6 +58,7 @@ class UserInAppStatistic(nux.database.Base):
         sa.ForeignKey("users.id"),
         primary_key=True,
     )  # type: ignore
+
     user: 'muser.User' = orm.relationship(
         lambda: muser.User,
         back_populates="apps_stats"
@@ -30,6 +70,37 @@ class UserInAppStatistic(nux.database.Base):
         primary_key=True,
     )  # type: ignore
     app: 'App' = orm.relationship(lambda: App)
+
+    installed: bool = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=True,
+    )  # type: ignore
+
+    # None means never updated
+    dt_stats_updated_at: datetime.datetime | None = sa.Column(
+        sa.DateTime,
+        nullable=True,
+    )  # type: ignore
+
+    activity_last_two_weeks: datetime.timedelta = sa.Column(
+        sa.Interval,
+        nullable=False,
+        default=datetime.timedelta(0),
+        server_default='0',
+    )  # type: ignore
+
+    activity_total: datetime.timedelta = sa.Column(
+        sa.Interval,
+        nullable=False,
+        default=datetime.timedelta(0),
+        server_default='0',
+    )  # type: ignore
+
+    dt_last_acivity: datetime.datetime = sa.Column(
+        sa.DateTime,
+        nullable=True,
+    )  # type: ignore
 
 
 class App(nux.database.Base):
@@ -128,10 +199,16 @@ def add_app_to_user(
         user: 'muser.User',
         app: App,
 ):
-    app_stats = UserInAppStatistic()
-    app_stats.app = app
-    app_stats.user = user
-    session.add(app_stats)
+    app_stats = session.query(UserInAppStatistic).get({
+        "user_id": user.id,
+        "app_id": app.id,
+    })
+    if app_stats is None:
+        app_stats = UserInAppStatistic()
+        app_stats.app = app
+        app_stats.user = user
+        session.add(app_stats)
+    app_stats.installed = True
 
 
 def delete_app_from_user(
@@ -145,7 +222,7 @@ def delete_app_from_user(
     })
     if app_stats is None:
         return
-    session.delete(app_stats)
+    app_stats.installed = False
 
 
 def get_user_apps(
@@ -156,6 +233,7 @@ def get_user_apps(
         only_approved: bool = False,
         only_games: bool = False,
         only_online: bool = False,
+        only_installed: bool = True,
 ) -> list[App]:
     q = (
         session.query(App)
@@ -170,6 +248,8 @@ def get_user_apps(
         q = q.where(App.category.contains('GAME'))  # type: ignore
     if only_online:
         q = q.where(App.category.contains('online'))  # type: ignore
+    if only_installed:
+        q = q.where(UserInAppStatistic.installed)
 
     return q.all()
 
@@ -208,8 +288,8 @@ def get_app(
 
 
 def get_recommended_apps(
-    session: orm.Session,
-    user: 'muser.User',
+        session: orm.Session,
+        user: muser.User,
 ) -> list[App]:
     friends = mfriends.get_friends(session, user, limit=100)
     recommended: defaultdict[App, int] = defaultdict(lambda: 0)
@@ -221,3 +301,51 @@ def get_recommended_apps(
     recommended_list = sorted(recommended.items(), key=lambda t: t[1],
                               reverse=True)
     return [app for app, _ in recommended_list]
+
+
+def add_user_in_app_record(
+        session: orm.Session,
+        user: muser.User,
+        app: App,
+        dt_begin: datetime.datetime,
+        dt_end: datetime.datetime,
+):
+    assert dt_begin < dt_end
+    record = UserInAppRecord()
+    record.id = record._generate_id()
+    record.user = user
+    record.app = app
+    record.dt_begin = dt_begin
+    record.dt_end = dt_end
+    session.add(record)
+    return record
+
+
+def update_stats(
+        session: orm.Session,
+        user: muser.User,
+):
+    TWO_WEEKS = datetime.timedelta(days=14)
+    two_weeks_before_now = now() - TWO_WEEKS
+    stats: dict[App, UserInAppStatistic] = {}
+    for record in user.in_app_records:
+        if record.dt_end < two_weeks_before_now:
+            session.delete(record)
+            continue
+        if record.app not in stats:
+            stat = stats[record.app] = session.query(UserInAppStatistic).get(
+                {"user_id": user.id, "app_id": record.app.id})
+            if stat is None:
+                continue
+            stat.dt_stats_updated_at = now()
+            stat.activity_last_two_weeks = datetime.timedelta(0)
+        else:
+            stat = stats[record.app]
+        stat.activity_last_two_weeks += record.dt_end - \
+            max(record.dt_begin, two_weeks_before_now)
+        print(record.dt_begin, two_weeks_before_now)
+        if stat.dt_last_acivity is None:
+            stat.dt_last_acivity = record.dt_end
+        else:
+            stat.dt_last_acivity = max(
+                stats[record.app].dt_last_acivity, record.dt_end)

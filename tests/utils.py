@@ -2,6 +2,10 @@ import string
 from typing import Union
 import unittest.mock
 import random
+import faker
+
+fake = faker.Faker()
+random.seed(0)
 
 
 def create_user_token(
@@ -38,6 +42,27 @@ def create_user(
 ):
     return {
         "Authorization": f'Bearer {create_user_token(client, nickname, phone)}'
+    }
+
+
+def create_android_app_payload(
+    package_name: str | None = None,
+    category: int | None = None,
+    name: str | None = None,
+):
+    if package_name is None:
+        package_name = fake.domain_name(levels=4)
+    if category is None:
+        category = fake.random_element(elements=[
+            0,
+            None,
+        ])
+    if name is None:
+        name = fake.company()
+    return {
+        "android_package_name": package_name,
+        "android_category": category,
+        "name": name,
     }
 
 

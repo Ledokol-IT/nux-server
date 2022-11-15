@@ -82,6 +82,11 @@ class User(nux.database.Base):
         cascade="all,delete",
         back_populates="user",
     )
+    in_app_records: list[mapp.UserInAppRecord] = orm.relationship(
+        lambda: mapp.UserInAppRecord,
+        cascade="all,delete",
+        back_populates="user",
+    )
 
     pending_friends_invites: list[mfriends.FriendsInvite]
     pending_friends_invites = orm.relationship(

@@ -12,14 +12,15 @@ import nux.models.user as muser
 import nux.notifications
 import nux.s3
 from nux.schemes import UserSchemeSecure
+from nux.resources.utils import UserQueryParam
 
 
 router = fastapi.APIRouter(prefix="/statistic")
 
 
-@router.get("/user/{user_id}",
-            response_model=list[muser.UserSchemeSecure])
-def get_friends(
+@router.get("/friend/{user_id}",
+            response_model=None)
+def get_friend_statistic(
         current_user=CurrentUserDependecy(),
         session=SessionDependecy()
 ):
