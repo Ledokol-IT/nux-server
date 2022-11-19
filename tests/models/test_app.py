@@ -48,8 +48,11 @@ def test_update_stats(session):
             two_weeks_before_now + td(days=3),
         )
         mapp.update_stats(session, user)
-        assert len(user.apps_stats) == 2
-        app1_stats = next(filter(lambda s: s.app == app1, user.apps_stats))
-        app2_stats = next(filter(lambda s: s.app == app2, user.apps_stats))
-        assert app1_stats.activity_last_two_weeks == td(days=1)
-        assert app2_stats.activity_last_two_weeks == td(days=1, hours=12)
+        apps_and_stats = mapp.get_user_apps_and_stats(
+            session, user)
+        assert len(apps_and_stats) == 2
+        app1_stats = next(filter(lambda s: s.app == app1, apps_and_stats))
+        app2_stats = next(filter(lambda s: s.app == app2, apps_and_stats))
+        assert app1_stats.statistics.activity_last_two_weeks == td(days=1)
+        assert app2_stats.statistics.activity_last_two_weeks == td(
+            days=1, hours=12)

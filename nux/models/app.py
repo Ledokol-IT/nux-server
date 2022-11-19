@@ -225,14 +225,15 @@ def delete_app_from_user(
     app_stats.installed = False
 
 
+def apply_visible(q: orm.Query) -> orm.Query:
+    return q.where(App.category.contains('GAME'))  # type: ignore
+
+
 def get_user_apps(
         session: orm.Session,
-        user: 'muser.User',
+        user: muser.User,
         *,
         only_visible: bool = False,
-        only_approved: bool = False,
-        only_games: bool = False,
-        only_online: bool = False,
         only_installed: bool = True,
 ) -> list[App]:
     q = (
@@ -241,17 +242,36 @@ def get_user_apps(
         .where(UserInAppStatistic.user_id == user.id)
     )
     if only_visible:
-        only_games = True
-    if only_approved:
-        q = q.where(App.approved)
-    if only_games:
-        q = q.where(App.category.contains('GAME'))  # type: ignore
-    if only_online:
-        q = q.where(App.category.contains('online'))  # type: ignore
+        q = apply_visible(q)
     if only_installed:
         q = q.where(UserInAppStatistic.installed)
 
     return q.all()
+
+
+class AppAndUserStatistics(t.NamedTuple):
+    app: App
+    statistics: UserInAppStatistic
+
+
+def get_user_apps_and_stats(
+        session: orm.Session,
+        user: muser.User,
+        *,
+        only_visible: bool = False,
+        only_installed: bool = True,
+) -> list[AppAndUserStatistics]:
+    q = (
+        session.query(App, UserInAppStatistic)
+        .join(UserInAppStatistic)
+        .where(UserInAppStatistic.user_id == user.id)
+    )
+    if only_visible:
+        q = apply_visible(q)
+    if only_installed:
+        q = q.where(UserInAppStatistic.installed)
+
+    return list(map(AppAndUserStatistics._make, q.all()))
 
 
 def set_apps_to_user(
@@ -296,7 +316,7 @@ def get_recommended_apps(
     for friend in friends:
         for app in get_user_apps(session, friend, only_visible=True):
             recommended[app] += 1
-    for app in get_user_apps(session, user, only_games=True):
+    for app in get_user_apps(session, user, only_visible=True):
         recommended.pop(app, None)
     recommended_list = sorted(recommended.items(), key=lambda t: t[1],
                               reverse=True)

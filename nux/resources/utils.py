@@ -27,7 +27,8 @@ def UserQueryParam(
 
     def _validate(
             session=SessionDependecy(),
-            user_id=fastapi.Query(alias=alias),
+            # user_id=fastapi.Query(alias=alias),
+            user_id=fastapi.Path(alias=alias)
     ):
         user = muser.get_user(session, id=user_id)
         if not user:

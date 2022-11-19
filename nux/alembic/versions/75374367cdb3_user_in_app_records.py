@@ -36,7 +36,8 @@ def upgrade() -> None:
     op.add_column('user_in_app_statistics', sa.Column(
         'dt_stats_updated_at', sa.DateTime(), nullable=True))
     op.add_column('user_in_app_statistics', sa.Column(
-        'activity_last_two_weeks', sa.Interval(), server_default='0', nullable=False))
+        'activity_last_two_weeks',
+        sa.Interval(), server_default='0', nullable=False))
     op.add_column('user_in_app_statistics', sa.Column(
         'activity_total', sa.Interval(), server_default='0', nullable=False))
     op.add_column('user_in_app_statistics', sa.Column(
