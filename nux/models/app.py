@@ -341,7 +341,7 @@ def add_user_in_app_record(
     return record
 
 
-def update_stats(
+def update_periodic_stats(
         session: orm.Session,
         user: muser.User,
 ):

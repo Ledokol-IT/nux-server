@@ -170,8 +170,8 @@ def get_recommended_apps(
 
 class LocalUserInAppRecordScheme(pydantic.BaseModel):
     android_package_name: str
-    dt_begin: datetime.datetime  # in UTC
-    dt_end: datetime.datetime  # in UTC
+    dt_begin: datetime.datetime
+    dt_end: datetime.datetime
 
 
 @apps_router.put("/apps/statistics/update_from_local/android")
@@ -179,4 +179,8 @@ def statistics_update_from_local(
         records: list[LocalUserInAppRecordScheme] = fastapi.Body(embed=True),
         current_user: muser.User = CurrentUserDependecy(),
 ):
+    # TODO: create new mapp.UserInAppRecords
+    # TODO: dont forget to call mapp.update_periodic_stats
+    # TODO: update total stat
+    # maybe new funcs in mapp
     ...

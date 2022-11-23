@@ -47,7 +47,7 @@ def test_update_stats(session):
             two_weeks_before_now + td(days=2),
             two_weeks_before_now + td(days=3),
         )
-        mapp.update_stats(session, user)
+        mapp.update_periodic_stats(session, user)
         apps_and_stats = mapp.get_user_apps_and_stats(
             session, user)
         assert len(apps_and_stats) == 2
