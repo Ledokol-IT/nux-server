@@ -83,10 +83,12 @@ def test_update_statistics(client):
                 "dt_begin": (now() - dlt1).isoformat(timespec='seconds'),
                 "dt_end": (now() - dlt2).isoformat(timespec='seconds'),
             })
-        res = client.put("/apps/statistics/update_from_local/android", json={"records": records}, headers=user)
+        res = client.put("/apps/statistics/update_from_local/android",
+                         json={"records": records}, headers=user)
         assert res.status_code == 200
         res = client.get("/apps/current_user/v2", headers=user)
         assert res.status_code == 200
         apps_and_stats = res.json()["apps_and_stats"]
-        total = td(seconds=sum(x["statistics"]["activity_total"] for x in apps_and_stats))
+        total = td(seconds=sum(x["statistics"]["activity_total"]
+                               for x in apps_and_stats))
         assert total == total_need
