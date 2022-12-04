@@ -98,7 +98,7 @@ class UserInAppStatistic(nux.database.Base):
         server_default='0',
     )  # type: ignore
 
-    dt_last_activity: datetime.datetime = sa.Column(
+    dt_last_acivity: datetime.datetime = sa.Column(
         sa.DateTime,
         nullable=True,
     )  # type: ignore
@@ -364,11 +364,11 @@ def update_periodic_stats(
             stat = stats[record.app]
         stat.activity_last_two_weeks += record.dt_end - \
             max(record.dt_begin, two_weeks_before_now)
-        if stat.dt_last_activity is None:
-            stat.dt_last_activity = record.dt_end
+        if stat.dt_last_acivity is None:
+            stat.dt_last_acivity = record.dt_end
         else:
-            stat.dt_last_activity = max(
-                stats[record.app].dt_last_activity, record.dt_end)
+            stat.dt_last_acivity = max(
+                stats[record.app].dt_last_acivity, record.dt_end)
 
 
 def update_total_stats(
