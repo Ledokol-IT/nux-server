@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+import logging
 import typing as t
 import uuid
 from collections import defaultdict
@@ -363,9 +364,23 @@ def update_periodic_stats(
             stat = stats[record.app]
         stat.activity_last_two_weeks += record.dt_end - \
             max(record.dt_begin, two_weeks_before_now)
-        print(record.dt_begin, two_weeks_before_now)
         if stat.dt_last_acivity is None:
             stat.dt_last_acivity = record.dt_end
         else:
             stat.dt_last_acivity = max(
                 stats[record.app].dt_last_acivity, record.dt_end)
+
+
+def update_total_stats(
+        session: orm.Session,
+        user: muser.User,
+        app: App,
+        dt_begin: datetime.datetime,
+        dt_end: datetime.datetime,
+):
+    stat = session.query(UserInAppStatistic).get(
+        {"user_id": user.id, "app_id": app.id})
+    if stat is None:
+        logging.warning(f'Statistic {stat} doesnt exists')
+    else:
+        stat.activity_total += dt_end - dt_begin

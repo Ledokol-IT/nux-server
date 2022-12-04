@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 
 import fastapi
 import pydantic
@@ -178,9 +179,12 @@ class LocalUserInAppRecordScheme(pydantic.BaseModel):
 def statistics_update_from_local(
         records: list[LocalUserInAppRecordScheme] = fastapi.Body(embed=True),
         current_user: muser.User = CurrentUserDependecy(),
+        session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
-    # TODO: create new mapp.UserInAppRecords
-    # TODO: dont forget to call mapp.update_periodic_stats
-    # TODO: update total stat
-    # maybe new funcs in mapp
-    ...
+    for record in records:
+        app = mapp.get_app(session, android_package_name=record.android_package_name)
+        mapp.add_user_in_app_record(session, current_user, app, record.dt_begin, record.dt_end)
+        mapp.update_total_stats(session, current_user, app, record.dt_begin, record.dt_end)
+    mapp.update_periodic_stats(session, current_user)
+    session.commit()
+    print(*map(lambda x: x.statistics.dt_last_acivity, mapp.get_user_apps_and_stats(session, user=current_user)))
