@@ -7,12 +7,12 @@ from collections import defaultdict
 
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-from nux.utils import now
 
 import nux.database
 import nux.models.user as muser
 import nux.models.friends as mfriends
 from nux.schemes import AppSchemeCreateAndroid, AppScheme
+from nux.utils import now
 
 
 class UserInAppRecord(nux.database.Base):
@@ -374,13 +374,20 @@ def update_periodic_stats(
 def update_total_stats(
         session: orm.Session,
         user: muser.User,
-        app: App,
-        dt_begin: datetime.datetime,
-        dt_end: datetime.datetime,
+        record,
 ):
+    app = get_app(
+        session,
+        android_package_name=record.android_package_name)
+    add_user_in_app_record(
+        session,
+        user,
+        app,
+        record.dt_begin,
+        record.dt_end)
     stat = session.query(UserInAppStatistic).get(
         {"user_id": user.id, "app_id": app.id})
     if stat is None:
         logging.warning(f'Statistic {stat} doesnt exists')
     else:
-        stat.activity_total += dt_end - dt_begin
+        stat.activity_total += record.dt_end - record.dt_begin

@@ -182,19 +182,9 @@ def statistics_update_from_local(
         session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
     for record in records:
-        app = mapp.get_app(session,
-                           android_package_name=record.android_package_name)
-        mapp.add_user_in_app_record(session,
-                                    current_user,
-                                    app,
-                                    record.dt_begin,
-                                    record.dt_end)
-        mapp.update_total_stats(session,
-                                current_user,
-                                app,
-                                record.dt_begin,
-                                record.dt_end)
+        mapp.update_total_stats(
+            session,
+            current_user,
+            record)
     mapp.update_periodic_stats(session, current_user)
     session.commit()
-    print(*map(lambda x: x.statistics.dt_last_acivity,
-               mapp.get_user_apps_and_stats(session, user=current_user)))

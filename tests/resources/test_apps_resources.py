@@ -75,13 +75,13 @@ def test_update_statistics(client):
     total_need = td(seconds=0)
     with freezegun.freeze_time("2012-01-14 12:00"):
         for i, app in enumerate(apps):
-            dlt1 = td(days=(i + 1) * 2, hours=12)
-            dlt2 = td(days=(i + 1))
-            total_need += dlt1 - dlt2
+            dt_begin = now() - td(days=(i + 1) * 2, hours=12)
+            dt_end = now() - td(days=(i + 1))
+            total_need += dt_end - dt_begin
             records.append({
                 "android_package_name": app["android_package_name"],
-                "dt_begin": (now() - dlt1).isoformat(timespec='seconds'),
-                "dt_end": (now() - dlt2).isoformat(timespec='seconds'),
+                "dt_begin": dt_begin.isoformat(timespec='seconds'),
+                "dt_end": dt_end.isoformat(timespec='seconds'),
             })
         res = client.put("/apps/statistics/update_from_local/android",
                          json={"records": records}, headers=user)
