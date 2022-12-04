@@ -182,9 +182,6 @@ def statistics_update_from_local(
         session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
     for record in records:
-        mapp.update_total_stats(
-            session,
-            current_user,
-            record)
+        mapp.update_stats_from_record(session, current_user, record)
     mapp.update_periodic_stats(session, current_user)
     session.commit()

@@ -371,22 +371,25 @@ def update_periodic_stats(
                 stats[record.app].dt_last_acivity, record.dt_end)
 
 
-def update_total_stats(
+def update_stats_from_record(
         session: orm.Session,
         user: muser.User,
         record,
 ):
     app = get_app(
         session,
-        android_package_name=record.android_package_name)
+        android_package_name=record.android_package_name
+    )
     add_user_in_app_record(
         session,
         user,
         app,
         record.dt_begin,
-        record.dt_end)
+        record.dt_end
+    )
     stat = session.query(UserInAppStatistic).get(
-        {"user_id": user.id, "app_id": app.id})
+        {"user_id": user.id, "app_id": app.id}
+    )
     if stat is None:
         logging.warning(f'Statistic {stat} doesnt exists')
     else:
