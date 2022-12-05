@@ -3,8 +3,10 @@ import logging
 import faker
 import freezegun
 from datetime import timedelta as td
-from nux.utils import now
+import random
+from collections import defaultdict
 
+from nux.utils import now
 from tests.utils import get_user, make_friends, create_user,\
     sync_apps_with_user, create_android_app_payload
 
@@ -68,16 +70,18 @@ def test_recommended_apps(client):
 
 def test_update_statistics(client):
     faker.Faker.seed(0)
+    random.seed(0)
     user = create_user(client)
     apps = [create_android_app_payload(category=0) for _ in range(5)]
     sync_apps_with_user(client, user, apps)
     local_records = []
-    total_need = td(seconds=0)
+    total_need = defaultdict[str](lambda: td(seconds=0))
     with freezegun.freeze_time("2012-01-14 12:00"):
-        for i, app in enumerate(apps):
-            dt_begin = now() - td(days=(i + 1) * 2, hours=12)
-            dt_end = now() - td(days=(i + 1))
-            total_need += dt_end - dt_begin
+        for i, app in enumerate(apps + apps):
+            dt_begin = now() - td(days=(i + 1) * random.randint(3, 5),
+                                  hours=12)
+            dt_end = now() - td(days=(i + 1) * random.randint(1, 3))
+            total_need[app["android_package_name"]] += dt_end - dt_begin
             local_records.append({
                 "android_package_name": app["android_package_name"],
                 "dt_begin": dt_begin.isoformat(timespec='seconds'),
@@ -89,6 +93,8 @@ def test_update_statistics(client):
         res = client.get("/apps/current_user/v2", headers=user)
         assert res.status_code == 200
         apps_and_stats = res.json()["apps_and_stats"]
-        total = td(seconds=sum(x["statistics"]["activity_total"]
-                               for x in apps_and_stats))
-        assert total == total_need
+        assert all(
+            total_need[x["app"]["android_package_name"]]
+            == td(seconds=x["statistics"]["activity_total"])
+            for x in apps_and_stats
+        )

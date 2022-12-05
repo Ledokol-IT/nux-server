@@ -56,3 +56,5 @@ def test_update_stats(session):
         assert app1_stats.statistics.activity_last_two_weeks == td(days=1)
         assert app2_stats.statistics.activity_last_two_weeks == td(
             days=1, hours=12)
+        assert app1_stats.statistics.activity_total == td(days=2)
+        assert app2_stats.statistics.activity_total == td(days=1, hours=12)
