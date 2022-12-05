@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import datetime
+import logging
+
 import fastapi
 import pydantic
 import sqlalchemy.orm
@@ -9,6 +12,8 @@ from nux.database import SessionDependecy
 import nux.models.app as mapp
 import nux.models.user as muser
 import nux.s3
+
+from nux.schemes import AppAndUserStatisticsScheme
 
 
 apps_router = fastapi.APIRouter()
@@ -99,6 +104,7 @@ class GetUserAppsResponse(pydantic.BaseModel):
     apps: list[mapp.AppScheme]
 
 
+# deprecated
 @apps_router.get("/user/{user_id}/apps", response_model=GetUserAppsResponse)
 def get_user_apps(
     user_id: str,
@@ -115,6 +121,39 @@ def get_user_apps(
     }
 
 
+class GetUserAppsResponseV2(pydantic.BaseModel):
+    apps_and_stats: list[AppAndUserStatisticsScheme]
+
+
+@apps_router.get("/apps/friend/{user_id}/v2",
+                 response_model=GetUserAppsResponseV2)
+def get_friend_apps_v2(
+    user_id: str,
+    session: sqlalchemy.orm.Session = SessionDependecy(),
+):
+    user = muser.get_user(session, user_id)
+    if user is None:
+        raise fastapi.HTTPException(
+            404,
+            detail="bad user"
+        )
+    return {
+        "apps_and_stats": mapp.get_user_apps_and_stats(
+            session, user, only_visible=True)
+    }
+
+
+@apps_router.get("/apps/current_user/v2", response_model=GetUserAppsResponseV2)
+def get_current_user_apps_v2(
+    current_user: muser.User = CurrentUserDependecy(),
+    session: sqlalchemy.orm.Session = SessionDependecy(),
+):
+    return {
+        "apps_and_stats": mapp.get_user_apps_and_stats(
+            session, current_user, only_visible=True),
+    }
+
+
 class RecomendationsAppsResponse(pydantic.BaseModel):
     apps: list[mapp.AppScheme]
 
@@ -128,3 +167,32 @@ def get_recommended_apps(
     return {
         "apps": mapp.get_recommended_apps(session, current_user),
     }
+
+
+class LocalUserInAppRecordScheme(pydantic.BaseModel):
+    android_package_name: str
+    dt_begin: datetime.datetime
+    dt_end: datetime.datetime
+
+
+@apps_router.put("/apps/statistics/update_from_local/android")
+def statistics_update_from_local(
+        local_records: list[LocalUserInAppRecordScheme] =
+        fastapi.Body(embed=True),
+        current_user: muser.User = CurrentUserDependecy(),
+        session: sqlalchemy.orm.Session = SessionDependecy(),
+):
+    for local_record in local_records:
+        app = mapp.get_app(
+            session,
+            android_package_name=local_record.android_package_name
+        )
+        mapp.add_user_in_app_record(
+            session,
+            current_user,
+            app,
+            local_record.dt_begin,
+            local_record.dt_end
+        )
+    mapp.update_periodic_stats(session, current_user)
+    session.commit()
