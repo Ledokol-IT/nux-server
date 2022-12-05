@@ -324,6 +324,19 @@ def get_recommended_apps(
     return [app for app, _ in recommended_list]
 
 
+def _update_total_stats(
+        session: orm.Session,
+        record: UserInAppRecord,
+):
+    stat = session.query(UserInAppStatistic).get(
+        {"user_id": record.user_id, "app_id": record.app_id}
+    )
+    if stat is None:
+        logging.warning(f'Statistic {stat} doesnt exists')
+    else:
+        stat.activity_total += record.dt_end - record.dt_begin
+
+
 def add_user_in_app_record(
         session: orm.Session,
         user: muser.User,
@@ -339,6 +352,8 @@ def add_user_in_app_record(
     record.dt_begin = dt_begin
     record.dt_end = dt_end
     session.add(record)
+    session.commit()
+    _update_total_stats(session, record)
     return record
 
 
@@ -369,16 +384,3 @@ def update_periodic_stats(
         else:
             stat.dt_last_acivity = max(
                 stats[record.app].dt_last_acivity, record.dt_end)
-
-
-def update_stats_from_record(
-        session: orm.Session,
-        record: UserInAppRecord,
-):
-    stat = session.query(UserInAppStatistic).get(
-        {"user_id": record.user_id, "app_id": record.app_id}
-    )
-    if stat is None:
-        logging.warning(f'Statistic {stat} doesnt exists')
-    else:
-        stat.activity_total += record.dt_end - record.dt_begin

@@ -187,14 +187,12 @@ def statistics_update_from_local(
             session,
             android_package_name=local_record.android_package_name
         )
-        record = mapp.add_user_in_app_record(
+        mapp.add_user_in_app_record(
             session,
             current_user,
             app,
             local_record.dt_begin,
             local_record.dt_end
         )
-        session.commit()
-        mapp.update_stats_from_record(session, record)
     mapp.update_periodic_stats(session, current_user)
     session.commit()
