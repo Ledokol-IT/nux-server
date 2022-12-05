@@ -4,7 +4,6 @@ import logging
 import typing as t
 import uuid
 from collections import defaultdict
-from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
@@ -14,8 +13,6 @@ import nux.models.user as muser
 import nux.models.friends as mfriends
 from nux.schemes import AppSchemeCreateAndroid, AppScheme
 from nux.utils import now
-if TYPE_CHECKING:
-    from nux.resources.apps_resources import LocalUserInAppRecordScheme
 
 
 class UserInAppRecord(nux.database.Base):
@@ -376,12 +373,10 @@ def update_periodic_stats(
 
 def update_stats_from_record(
         session: orm.Session,
-        user: muser.User,
-        record: LocalUserInAppRecordScheme,
+        record: UserInAppRecord,
 ):
-    app = get_app(session, android_package_name=record.android_package_name)
     stat = session.query(UserInAppStatistic).get(
-        {"user_id": user.id, "app_id": app.id}
+        {"user_id": record.user_id, "app_id": record.app_id}
     )
     if stat is None:
         logging.warning(f'Statistic {stat} doesnt exists')

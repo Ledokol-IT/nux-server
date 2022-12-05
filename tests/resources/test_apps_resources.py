@@ -71,20 +71,20 @@ def test_update_statistics(client):
     user = create_user(client)
     apps = [create_android_app_payload(category=0) for _ in range(5)]
     sync_apps_with_user(client, user, apps)
-    records = []
+    local_records = []
     total_need = td(seconds=0)
     with freezegun.freeze_time("2012-01-14 12:00"):
         for i, app in enumerate(apps):
             dt_begin = now() - td(days=(i + 1) * 2, hours=12)
             dt_end = now() - td(days=(i + 1))
             total_need += dt_end - dt_begin
-            records.append({
+            local_records.append({
                 "android_package_name": app["android_package_name"],
                 "dt_begin": dt_begin.isoformat(timespec='seconds'),
                 "dt_end": dt_end.isoformat(timespec='seconds'),
             })
         res = client.put("/apps/statistics/update_from_local/android",
-                         json={"records": records}, headers=user)
+                         json={"local_records": local_records}, headers=user)
         assert res.status_code == 200
         res = client.get("/apps/current_user/v2", headers=user)
         assert res.status_code == 200

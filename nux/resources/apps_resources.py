@@ -177,22 +177,24 @@ class LocalUserInAppRecordScheme(pydantic.BaseModel):
 
 @apps_router.put("/apps/statistics/update_from_local/android")
 def statistics_update_from_local(
-        records: list[LocalUserInAppRecordScheme] = fastapi.Body(embed=True),
+        local_records: list[LocalUserInAppRecordScheme] =
+        fastapi.Body(embed=True),
         current_user: muser.User = CurrentUserDependecy(),
         session: sqlalchemy.orm.Session = SessionDependecy(),
 ):
-    for record in records:
+    for local_record in local_records:
         app = mapp.get_app(
             session,
-            android_package_name=record.android_package_name
+            android_package_name=local_record.android_package_name
         )
-        mapp.add_user_in_app_record(
+        record = mapp.add_user_in_app_record(
             session,
             current_user,
             app,
-            record.dt_begin,
-            record.dt_end
+            local_record.dt_begin,
+            local_record.dt_end
         )
-        mapp.update_stats_from_record(session, current_user, record)
+        session.commit()
+        mapp.update_stats_from_record(session, record)
     mapp.update_periodic_stats(session, current_user)
     session.commit()
