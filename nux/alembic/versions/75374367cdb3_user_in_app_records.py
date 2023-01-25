@@ -32,7 +32,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_in_app_records_dt_end'),
                     'user_in_app_records', ['dt_end'], unique=False)
     op.add_column('user_in_app_statistics', sa.Column(
-        'installed', sa.Boolean(), nullable=False))
+        'installed', sa.Boolean(), nullable=False, server_default='true'))
     op.add_column('user_in_app_statistics', sa.Column(
         'dt_stats_updated_at', sa.DateTime(), nullable=True))
     op.add_column('user_in_app_statistics', sa.Column(
