@@ -38,9 +38,9 @@ async def log_requests(request: fastapi.Request, call_next):
 
     level = "INFO"
     if 400 <= response.status_code:
-        level = logging.WARNING
+        level = "WARNING"
     if 500 <= response.status_code:
-        level = logging.ERROR
+        level = "ERROR"
 
     process_time = (time.time() - start_time)
 
