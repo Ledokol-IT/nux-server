@@ -208,8 +208,10 @@ def add_app_to_user(
         app_stats = UserInAppStatistic()
         app_stats.app = app
         app_stats.user = user
+        app_stats.installed = True
         session.add(app_stats)
     app_stats.installed = True
+    session.merge(app_stats)
 
 
 def delete_app_from_user(
