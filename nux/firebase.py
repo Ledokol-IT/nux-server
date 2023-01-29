@@ -43,7 +43,7 @@ def setup_firebase(options):
 def send_messages(
     messages: list[firebase_admin.messaging.Message],
 ):
-    logger.critical(f"sent {len(messages)} messages")
+    logger.debug(f"sent {len(messages)} messages")
     firebase_admin.messaging.send_all(
         messages,
         app=firebase_app,
