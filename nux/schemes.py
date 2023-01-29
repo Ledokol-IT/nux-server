@@ -114,7 +114,7 @@ class UserInAppStatisticsScheme(pydantic.BaseModel):
     installed: bool
     activity_last_two_weeks: datetime.timedelta
     activity_total: datetime.timedelta
-    dt_last_acivity: datetime.datetime
+    dt_last_activity: datetime.datetime | None
 
     class Config:
         orm_mode = True

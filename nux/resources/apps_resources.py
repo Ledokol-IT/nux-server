@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import logging
 
 import fastapi
 import pydantic
@@ -13,14 +12,14 @@ import nux.models.app as mapp
 import nux.models.user as muser
 import nux.s3
 
-from nux.schemes import AppAndUserStatisticsScheme
+from nux.schemes import AppAndUserStatisticsScheme, AppScheme
 
 
 apps_router = fastapi.APIRouter()
 
 
 class SyncInstalledAppsResponse(pydantic.BaseModel):
-    apps: list[mapp.AppScheme]
+    apps: list[AppScheme]
     send_icons_apps_ids: list[str]
 
 
@@ -56,7 +55,7 @@ def sync_installed_apps(
     }
 
 
-@apps_router.get("/app/{app_id}", response_model=mapp.AppScheme)
+@apps_router.get("/app/{app_id}", response_model=AppScheme)
 def get_app_by_id(
     app_id,
     session: sqlalchemy.orm.Session = SessionDependecy()
@@ -72,9 +71,9 @@ class SetIconsRequestBody(pydantic.BaseModel):
 
 
 @apps_router.put("/app/package/{package_name}/set_images",
-                 response_model=mapp.AppScheme)
+                 response_model=AppScheme)
 @apps_router.put("/app/package/{package_name}/set_icon",
-                 response_model=mapp.AppScheme)
+                 response_model=AppScheme)
 async def set_images(
     package_name,
     icon: fastapi.UploadFile = fastapi.File(),
@@ -101,7 +100,7 @@ async def set_images(
 
 
 class GetUserAppsResponse(pydantic.BaseModel):
-    apps: list[mapp.AppScheme]
+    apps: list[AppScheme]
 
 
 # deprecated
@@ -155,7 +154,7 @@ def get_current_user_apps_v2(
 
 
 class RecomendationsAppsResponse(pydantic.BaseModel):
-    apps: list[mapp.AppScheme]
+    apps: list[AppScheme]
 
 
 @apps_router.get("/apps/recommendations",
