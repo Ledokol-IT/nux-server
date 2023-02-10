@@ -110,6 +110,24 @@ class AppScheme(AppN):
         orm_mode = True
 
 
+class UserInAppStatisticsScheme(pydantic.BaseModel):
+    installed: bool
+    activity_last_two_weeks: datetime.timedelta
+    activity_total: datetime.timedelta
+    dt_last_activity: datetime.datetime | None
+
+    class Config:
+        orm_mode = True
+
+
+class AppAndUserStatisticsScheme(pydantic.BaseModel):
+    app: AppScheme
+    statistics: UserInAppStatisticsScheme
+
+    class Config:
+        orm_mode = True
+
+
 class PendingFriendsInviteScheme(pydantic.BaseModel):
     dt_sent: datetime.datetime
     from_user: UserSchemeSecure

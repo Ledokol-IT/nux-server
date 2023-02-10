@@ -1,30 +1,16 @@
-import faker
+import logging
 
+import faker
+import freezegun
+from datetime import timedelta as td
+import random
+from collections import defaultdict
+
+from nux.utils import now
 from tests.utils import get_user, make_friends, create_user,\
-    sync_apps_with_user
+    sync_apps_with_user, create_android_app_payload
 
 fake = faker.Faker()
-
-
-def create_android_app_payload(
-    package_name: str | None = None,
-    category: int | None = None,
-    name: str | None = None,
-):
-    if package_name is None:
-        package_name = fake.domain_name(levels=4)
-    if category is None:
-        category = fake.random_element(elements=[
-            0,
-            None,
-        ])
-    if name is None:
-        name = fake.company()
-    return {
-        "android_package_name": package_name,
-        "android_category": category,
-        "name": name,
-    }
 
 
 def test_sync_apps_ok(client, user_auth_header):
@@ -80,3 +66,35 @@ def test_recommended_apps(client):
     assert len(res.json()["apps"]) == 2
     assert all(x["android_package_name"] == y["android_package_name"]
                for x, y in zip(res.json()["apps"], [app3, app2]))
+
+
+def test_update_statistics(client):
+    faker.Faker.seed(0)
+    random.seed(0)
+    user = create_user(client)
+    apps = [create_android_app_payload(category=0) for _ in range(5)]
+    sync_apps_with_user(client, user, apps)
+    local_records = []
+    total_need = defaultdict[str](lambda: td(seconds=0))
+    with freezegun.freeze_time("2012-01-14 12:00"):
+        for i, app in enumerate(apps + apps):
+            dt_begin = now() - td(days=(i + 1) * random.randint(3, 5),
+                                  hours=12)
+            dt_end = now() - td(days=(i + 1) * random.randint(1, 3))
+            total_need[app["android_package_name"]] += dt_end - dt_begin
+            local_records.append({
+                "android_package_name": app["android_package_name"],
+                "dt_begin": dt_begin.isoformat(timespec='seconds'),
+                "dt_end": dt_end.isoformat(timespec='seconds'),
+            })
+        res = client.put("/apps/statistics/update_from_local/android",
+                         json={"local_records": local_records}, headers=user)
+        assert res.status_code == 200
+        res = client.get("/apps/current_user/v2", headers=user)
+        assert res.status_code == 200
+        apps_and_stats = res.json()["apps_and_stats"]
+        assert all(
+            total_need[x["app"]["android_package_name"]]
+            == td(seconds=x["statistics"]["activity_total"])
+            for x in apps_and_stats
+        )
