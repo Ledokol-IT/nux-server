@@ -70,4 +70,3 @@ jobs:
           echo "SMSAERO_APIKEY: ${{ secrets.SMSAERO_APIKEY }}" >> $TMPDIR/vars.yml
 
           ansible-playbook -vv ansible/playbook.yml --extra-vars "@$TMPDIR/vars.yml"
-  
