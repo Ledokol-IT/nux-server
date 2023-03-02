@@ -13,6 +13,19 @@
         project_name: nux server api
         definition:
           services:
+            postgres:
+              image: postgres
+              volumes:
+                - /nux_postgresql_data:/var/lib/postgresql/data
+              env_file:
+                .env
+              ports:
+                - "5432:5432"
+              healthcheck:
+                test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+                interval: 10s
+                timeout: 5s
+                retries: 5
             app:
               logging:
                 options:
