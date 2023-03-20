@@ -8,6 +8,7 @@
       community.docker.docker_login:
         username: "{{DOCKERHUB_USERNAME}}"
         password: "{{DOCKERHUB_TOKEN}}"
+        reauthorize: true
     - name: Run server
       community.docker.docker_compose:
         project_name: nux server api
